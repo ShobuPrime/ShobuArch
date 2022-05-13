@@ -1,0 +1,100 @@
+kernel: linux-zen
+hostname: ShobuArch
+timezone: America/New_York
+user:
+  username: shobuprime
+  password: demo
+  language:
+    locale: en_US.UTF-8
+    charset: UTF-8
+    keyboard: us
+storage:
+  system_disk: /dev/nvme0n2
+  system_disk_id: VMware_Virtual_NVMe_Disk-VMware NVME_0000
+  mirror_install: true
+  mirror_disk: /dev/nvme0n3
+  mirror_disk_id: VMware_Virtual_NVMe_Disk-VMware NVME_0000
+  filesystem: zfs
+desktop:
+  environment: kde
+  install_type: FULL
+pacman:
+  aur:
+    aur_helper: yay
+    aur_packages:
+    - microsoft-edge-stable-bin
+    - openrazer-meta
+    - polychromatic
+  packages:
+  - cockpit
+  - cockpit-machines
+  - code
+  - dmidecode
+  - dnsmasq
+  - docker
+  - efibootmgr
+  - firefox
+  - firewalld
+  - flatpak
+  - fwupd
+  - go
+  - grub
+  - libdbusmenu-glib
+  - networkmanager
+  - network-manager-applet
+  - openssh
+  - os-prober
+  - packagekit
+  - qemu
+  - reflector
+  - rsync
+  - steam
+  - terminus-font
+  - vde2
+  - virt-manager
+  - wget
+  - wpa_supplicant
+  - xdg-user-dirs
+  - xdg-utils
+  - bluedevil
+  - breeze-gtk
+  - discover
+  - drkonqi
+  - kde-accessibility-meta
+  - kde-education-meta
+  - kde-games-meta
+  - kde-graphics-meta
+  - kde-gtk-config
+  - kde-multimedia-meta
+  - kde-network-meta
+  - kde-pim-meta
+  - kdeplasma-addons
+  - kde-sdk-meta
+  - kde-system-meta
+  - kde-utilities-meta
+  - kdevelop-meta
+  - kgamma5
+  - khotkeys
+  - kinfocenter
+  - kscreen
+  - ksshaskpass
+  - kwallet-pam
+  - kwayland-integration
+  - kwrited
+  - oxygen
+  - packagekit-qt5
+  - plasma-browser-integration
+  - plasma-desktop
+  - plasma-disks
+  - plasma-firewall
+  - plasma-nm
+  - plasma-pa
+  - plasma-systemmonitor
+  - plasma-thunderbolt
+  - plasma-vault
+  - plasma-wayland-session
+  - plasma-workspace-wallpapers
+  - powerdevil
+  - sddm
+  - sddm-kcm
+  - xdg-desktop-portal-kde
