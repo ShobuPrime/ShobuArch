@@ -171,6 +171,7 @@ func user(c *conf.Config) {
 	i.UserPackages(c)
 	i.UserPWAs(c)
 	i.UserShell(c)
+	i.UserKeyring(c)
 	clear()
 
 	log.Println(`
@@ -213,6 +214,8 @@ func main() {
 	clear()
 	MainLogo()
 	c := conf.Config{}
+
+	debug()
 
 	// https://gobyexample.com/command-line-flags
 	method_flag := flag.String("method", "m", `'a': Automated, 'm': Manual`)

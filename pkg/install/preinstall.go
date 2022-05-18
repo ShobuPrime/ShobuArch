@@ -51,10 +51,7 @@ func Prerequisites(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	update := `pacman -Syy --noconfirm`
-	z.Shell(&update)
-
-	prereqs := fmt.Sprintf(`pacman -S --noconfirm --needed btrfs-progs glibc gptfdisk %s-headers packagekit sed sudo`, c.Kernel)
+	prereqs := `pacman -Syy --noconfirm --needed btrfs-progs glibc gptfdisk sed sudo`
 	z.Shell(&prereqs)
 }
 
@@ -276,7 +273,7 @@ func ArchInstall(c *conf.Config) {
 	cmd_list := []string{}
 
 	cmd_list = append(cmd_list,
-		fmt.Sprintf(`pacstrap /mnt --noconfirm --needed archlinux-keyring base base-devel dkms libnewt %s linux-firmware %s-headers nano packagekit sed sudo vim sudo wget`, c.Kernel, c.Kernel),
+		fmt.Sprintf(`pacstrap /mnt --noconfirm --needed archlinux-keyring base base-devel dkms libnewt %s linux-firmware %s-docs %s-headers nano packagekit sed sudo vim sudo wget`, c.Kernel, c.Kernel, c.Kernel),
 		`echo "keyserver hkp://keyserver.ubuntu.com" >> /mnt/etc/pacman.d/gnupg/gpg.conf`,
 		`cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist`,
 	)
@@ -285,7 +282,7 @@ func ArchInstall(c *conf.Config) {
 	case "zfs":
 		log.Printf("Generating fstab for %s\n", c.Storage.Filesystem)
 		cmd_list = append(cmd_list,
-			`genfstab -U -p /mnt >> /mnt/etc/fstab`,
+			`genfstab -L /mnt >> /mnt/etc/fstab`,
 		)
 		log.Println("Commenting out zroot entries in fstab. ZFS handles this by itself")
 		cmd_list = append(cmd_list,

@@ -31,10 +31,13 @@ func BasePkgs(c *Config) {
 		"firewalld",              // Firewall daemon with D-Bus interface
 		"flatpak",                // Sandboxed desktop applications on Linux.
 		"fwupd",                  // Daemon to update some devices' firmware
-		"gnome-keyring",          // Stores passwords and encryption keys
 		"go",                     // Core compiler tools for the Go programming language
 		"grub",                   // GRand Unified Bootloader
+		"keepassxc",              // Cross-platform community-driven port of Keepass password manager
 		"libdbusmenu-glib",       // Library for passing menus over DBus
+		"lib32-pipewire",         // Low-latency audio/video router and processor -- 32bit
+		"lib32-pipewire-jack",    // Pipewire JACK support -- 32bit
+		"lib32-pipewire-v4l2",    // Pipewire V4L2 interceptor -- 32bit
 		"networkmanager",         // Network connection manager and user applications
 		"network-manager-applet", // Applet for managing network connections
 		"obs-studio",             // Free, open source software for live streaming and recording
@@ -45,6 +48,7 @@ func BasePkgs(c *Config) {
 		"pipewire-docs",          // Pipewire Documentation
 		"pipewire-jack",          // Pipewire JACK support
 		"pipewire-pulse",         // Pipewire PulseAudio replacement
+		"pipewire-v4l2",          // Pipewire V4L2 interceptor
 		"qemu-full",              // A generic and open source machine emulator and virtualizer
 		"qpwgraph",               // PipeWire Graph Qt GUI Interface
 		"reflector",              // A Python 3 module and script to retrieve and filter the latest Pacman mirror list.
@@ -108,6 +112,8 @@ func KDE(c *Config) {
 			"k3b",                         // CD burning application
 			"kamera",                      // KDE integration for gphoto2 cameras
 			"kamoso",                      // A webcam recorder
+			"kalarm",                      // Personal alarm scheduler
+			"kalendar",                    // A calendar application using Akonadi to sync
 			"kate",                        // Advanced Text Editor
 			"kbackup",                     // Backup directories or files
 			"kcalc",                       // Scientific Calculator
@@ -117,7 +123,6 @@ func KDE(c *Config) {
 			"kcron",                       // Configure and schedule tasks
 			"kde-gtk-config",              // GTK2 and GTK3 Configurator for KDE
 			"kde-network-meta",            // KDE network applications
-			"kde-pim-meta",                // Personal Information Management (PIM) Applications
 			"kdebugsettings",              // Enable/disable qCDebug
 			"kdegraphics-thumbnailers",    // Thumbnailers for various graphics file formats
 			"kdenlive",                    // Non-linear video editor for Linux
@@ -132,6 +137,7 @@ func KDE(c *Config) {
 			"khotkeys",                    // KHotKeys
 			"kimagemapeditor",             // HTML Image Map Editor
 			"kinfocenter",                 // Provides information about a computer system
+			"kleopatra",                   // Certificate Manager and Unified Crypto GUI
 			"kmag",                        // Screen Magnifier
 			"kmousetool",                  // Clicks the mouse for you, reducing the effects of RSI
 			"kmouth",                      // Speech Synthesizer Frontend
@@ -496,10 +502,12 @@ func AUR(c *Config) {
 	case "FULL":
 		c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
 			//"bottles",                   // Sandboxed Windows applications in Linux
+			"bcompare",                    // Beyond Compare 4
 			"cockpit-navigator",           // File Browser for Cockpit
 			"enpass-bin",                  // A multiplatform password manager
 			"firefox-pwa-bin",             // Install, manage and use PWAs in Firefox (native component)
 			"macchina-bin",                // A system information fetcher/frontend, with an (unhealthy) emphasis on performance
+			//"morgen-bin",                // Modern, intuitive and smart calendar application (Successor to MineTime)
 			"openrazer-meta",              // Razer device drivers
 			"polychromatic",               // RGB management GUI for Razer Devices
 			"razer-nari-pipewire-profile", // Razer Nari headsets pipewire profile
@@ -527,7 +535,7 @@ func Flatpak(c *Config) {
 		c.Flatpak.Packages = append(c.Flatpak.Packages,
 			"com.belmoussaoui.Obfuscate",       // Censor private information from images
 			//"com.brave.Browser",              // Web browser from Brave
-			//"com.microsoft.Edge",             // Microsoft Edge Chromium Browser
+			"com.microsoft.Edge",               // Microsoft Edge Chromium Browser
 			"com.getmailspring.Mailspring",     // Email client
 			"com.github.liferooter.textpieces", // Transform text without random websites
 			"com.github.tchx84.Flatseal",       // Manage Flatpak permissions
@@ -537,7 +545,7 @@ func Flatpak(c *Config) {
 			//"com.synology.SynologyDrive",     // Powerful private cloud storage with no recurring fees
 			"com.usebottles.bottles",           // Sandox Windows Applications in Linux
 			"im.riot.Riot",                     // Element -- Matrix Chat Client
-			//"io.freetubeapp.FreeTube",        // Open Source YouTube app for privacy
+			"com.github.alainm23.planner",      // Never worry about forgetting things again
 			"io.github.antimicrox.antimicrox",  // Map gamepad buttons
 			"io.github.m64p.m64p",              // Nintendo 64 Emulator
 			"io.github.seadve.Kooha",           // Record your screen
@@ -550,8 +558,10 @@ func Flatpak(c *Config) {
 			"org.gnome.Firmware",               // Install firmware on devices
 			"org.gnome.Maps",                   // Find places around the world
 			"org.gnome.Weather",                // Show weather conditions and forecast
+			"org.libreoffice.LibreOffice",      // LibreOffice productivity suite
 			"org.libretro.RetroArch",           // Frontend for emulators, game engines and media players
 			"org.mixxx.Mixxx",                  // DJ Mixing software (Traktor alternative)
+			//"org.onlyoffice.desktopeditors",  // OnlyOffice productivity suite
 			"org.ppsspp.PPSSPP",                // PlayStation Portable emulator
 			"org.yuzu_emu.yuzu",                // Nintendo Switch emulator
 		)
