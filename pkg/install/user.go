@@ -185,7 +185,9 @@ func UserKeyring(c *conf.Config) {
 
 			log.Println("Done!")
 			// Return to original directory
-			os.Chdir(pwd)
+			if err := os.Chdir(pwd); err != nil {
+				log.Fatalln(err)
+			}
 		}
 	}
 }
