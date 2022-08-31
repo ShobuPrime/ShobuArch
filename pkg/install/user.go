@@ -95,11 +95,11 @@ func UserKeyring(c *conf.Config) {
 			}
 
 			log.Printf("Making Keepass directory")
-			if err := os.MkdirAll("keepass", 0755); err != nil {
+			if err := os.MkdirAll("keepassxc", 0755); err != nil {
 				log.Fatalln(err)
 			}
 
-			keepass_config := filepath.Join(config_dir, "keepass", "keepassxc.ini")
+			keepass_config := filepath.Join(config_dir, "keepassxc", "keepassxc.ini")
 
 			config_settings := []string{
 				`[General]`,
