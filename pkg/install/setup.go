@@ -119,7 +119,7 @@ func SetupMirrors(c *conf.Config) {
 	cmd := []string{`pacman`, `-Syy`, `--noconfirm`, `--needed`, `pacman-contrib`, `curl`}
 	z.Arch_chroot(&cmd, false, c)
 
-	cmd = []string{`pacman`, `-Syy`, `--noconfirm`, `--needed`, `reflector`, `rsync`, `grub`, `arch-install-scripts`, `git`}
+	cmd = []string{`pacman`, `-Syy`, `--noconfirm`, `--needed`, `reflector`, `rsync`, `arch-install-scripts`, `git`}
 	z.Arch_chroot(&cmd, false, c)
 
 	cmd = []string{`cp`, `/etc/pacman.d/mirrorlist`, `/etc/pacman.d.mirrorlist.bak`}
@@ -661,34 +661,105 @@ func SetupEFI(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	// Assuming Grub by default for now.
-	// To-do: Future work will consider other EFI loaders
-	cmd := []string{`sed`, `-i`, `s/quiet/quiet video=1920x1080/g`, `/etc/default/grub`}
-	z.Arch_chroot(&cmd, false, c)
-
-	switch c.Storage.Filesystem {
-	case "zfs":
-		cmd = []string{`sed`, `-i`, `s/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="root=ZFS=zroot\/ROOT\/default"/g`, `/etc/default/grub`}
+	switch c.Bootloader {
+	case "grub": // GRand Unified Bootloader
+		cmd := []string{`sudo`, `pacman`, `-U`, `--needed`, `--noconfirm`, `grub`}
 		z.Arch_chroot(&cmd, false, c)
+
+		cmd = []string{`sed`, `-i`, `s/quiet/quiet video=1920x1080/g`, `/etc/default/grub`}
+		z.Arch_chroot(&cmd, false, c)
+	
+		switch c.Storage.Filesystem {
+		case "zfs":
+			cmd = []string{`sed`, `-i`, `s/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="root=ZFS=zroot\/ROOT\/default"/g`, `/etc/default/grub`}
+			z.Arch_chroot(&cmd, false, c)
+		}
+	
+		cmd = []string{`grub-install`, `--target=x86_64-efi`, `--efi-directory=/boot`, `--bootloader-id=ArchLinux`}
+		z.Arch_chroot(&cmd, false, c)
+	
+		cmd = []string{`grub-mkconfig`, `-o`, `/boot/grub/grub.cfg`}
+		z.Arch_chroot(&cmd, false, c)
+	case "systemd-boot":
+		cmd := []string{`bootctl`, `--path=/boot`, `install`}
+		z.Arch_chroot(&cmd, false, c)
+
+		cmd = []string{`touch`, `/boot/loader/entries/arch.conf`}
+		z.Arch_chroot(&cmd, false, c)
+
+		cmd = []string{
+			`awk`,
+			`BEGIN{ printf "title ArchLinux\n" >> "/boot/loader/entries/arch.conf" }`,
+		}
+		z.Arch_chroot(&cmd, false, c)
+
+		cmd = []string{
+			`awk`,
+			fmt.Sprintf(`BEGIN{ printf "linux /vmlinuz-%v\n" >> "/boot/loader/entries/arch.conf" }`, c.Kernel),
+		}
+		z.Arch_chroot(&cmd, false, c)
+
+		cpu := u.ListCPU()
+	
+		for i := range cpu.Processor {
+			switch cpu.Processor[i].Data {
+			case "GenuineIntel":
+				cmd := []string{
+					`awk`,
+					`BEGIN{ printf "initrd intel-ucode.img\n" >> "/boot/loader/entries/arch.conf" }`,
+				}
+				z.Arch_chroot(&cmd, false, c)
+			case "AuthenticAMD":
+				cmd := []string{
+					`awk`,
+					`BEGIN{ printf "initrd amd-ucode.img\n" >> "/boot/loader/entries/arch.conf" }`,
+				}
+				z.Arch_chroot(&cmd, false, c)
+			}
+		}
+
+		cmd = []string{
+			`awk`,
+			fmt.Sprintf(`BEGIN{ printf "initrd initramfs-%v.img\n" >> "/boot/loader/entries/arch.conf" }`, c.Kernel),
+		}
+		z.Arch_chroot(&cmd, false, c)
+
+		switch c.Storage.Filesystem {
+		case "luks":
+			uuid_command := fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
+			root_uuid := z.Shell(&uuid_command)
+
+			cmd := []string{
+				`awk`,
+				fmt.Sprintf(`BEGIN{ printf "options rd.luks.name=%v=ROOT root=\/dev\/mapper\/ROOT\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid),
+			}
+			z.Arch_chroot(&cmd, false, c)
+
+			cmd = []string{
+				`awk`,
+				fmt.Sprintf(`BEGIN{ printf "rootflags=subvol=@ rd.luks.options=%v=discard rw quiet\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid),
+			}
+			z.Arch_chroot(&cmd, false, c)
+		case "zfs":
+			cmd := []string{
+				`awk`,
+				`BEGIN{ printf "root=ZFS=zroot\/ROOT\/default\n" >> "/boot/loader/entries/arch.conf" }`,
+			}
+			z.Arch_chroot(&cmd, false, c)
+		}
 	}
-
-	cmd = []string{`grub-install`, `--target=x86_64-efi`, `--efi-directory=/boot`, `--bootloader-id=ArchLinux`}
-	z.Arch_chroot(&cmd, false, c)
-
-	cmd = []string{`grub-mkconfig`, `-o`, `/boot/grub/grub.cfg`}
-	z.Arch_chroot(&cmd, false, c)
 
 	switch c.Storage.Filesystem {
 	case "luks":
 		// HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems)
-		cmd = []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
+		cmd := []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
 		z.Arch_chroot(&cmd, false, c)
 	case "zfs":
 		// HOOKS=(base udev autodetect modconf block keyboard zfs filesystems)
-		cmd = []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard zfs filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
+		cmd := []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard zfs filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
 		z.Arch_chroot(&cmd, false, c)
 	}
 
-	cmd = []string{`mkinitcpio`, `-p`, c.Kernel}
+	cmd := []string{`mkinitcpio`, `-p`, c.Kernel}
 	z.Arch_chroot(&cmd, false, c)
 }

@@ -34,7 +34,6 @@ func BasePkgs(c *Config) {
 		"flatpak",                // Sandboxed desktop applications on Linux.
 		"fwupd",                  // Daemon to update some devices' firmware
 		"go",                     // Core compiler tools for the Go programming language
-		"grub",                   // GRand Unified Bootloader
 		"keepassxc",              // Cross-platform community-driven port of Keepass password manager
 		"libdbusmenu-glib",       // Library for passing menus over DBus
 		"lib32-pipewire",         // Low-latency audio/video router and processor -- 32bit
@@ -504,7 +503,7 @@ func AUR(c *Config) {
 	case "FULL":
 		c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
 			"bcompare",                    // Beyond Compare 4
-			"cockpit-navigator",           // File Browser for Cockpit
+			//"cockpit-navigator",         // File Browser for Cockpit
 			"enpass-bin",                  // A multiplatform password manager
 			"firefox-pwa-bin",             // Install, manage and use PWAs in Firefox (native component)
 			"macchina-bin",                // A system information fetcher/frontend, with an (unhealthy) emphasis on performance
@@ -534,42 +533,42 @@ func Flatpak(c *Config) {
 	case "MINIMAL":
 	case "FULL":
 		c.Flatpak.Packages = append(c.Flatpak.Packages,
-			"com.belmoussaoui.Obfuscate",       // Censor private information from images
-			//"com.brave.Browser",              // Web browser from Brave
-			//"com.microsoft.Edge",             // Microsoft Edge Chromium Browser
-			//"com.getmailspring.Mailspring",   // Email client
-			"com.github.alainm23.planner",      // Never worry about forgetting things again
-			"com.github.liferooter.textpieces", // Transform text without random websites
-			"com.github.tchx84.Flatseal",       // Manage Flatpak permissions
-			"com.gitlab.bitseater.meteo",       // Weather forecast app
-			//"com.obsproject.Studio",          // Live streaming and video recording software
-			"com.steamgriddb.steam-rom-manager",// Manage ROMs in Steam
-			"com.snes9x.Snes9x",                // Super Nintendo Emulator
-			"com.stepmania.StepMania",          // Rhythm and Dance Game (DDR for PC)
-			//"com.synology.SynologyDrive",     // Powerful private cloud storage with no recurring fees
-			"com.usebottles.bottles",           // Sandox Windows Applications in Linux
-			"im.riot.Riot",                     // Element -- Matrix Chat Client
-			"io.github.antimicrox.antimicrox",  // Map gamepad buttons
-			"io.github.peazip.PeaZip",          // File Archiver Utility (RAR, TAR, ZIP)
-			"io.github.m64p.m64p",              // Nintendo 64 Emulator
-			"io.github.seadve.Kooha",           // Record your screen
-			"io.mgba.mGBA",                     // Nintendo Game Boy Advance Emulator
-			"net.davidotek.pupgui2",            // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
-			"net.filebot.Filebot",              // Ultimate TV and Movie Renamer
-			"net.kuribo64.melonDS",             // Nintendo DS and DSi emulator
-			"net.pcsx2.PCSX2",                  // Playstation 2 emulator
-			"org.citra_emu.citra",              // Nintendo 3DS emulator
-			"org.DolphinEmu.dolphin-emu",       // Nintendo GameCube and Wii emulator
-			"org.gnome.Firmware",               // Install firmware on devices
-			//"org.gnome.Maps",                 // Find places around the world
-			"org.libreoffice.LibreOffice",      // LibreOffice productivity suite
-			"org.libretro.RetroArch",           // Frontend for emulators, game engines and media players
-			"org.mixxx.Mixxx",                  // DJ Mixing software (Traktor alternative)
-			"org.mozilla.Thunderbird",          // Email, RSS, and newsgroup client with integrated spam filter
-			//"org.onlyoffice.desktopeditors",  // OnlyOffice productivity suite
-			"org.ppsspp.PPSSPP",                // PlayStation Portable emulator
-			"org.yuzu_emu.yuzu",                // Nintendo Switch emulator
-			"tv.plex.PlexDesktop",              // Plex Client for desktop computers
+			"com.belmoussaoui.Obfuscate",        // Censor private information from images
+			//"com.brave.Browser",               // Web browser from Brave
+			//"com.microsoft.Edge",              // Microsoft Edge Chromium Browser
+			//"com.getmailspring.Mailspring",    // Email client
+			"com.github.alainm23.planner",       // Never worry about forgetting things again
+			"com.github.liferooter.textpieces",  // Transform text without random websites
+			"com.github.tchx84.Flatseal",        // Manage Flatpak permissions
+			"com.gitlab.bitseater.meteo",        // Weather forecast app
+			//"com.obsproject.Studio",           // Live streaming and video recording software
+			"com.steamgriddb.steam-rom-manager", // Manage ROMs in Steam
+			"com.snes9x.Snes9x",                 // Super Nintendo Emulator
+			"com.stepmania.StepMania",           // Rhythm and Dance Game (DDR for PC)
+			//"com.synology.SynologyDrive",      // Powerful private cloud storage with no recurring fees
+			"com.usebottles.bottles",            // Sandox Windows Applications in Linux
+			"im.riot.Riot",                      // Element -- Matrix Chat Client
+			"io.github.antimicrox.antimicrox",   // Map gamepad buttons
+			"io.github.peazip.PeaZip",           // File Archiver Utility (RAR, TAR, ZIP)
+			"io.github.m64p.m64p",               // Nintendo 64 Emulator
+			"io.github.seadve.Kooha",            // Record your screen
+			"io.mgba.mGBA",                      // Nintendo Game Boy Advance Emulator
+			"net.davidotek.pupgui2",             // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
+			"net.filebot.Filebot",               // Ultimate TV and Movie Renamer
+			"net.kuribo64.melonDS",              // Nintendo DS and DSi emulator
+			"net.pcsx2.PCSX2",                   // Playstation 2 emulator
+			"org.citra_emu.citra",               // Nintendo 3DS emulator
+			"org.DolphinEmu.dolphin-emu",        // Nintendo GameCube and Wii emulator
+			"org.gnome.Firmware",                // Install firmware on devices
+			//"org.gnome.Maps",                  // Find places around the world
+			"org.libreoffice.LibreOffice",       // LibreOffice productivity suite
+			"org.libretro.RetroArch",            // Frontend for emulators, game engines and media players
+			"org.mixxx.Mixxx",                   // DJ Mixing software (Traktor alternative)
+			"org.mozilla.Thunderbird",           // Email, RSS, and newsgroup client with integrated spam filter
+			//"org.onlyoffice.desktopeditors",   // OnlyOffice productivity suite
+			"org.ppsspp.PPSSPP",                 // PlayStation Portable emulator
+			"org.yuzu_emu.yuzu",                 // Nintendo Switch emulator
+			"tv.plex.PlexDesktop",               // Plex Client for desktop computers
 		)
 	}
 

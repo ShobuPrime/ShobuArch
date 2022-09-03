@@ -26,25 +26,25 @@ func debug() {
 
 	// Change values as you'd like here, and call relevant functions below
 	cdb := conf.Config{
-		Format: "YAML",
-		Kernel: "linux-zen",
+		Format:   "YAML",
+		Kernel:   "linux-zen",
 		Timezone: "",
 		User: conf.User{
 			Username: "shobuprime",
 			Password: "demo",
 			Language: conf.Language{
-				Locale: "en_US.UTF-8",
-				CharSet: "UTF-8",
+				Locale:   "en_US.UTF-8",
+				CharSet:  "UTF-8",
 				Keyboard: "us",
 			},
 		},
 		Storage: conf.Storage{
-			SystemDisk: "",
-			SystemDiskID: "",
+			SystemDisk:    "",
+			SystemDiskID:  "",
 			MirrorInstall: false,
-			MirrorDisk: "",
-			MirrorDiskID: "",
-			Filesystem: "",
+			MirrorDisk:    "",
+			MirrorDiskID:  "",
+			Filesystem:    "",
 		},
 		Desktop: conf.Desktop{
 			Environment: "",
@@ -52,7 +52,7 @@ func debug() {
 		},
 		Pacman: conf.Pacman{
 			AUR: conf.AURs{
-				Helper: "",
+				Helper:   "",
 				Packages: []string{""},
 			},
 			Packages: []string{
@@ -65,10 +65,10 @@ func debug() {
 		PWA: conf.PWAs{
 			Sites: []conf.Site{
 				{
-					Name: "",
+					Name:        "",
 					Description: "",
-					StartUrl: "",
-					Manifest: "",
+					StartUrl:    "",
+					Manifest:    "",
 				},
 			},
 		},

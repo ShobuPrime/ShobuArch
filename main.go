@@ -87,6 +87,7 @@ func config(c *conf.Config) {
 
 	conf.Logo()
 	conf.SetKernel(c)
+	conf.SetBootloader(c)
 	conf.BasePkgs(c)
 	clear()
 
@@ -215,7 +216,7 @@ func main() {
 	MainLogo()
 	c := conf.Config{}
 
-	debug()
+	//debug()
 
 	// https://gobyexample.com/command-line-flags
 	method_flag := flag.String("method", "m", `'a': Automated, 'm': Manual`)

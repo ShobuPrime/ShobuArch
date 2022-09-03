@@ -34,16 +34,17 @@ import (
 )
 
 type Config struct {
-	Format   string   `json:"-" yaml:"-"`
-	Kernel   string   `json:"kernel" yaml:"kernel"`
-	Hostname string   `json:"hostname,omitempty" yaml:"hostname,omitempty"`
-	Timezone string   `json:"timezone,omitempty" yaml:"timezone,omitempty"`
-	User     User     `json:"user" yaml:"user"`
-	Storage  Storage  `json:"storage" yaml:"storage"`
-	Desktop  Desktop  `json:"desktop,omitempty" yaml:"desktop,omitempty"`
-	Pacman   Pacman   `json:"pacman,omitempty" yaml:"pacman,omitempty"`
-	Flatpak  Flatpaks `json:"flatpak,omitempty" yaml:"flatpak,omitempty"`
-	PWA      PWAs     `json:"pwa,omitempty" yaml:"pwa,omitempty"`
+	Format     string   `json:"-" yaml:"-"`
+	Kernel     string   `json:"kernel" yaml:"kernel"`
+	Bootloader string   `json:"bootloader" yaml:"kernel"`
+	Hostname   string   `json:"hostname,omitempty" yaml:"hostname,omitempty"`
+	Timezone   string   `json:"timezone,omitempty" yaml:"timezone,omitempty"`
+	User       User     `json:"user" yaml:"user"`
+	Storage    Storage  `json:"storage" yaml:"storage"`
+	Desktop    Desktop  `json:"desktop,omitempty" yaml:"desktop,omitempty"`
+	Pacman     Pacman   `json:"pacman,omitempty" yaml:"pacman,omitempty"`
+	Flatpak    Flatpaks `json:"flatpak,omitempty" yaml:"flatpak,omitempty"`
+	PWA        PWAs     `json:"pwa,omitempty" yaml:"pwa,omitempty"`
 }
 
 type User struct {
@@ -158,6 +159,30 @@ func SetKernel(c *Config) {
 	log.Printf("Selected %q kernel -- %q\n", kernel_choice, c.Kernel)
 
 	SaveConfig(c)
+}
+
+func SetBootloader(c *Config) {
+	prompt := promptui.Select{
+		Label: "Please select your preferred bootloader",
+		Items: []string{"grub", "systemd-boot"},
+		Size:  4,
+	}
+
+	_, bootloader_choice, err := prompt.Run()
+
+	if err != nil {
+		log.Printf("Kernel selection failed %v\n", err)
+		return
+	}
+
+	switch bootloader_choice {
+	case "grub":
+		c.Bootloader = "grub"
+	case "systemd-boot":
+		c.Kernel = "systemd-boot"
+	}
+
+	log.Printf("Selected %q to boot with -- %q\n", bootloader_choice, c.Bootloader)
 }
 
 func SetUserInfo(c *Config) {

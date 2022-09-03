@@ -19,8 +19,8 @@ package install
 
 import (
 	"fmt"
-	"io/ioutil"
 	"log"
+	"os"
 	"strings"
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
@@ -60,23 +60,23 @@ func PostInstallCleanup(c *conf.Config) {
 	z.Arch_chroot(&cmd, false, c)
 
 	log.Println("Saving config to user profile")
-	config_bytes, err := ioutil.ReadFile(fmt.Sprintf("./shobuarch_config.%s", strings.ToLower(c.Format)))
+	config_bytes, err := os.ReadFile(fmt.Sprintf("./shobuarch_config.%s", strings.ToLower(c.Format)))
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = ioutil.WriteFile(fmt.Sprintf("/mnt/home/%s/Desktop/shobuarch_config.%s", c.User.Username, strings.ToLower(c.Format)), config_bytes, 0755)
+	err = os.WriteFile(fmt.Sprintf("/mnt/home/%s/Desktop/shobuarch_config.%s", c.User.Username, strings.ToLower(c.Format)), config_bytes, 0755)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
 	log.Println("Saving log to user profile")
-	log_bytes, err := ioutil.ReadFile("./shobuarch.log")
+	log_bytes, err := os.ReadFile("./shobuarch.log")
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = ioutil.WriteFile(fmt.Sprintf("/mnt/home/%s/Desktop/shobuarch.log", c.User.Username), log_bytes, 0755)
+	err = os.WriteFile(fmt.Sprintf("/mnt/home/%s/Desktop/shobuarch.log", c.User.Username), log_bytes, 0755)
 	if err != nil {
 		log.Fatalln(err)
 	}

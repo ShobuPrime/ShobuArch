@@ -51,7 +51,7 @@ func Prerequisites(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	prereqs := `pacman -Syy --noconfirm --needed btrfs-progs glibc gptfdisk sed sudo`
+	prereqs := `pacman -Syy --noconfirm --needed btrfs-progs glibc gptfdisk sbctl sed sudo`
 	z.Shell(&prereqs)
 }
 
@@ -176,7 +176,7 @@ func FormatDisks(c *conf.Config) {
 			fmt.Sprintf(`mount -o %v,subvol=@tmp %v /mnt/tmp`, mount_options, disk1_part2),
 			fmt.Sprintf(`mount -o %v,subvol=@var %v /mnt/var`, mount_options, disk1_part2),
 			fmt.Sprintf(`mount -o %v,subvol=@.snapshots %v /mnt/.snapshots`, mount_options, disk1_part2),
-			`mkdir -p /mnt/boot/efi`,
+			`mkdir -p /mnt/boot/EFI`,
 			fmt.Sprintf(`mount -t vfat %s /mnt/boot/`, disk1_part1),
 		)
 	case "ext4":
@@ -187,9 +187,12 @@ func FormatDisks(c *conf.Config) {
 	case "luks":
 		cmd_list = append(cmd_list,
 			fmt.Sprintf(`echo -n "%v" | cryptsetup -y -v luksFormat %v -`, c.Storage.EncryptionKey, disk1_part2),
-			fmt.Sprintf(`echo -n "%v" | cryptsetup open %v ROOT -`, c.Storage.EncryptionKey, disk1_part2),
-			fmt.Sprintf(`mkfs.btrfs -L ROOT %v -f`, disk1_part2),
-			fmt.Sprintf(`mount -t btrfs %v /mnt`, disk1_part2),
+			fmt.Sprintf(`echo -n "%v" | cryptsetup -v luksOpen %v ROOT -`, c.Storage.EncryptionKey, disk1_part2),
+			`lsblk`,
+			// fmt.Sprintf(`mkfs.btrfs -L ROOT %v -f`, disk1_part2),
+			`mkfs.btrfs /dev/mapper/ROOT -f`,
+			// fmt.Sprintf(`mount -t btrfs %v /mnt`, disk1_part2),
+			`mount /dev/mapper/ROOT /mnt`,
 			`btrfs subvolume create /mnt/@`, // subvolumesetup
 			`btrfs subvolume create /mnt/@home`,
 			`btrfs subvolume create /mnt/@var`,
@@ -202,7 +205,7 @@ func FormatDisks(c *conf.Config) {
 			fmt.Sprintf(`mount -o %v,subvol=@tmp %v /mnt/tmp`, mount_options, disk1_part2),
 			fmt.Sprintf(`mount -o %v,subvol=@var %v /mnt/var`, mount_options, disk1_part2),
 			fmt.Sprintf(`mount -o %v,subvol=@.snapshots %v /mnt/.snapshots`, mount_options, disk1_part2),
-			`mkdir -p /mnt/boot/efi`,
+			`mkdir -p /mnt/boot/EFI`,
 			fmt.Sprintf(`mount -t vfat %s /mnt/boot/`, disk1_part1),
 		)
 	case "zfs":
@@ -273,7 +276,7 @@ func ArchInstall(c *conf.Config) {
 	cmd_list := []string{}
 
 	cmd_list = append(cmd_list,
-		fmt.Sprintf(`pacstrap /mnt --noconfirm --needed archlinux-keyring base base-devel dkms libnewt %s linux-firmware %s-docs %s-headers nano packagekit sed sudo vim sudo wget`, c.Kernel, c.Kernel, c.Kernel),
+		fmt.Sprintf(`pacstrap /mnt --noconfirm --needed archlinux-keyring base base-devel dkms libnewt %s linux-firmware %s-docs %s-headers nano packagekit sbctl sed sudo vim sudo wget`, c.Kernel, c.Kernel, c.Kernel),
 		`echo "keyserver hkp://keyserver.ubuntu.com" >> /mnt/etc/pacman.d/gnupg/gpg.conf`,
 		`cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist`,
 	)
