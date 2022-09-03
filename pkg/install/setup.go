@@ -726,18 +726,12 @@ func SetupEFI(c *conf.Config) {
 
 		switch c.Storage.Filesystem {
 		case "luks":
-			uuid_command := `lsblk -dno UUID /dev/mapper/ROOT`
+			uuid_command := `lsblk -dno UUID /dev/mapper/luks_ROOT`
 			root_uuid := strings.TrimRight(strings.TrimSpace(z.Shell(&uuid_command)), "\n")
 
 			cmd := []string{
 				`awk`,
-				fmt.Sprintf(`BEGIN{ printf "options rd.luks.name=%v=ROOT root=\/dev\/mapper\/ROOT\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid),
-			}
-			z.Arch_chroot(&cmd, false, c)
-
-			cmd = []string{
-				`awk`,
-				fmt.Sprintf(`BEGIN{ printf "rootflags=subvol=@ rd.luks.options=%v=discard rw quiet\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid),
+				fmt.Sprintf(`BEGIN{ printf "options rd.luks.uuid=%v root=\/dev\/mapper\/luks_ROOT rootflags=subvol=@ rd.luks.options=%v=timeout=10s,discard,quiet,rw\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid, root_uuid),
 			}
 			z.Arch_chroot(&cmd, false, c)
 		case "zfs":
@@ -747,13 +741,46 @@ func SetupEFI(c *conf.Config) {
 			}
 			z.Arch_chroot(&cmd, false, c)
 		}
+
+		cmd = []string{
+			`awk`,
+			`BEGIN{ printf "default arch.conf\n" >> "/boot/loader/loader.conf" }`,
+		}
+		z.Arch_chroot(&cmd, false, c)
+
+		cmd = []string{
+			`awk`,
+			`BEGIN{ printf "timeout 3\n" >> "/boot/loader/loader.conf" }`,
+		}
+		z.Arch_chroot(&cmd, false, c)
+
+		cmd = []string{
+			`awk`,
+			`BEGIN{ printf "console-mode max\n" >> "/boot/loader/loader.conf" }`,
+		}
+		z.Arch_chroot(&cmd, false, c)
+		
+		cmd = []string{
+			`awk`,
+			`BEGIN{ printf "editor 0\n" >> "/boot/loader/loader.conf" }`,
+		}
+		z.Arch_chroot(&cmd, false, c)
 	}
 
 	switch c.Storage.Filesystem {
 	case "luks":
 		// HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems)
-		cmd := []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
-		z.Arch_chroot(&cmd, false, c)
+		switch c.Bootloader {
+		case "systemd-boot":
+			cmd := []string{`sed`, `-i`, `s/MODULES=()/MODULES=(btrfs)/g`, `/etc/mkinitcpio.conf`}
+			z.Arch_chroot(&cmd, false, c)
+
+			cmd = []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev systemd autodetect keyboard modconf block sd-encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
+			z.Arch_chroot(&cmd, false, c)
+		default:
+			cmd := []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
+			z.Arch_chroot(&cmd, false, c)
+		}
 	case "zfs":
 		// HOOKS=(base udev autodetect modconf block keyboard zfs filesystems)
 		cmd := []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard zfs filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}

@@ -141,7 +141,7 @@ func FormatDisks(c *conf.Config) {
 	log.Println("Detecting SSD...")
 	if c.Storage.SystemDiskRota || strings.Contains(c.Storage.SystemDiskID, "SSD") {
 		// MOUNT_OPTIONS if SSD: noatime,compress=zstd,ssd,commit=120
-		mount_options = `noatime,compress=zstd,ssd,commit=120`
+		mount_options = `discard,noatime,compress=zstd,ssd,commit=120`
 		log.Printf(`SSD detected! MOUNT_OPTIONS=%v\n`, mount_options)
 	} else {
 		// MOUNT_OPTIONS if HDD: noatime,compress=zstd,commit=120
@@ -185,13 +185,13 @@ func FormatDisks(c *conf.Config) {
 		)
 	case "luks":
 		cmd_list = append(cmd_list,
-			fmt.Sprintf(`echo -n "%v" | cryptsetup -y -v luksFormat %v -`, c.Storage.EncryptionKey, disk1_part2),
-			fmt.Sprintf(`echo -n "%v" | cryptsetup -v luksOpen %v ROOT -`, c.Storage.EncryptionKey, disk1_part2),
+			fmt.Sprintf(`echo -n "%v" | cryptsetup -y -v luksFormat --type=luks2 --label=ROOT %v -`, c.Storage.EncryptionKey, disk1_part2),
+			fmt.Sprintf(`echo -n "%v" | cryptsetup -v luksOpen %v luks_ROOT -`, c.Storage.EncryptionKey, disk1_part2),
 			`lsblk`,
 			// fmt.Sprintf(`mkfs.btrfs -L ROOT %v -f`, disk1_part2),
-			`mkfs.btrfs /dev/mapper/ROOT -f`,
+			`mkfs.btrfs /dev/mapper/luks_ROOT -f`,
 			// fmt.Sprintf(`mount -t btrfs %v /mnt`, disk1_part2),
-			`mount /dev/mapper/ROOT /mnt`,
+			`mount /dev/mapper/luks_ROOT /mnt`,
 			`btrfs subvolume create /mnt/@`, // subvolumesetup
 			`btrfs subvolume create /mnt/@home`,
 			`btrfs subvolume create /mnt/@var`,
@@ -204,12 +204,12 @@ func FormatDisks(c *conf.Config) {
 			// fmt.Sprintf(`mount -o %v,subvol=@tmp %v /mnt/tmp`, mount_options, disk1_part2),
 			// fmt.Sprintf(`mount -o %v,subvol=@var %v /mnt/var`, mount_options, disk1_part2),
 			// fmt.Sprintf(`mount -o %v,subvol=@.snapshots %v /mnt/.snapshots`, mount_options, disk1_part2),
-			fmt.Sprintf(`mount -o %v,subvol=@ /dev/mapper/ROOT /mnt`, mount_options), // mountallsubvol
+			fmt.Sprintf(`mount -o %v,subvol=@ /dev/mapper/luks_ROOT /mnt`, mount_options), // mountallsubvol
 			`mkdir -p /mnt/{home,var,tmp,.snapshots}`,
-			fmt.Sprintf(`mount -o %v,subvol=@home /dev/mapper/ROOT /mnt/home`, mount_options),
-			fmt.Sprintf(`mount -o %v,subvol=@tmp /dev/mapper/ROOT /mnt/tmp`, mount_options),
-			fmt.Sprintf(`mount -o %v,subvol=@var /dev/mapper/ROOT /mnt/var`, mount_options),
-			fmt.Sprintf(`mount -o %v,subvol=@.snapshots /dev/mapper/ROOT /mnt/.snapshots`, mount_options),
+			fmt.Sprintf(`mount -o %v,subvol=@home /dev/mapper/luks_ROOT /mnt/home`, mount_options),
+			fmt.Sprintf(`mount -o %v,subvol=@tmp /dev/mapper/luks_ROOT /mnt/tmp`, mount_options),
+			fmt.Sprintf(`mount -o %v,subvol=@var /dev/mapper/luks_ROOT /mnt/var`, mount_options),
+			fmt.Sprintf(`mount -o %v,subvol=@.snapshots /dev/mapper/luks_ROOT /mnt/.snapshots`, mount_options),
 			`mkdir -p /mnt/boot/EFI`,
 			fmt.Sprintf(`mount -t vfat %s /mnt/boot/`, disk1_part1),
 		)
