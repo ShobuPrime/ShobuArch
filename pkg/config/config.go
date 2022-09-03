@@ -22,7 +22,6 @@ import (
 	"encoding/json"
 	"fmt"
 	"gopkg.in/yaml.v2"
-	"io/ioutil"
 	"log"
 	"os"
 	"strings"
@@ -179,7 +178,7 @@ func SetBootloader(c *Config) {
 	case "grub":
 		c.Bootloader = "grub"
 	case "systemd-boot":
-		c.Kernel = "systemd-boot"
+		c.Bootloader = "systemd-boot"
 	}
 
 	log.Printf("Selected %q to boot with -- %q\n", bootloader_choice, c.Bootloader)
@@ -735,14 +734,14 @@ func SetLocale(c *Config) {
 func LoadConfig(c *Config) {
 	switch c.Format {
 	case "yaml", "YAML":
-		config_file, err := ioutil.ReadFile("shobuarch_config.yaml")
+		config_file, err := os.ReadFile("shobuarch_config.yaml")
 		log.Printf("\n%s\n", config_file)
 		if err != nil {
 			log.Panic("Config file not found!")
 		}
 		_ = yaml.Unmarshal([]byte(config_file), &c)
 	default:
-		config_file, err := ioutil.ReadFile("shobuarch_config.json")
+		config_file, err := os.ReadFile("shobuarch_config.json")
 		log.Printf("\n%s\n", config_file)
 		if err != nil {
 			log.Panic("Config file not found!")
@@ -757,9 +756,9 @@ func SaveConfig(c *Config) {
 	switch c.Format {
 	case "yaml", "YAML":
 		file, _ := yaml.Marshal(c)
-		_ = ioutil.WriteFile("./shobuarch_config.yaml", file, 0644)
+		_ = os.WriteFile("./shobuarch_config.yaml", file, 0644)
 	default:
 		file, _ := json.MarshalIndent(c, "", " ")
-		_ = ioutil.WriteFile("./shobuarch_config.json", file, 0644)
+		_ = os.WriteFile("./shobuarch_config.json", file, 0644)
 	}
 }

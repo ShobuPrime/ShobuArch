@@ -77,10 +77,10 @@ func Mirrors(c *conf.Config) {
 		`timedatectl set-ntp true`,
 		`pacman -Syy --noconfirm archlinux-keyring`,
 		`pacman -Syy --noconfirm --needed pacman-contrib terminus-font`,
-		`sed -n 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf`,
-		`pacman -Syy --noconfirm --needed grub reflector rsync`,
-		`cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup`,
-		`reflector -a 48 -c US -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist`,
+		// `sed -n 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf`,
+		`pacman -Syy --noconfirm --needed reflector rsync`,
+		//`cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup`,
+		//`reflector -a 48 -c US -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist`,
 	)
 
 	for i := range cmd_list {
@@ -301,7 +301,7 @@ func ArchInstall(c *conf.Config) {
 	default:
 		log.Printf("Generating fstab for %s\n", c.Storage.Filesystem)
 		cmd_list = append(cmd_list,
-			`genfstab -L /mnt >> /mnt/etc/fstab`,
+			`genfstab -U -p /mnt >> /mnt/etc/fstab`,
 		)
 	}
 
