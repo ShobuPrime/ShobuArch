@@ -726,8 +726,8 @@ func SetupEFI(c *conf.Config) {
 
 		switch c.Storage.Filesystem {
 		case "luks":
-			uuid_command := fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
-			root_uuid := z.Shell(&uuid_command)
+			uuid_command := `lsblk -dno UUID /dev/mapper/ROOT`
+			root_uuid := strings.TrimRight(strings.TrimSpace(z.Shell(&uuid_command)), "\n")
 
 			cmd := []string{
 				`awk`,

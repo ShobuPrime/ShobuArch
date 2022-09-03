@@ -128,6 +128,10 @@ func PostInstallUnmount(c *conf.Config) {
 	)
 
 	switch c.Storage.Filesystem {
+	case "luks":
+		cmd_list = append(cmd_list,
+			`umount -A /dev/mapper/ROOT`,
+		)
 	case "zfs":
 		cmd_list = append(cmd_list,
 			`zfs umount -a`,
