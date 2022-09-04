@@ -706,13 +706,13 @@ func SetupEFI(c *conf.Config) {
 			case "GenuineIntel":
 				cmd := []string{
 					`awk`,
-					`BEGIN{ printf "initrd intel-ucode.img\n" >> "/boot/loader/entries/arch.conf" }`,
+					`BEGIN{ printf "initrd \/intel-ucode.img\n" >> "/boot/loader/entries/arch.conf" }`,
 				}
 				z.Arch_chroot(&cmd, false, c)
 			case "AuthenticAMD":
 				cmd := []string{
 					`awk`,
-					`BEGIN{ printf "initrd amd-ucode.img\n" >> "/boot/loader/entries/arch.conf" }`,
+					`BEGIN{ printf "initrd \/amd-ucode.img\n" >> "/boot/loader/entries/arch.conf" }`,
 				}
 				z.Arch_chroot(&cmd, false, c)
 			}
@@ -720,18 +720,18 @@ func SetupEFI(c *conf.Config) {
 
 		cmd = []string{
 			`awk`,
-			fmt.Sprintf(`BEGIN{ printf "initrd initramfs-%v.img\n" >> "/boot/loader/entries/arch.conf" }`, c.Kernel),
+			fmt.Sprintf(`BEGIN{ printf "initrd \/initramfs-%v.img\n" >> "/boot/loader/entries/arch.conf" }`, c.Kernel),
 		}
 		z.Arch_chroot(&cmd, false, c)
 
 		switch c.Storage.Filesystem {
 		case "luks":
-			uuid_command := `lsblk -dno UUID /dev/mapper/luks_ROOT`
+			uuid_command := fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
 			root_uuid := strings.TrimRight(strings.TrimSpace(z.Shell(&uuid_command)), "\n")
 
 			cmd := []string{
 				`awk`,
-				fmt.Sprintf(`BEGIN{ printf "options rd.luks.uuid=%v root=\/dev\/mapper\/luks_ROOT rootflags=subvol=@ rd.luks.options=%v=timeout=10s,discard,quiet,rw\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid, root_uuid),
+				fmt.Sprintf(`BEGIN{ printf "options rd.luks.name=%v=luks_ROOT root=\/dev\/mapper\/luks_ROOT rootflags=subvol=@ rd.luks.options=%v=timeout=15s,discard,quiet,rw\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid, root_uuid),
 			}
 			z.Arch_chroot(&cmd, false, c)
 		case "zfs":
