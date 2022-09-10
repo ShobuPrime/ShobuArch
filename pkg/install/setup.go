@@ -274,6 +274,10 @@ func SetupServices(c *conf.Config) {
 			cmd_list = append(cmd_list,
 				`firewalld`,
 			)
+		case "network-manager":
+			cmd_list = append(cmd_list,
+				`bluetooth.service`,
+			)
 		case "virt-manager":
 			cmd_list = append(cmd_list,
 				`libvirtd.service`,
@@ -467,6 +471,38 @@ func SetupGraphics(c *conf.Config) {
 	}
 
 	z.Arch_chroot(&cmd, false, c)
+}
+
+func SetupBiometrics(c *conf.Config) {
+	log.Println(`
+	-------------------------------------------------------------------------
+                    Detecting Biometric Hardware
+	-------------------------------------------------------------------------
+	`)
+
+	usb := u.ListUSB()
+	bio := u.BiometricIDs()
+
+	//cmd := []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`}
+
+	for i := range usb.USBDevices {
+
+		if strings.Contains(usb.USBDevices[i].Description, `Camera`) {
+			for j := range bio.Face {
+				if usb.USBDevices[i].ID == bio.Face[j] {
+					log.Println(`howdy compatible device found`)
+				}
+			}
+		}
+
+		if strings.Contains(usb.USBDevices[i].Description, `Fingerprint`) {
+			for j := range bio.Fingerprint {
+				if usb.USBDevices[i].ID == bio.Fingerprint[j] {
+					log.Println(`fprint compatible device found`)
+				}
+			}
+		}
+	}
 }
 
 func SetupUser(c *conf.Config) {
@@ -668,16 +704,16 @@ func SetupEFI(c *conf.Config) {
 
 		cmd = []string{`sed`, `-i`, `s/quiet/quiet video=1920x1080/g`, `/etc/default/grub`}
 		z.Arch_chroot(&cmd, false, c)
-	
+
 		switch c.Storage.Filesystem {
 		case "zfs":
 			cmd = []string{`sed`, `-i`, `s/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="root=ZFS=zroot\/ROOT\/default"/g`, `/etc/default/grub`}
 			z.Arch_chroot(&cmd, false, c)
 		}
-	
+
 		cmd = []string{`grub-install`, `--target=x86_64-efi`, `--efi-directory=/boot`, `--bootloader-id=ArchLinux`}
 		z.Arch_chroot(&cmd, false, c)
-	
+
 		cmd = []string{`grub-mkconfig`, `-o`, `/boot/grub/grub.cfg`}
 		z.Arch_chroot(&cmd, false, c)
 	case "systemd-boot":
@@ -700,7 +736,7 @@ func SetupEFI(c *conf.Config) {
 		z.Arch_chroot(&cmd, false, c)
 
 		cpu := u.ListCPU()
-	
+
 		for i := range cpu.Processor {
 			switch cpu.Processor[i].Data {
 			case "GenuineIntel":
@@ -759,7 +795,7 @@ func SetupEFI(c *conf.Config) {
 			`BEGIN{ printf "console-mode max\n" >> "/boot/loader/loader.conf" }`,
 		}
 		z.Arch_chroot(&cmd, false, c)
-		
+
 		cmd = []string{
 			`awk`,
 			`BEGIN{ printf "editor 0\n" >> "/boot/loader/loader.conf" }`,

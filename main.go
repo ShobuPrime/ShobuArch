@@ -152,6 +152,7 @@ func setup(c *conf.Config) {
 	i.SetupCustomRepos(c)
 	i.SetupMicrocode(c)
 	i.SetupGraphics(c)
+	i.SetupBiometrics(c)
 	i.SetupUser(c)
 	i.SetupAUR(c)
 	i.SetupFlatpaks(c)
