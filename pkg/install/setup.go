@@ -541,6 +541,7 @@ func SetupUser(c *conf.Config) {
 		case "virt-manager":
 			group_list = append(group_list,
 				`kvm`,
+				`libvirt`,
 			)
 		}
 	}

@@ -550,7 +550,7 @@ func Flatpak(c *Config) {
 			"im.riot.Riot",                      // Element -- Matrix Chat Client
 			"io.github.antimicrox.antimicrox",   // Map gamepad buttons
 			"io.github.peazip.PeaZip",           // File Archiver Utility (RAR, TAR, ZIP)
-			"io.github.m64p.m64p",               // Nintendo 64 Emulator
+			"io.github.simple64.simple64",       // Nintendo 64 Emulator
 			"io.github.seadve.Kooha",            // Record your screen
 			"io.mgba.mGBA",                      // Nintendo Game Boy Advance Emulator
 			"net.davidotek.pupgui2",             // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
