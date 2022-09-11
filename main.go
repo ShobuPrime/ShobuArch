@@ -154,6 +154,7 @@ func setup(c *conf.Config) {
 	i.SetupGraphics(c)
 	i.SetupBiometrics(c)
 	i.SetupUser(c)
+	i.SetupSecurityModules(c)
 	i.SetupAUR(c)
 	i.SetupFlatpaks(c)
 	i.SetupEFI(c)
@@ -217,7 +218,7 @@ func main() {
 	MainLogo()
 	c := conf.Config{}
 
-	//debug()
+	debug()
 
 	// https://gobyexample.com/command-line-flags
 	method_flag := flag.String("method", "m", `'a': Automated, 'm': Manual`)

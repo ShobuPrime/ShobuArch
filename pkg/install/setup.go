@@ -21,6 +21,7 @@ import (
 	"fmt"
 	"log"
 	"os"
+	"path/filepath"
 	"runtime"
 	"strconv"
 	"strings"
@@ -262,6 +263,10 @@ func SetupServices(c *conf.Config) {
 
 	for i := range c.Pacman.Packages {
 		switch c.Pacman.Packages[i] {
+		case "apparmor":
+			cmd_list = append(cmd_list,
+				`apparmor.service`,
+			)
 		case "cockpit":
 			cmd_list = append(cmd_list,
 				`cockpit.socket`,
@@ -274,7 +279,7 @@ func SetupServices(c *conf.Config) {
 			cmd_list = append(cmd_list,
 				`firewalld`,
 			)
-		case "network-manager":
+		case "networkmanager":
 			cmd_list = append(cmd_list,
 				`bluetooth.service`,
 			)
@@ -486,7 +491,6 @@ func SetupBiometrics(c *conf.Config) {
 	//cmd := []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`}
 
 	for i := range usb.USBDevices {
-
 		if strings.Contains(usb.USBDevices[i].Description, `Camera`) {
 			for j := range bio.Face {
 				if usb.USBDevices[i].ID == bio.Face[j] {
@@ -562,7 +566,7 @@ func SetupUser(c *conf.Config) {
 
 	log.Println("Initializing user directories...")
 	user_directories := []string{
-		`.cache`, `.config`, `.local/share/applications`, `.local/share/icons`,
+		`.cache`, `.config/autostart`, `.local/share/applications`, `.local/share/icons`,
 		`Desktop`, `Documents`, `Downloads`, `Music`, `Pictures`, `Public`,
 		`Templates`, `Videos`,
 	}
@@ -592,6 +596,82 @@ func SetupUser(c *conf.Config) {
 
 	cmd = []string{`sudo`, `sed`, `-i`, `s/# %sudo ALL=(ALL:ALL) ALL/%sudo ALL=(ALL:ALL) ALL/g`, `/etc/sudoers`}
 	z.Arch_chroot(&cmd, false, c)
+}
+
+func SetupSecurityModules(c *conf.Config) {
+
+	log.Println(`
+	-------------------------------------------------------------------------
+                    Setup Linux Security Modules
+	-------------------------------------------------------------------------
+	`)
+
+	// Currently only supporting AppArmor
+	// ToDo: Will provde considerations for SElinux
+
+	cmd := []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`}
+
+	for i := range c.Pacman.Packages {
+		switch c.Pacman.Packages[i] {
+		case "apparmor":
+			log.Println("AppArmor Linux Security Module detected...")
+			pwd, err := os.Getwd()
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			log.Println(`Installing Audit framework...`)
+			cmd = append(cmd,
+				`audit`,
+				`python-notify2`,
+				`python-psutil`,
+			)
+			z.Arch_chroot(&cmd, false, c)
+
+			log.Println(`Enabling Audit service...`)
+			cmd = []string{`systemctl`, `enable`, `--now`, `auditd.service`}
+
+			config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
+			log.Printf("Changing directory to %q", config_dir)
+			if err := os.Chdir(config_dir); err != nil {
+				log.Fatalln(err)
+			}
+
+			// aa-notify autostart
+			aan_config := filepath.Join(config_dir, "autostart", "apparmor-notify.desktop")
+
+			autostart_settings := []string{
+				`[Desktop Entry]`,
+				`Type=Application`,
+				`Name=AppArmor Notify`,
+				`Comment=Receive on screen notifications of AppArmor denials`,
+				`TryExec=aa-notify`,
+				`Exec=aa-notify -p -s 1 -w 60 -f /var/log/audit/audit.log`,
+				`StartupNotify=false`,
+				`NoDisplay=true`,
+			}
+
+			log.Println(`Creating autostart for AppArmor Notify service`)
+			f, err := os.OpenFile(aan_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Saving settings`)
+			if _, err := f.Write([]byte(strings.Join(autostart_settings, "\n"))); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Closing file`)
+			if err := f.Close(); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println("Done!")
+			log.Println("Returning to original directory")
+			// Return to original directory
+			if err := os.Chdir(pwd); err != nil {
+				log.Fatalln(err)
+			}
+		}
+	}
 }
 
 func SetupAUR(c *conf.Config) {
