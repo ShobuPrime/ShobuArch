@@ -858,7 +858,13 @@ func SetupEFI(c *conf.Config) {
 
 		switch c.Storage.Filesystem {
 		case "luks":
-			uuid_command := fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
+			
+			var uuid_command string
+			if strings.HasPrefix(c.Storage.SystemDisk, "/dev/nvme") {
+				uuid_command = fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
+			} else {
+				uuid_command = fmt.Sprintf(`lsblk -dno UUID %v2`, c.Storage.SystemDisk)
+			}
 			root_uuid := strings.TrimRight(strings.TrimSpace(z.Shell(&uuid_command)), "\n")
 
 			cmd := []string{
