@@ -488,7 +488,7 @@ func SetupBiometrics(c *conf.Config) {
 	usb := u.ListUSB()
 	bio := u.BiometricIDs()
 
-	//cmd := []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`}
+	cmd := []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`}
 
 	for i := range usb.USBDevices {
 		if strings.Contains(usb.USBDevices[i].Description, `Camera`) {
@@ -503,6 +503,8 @@ func SetupBiometrics(c *conf.Config) {
 			for j := range bio.Fingerprint {
 				if usb.USBDevices[i].ID == bio.Fingerprint[j] {
 					log.Println(`fprint compatible device found`)
+					cmd = append(cmd, `fprintd`, `libfprint`)
+					
 				}
 			}
 		}
@@ -567,8 +569,8 @@ func SetupUser(c *conf.Config) {
 	log.Println("Initializing user directories...")
 	user_directories := []string{
 		`.cache`, `.config/autostart`, `.local/share/applications`, `.local/share/icons`,
-		`Desktop`, `Documents`, `Downloads`, `Music`, `Pictures`, `Public`,
-		`Templates`, `Videos`,
+		`Applications`, `Desktop`, `Developer`, `Documents`, `Downloads`, `Music`,
+		`Pictures`, `Public`, `Templates`, `Videos`,
 	}
 
 	for i := range user_directories {
@@ -639,16 +641,29 @@ func SetupSecurityModules(c *conf.Config) {
 
 			// aa-notify autostart
 			aan_config := filepath.Join(config_dir, "autostart", "apparmor-notify.desktop")
-
+			
 			autostart_settings := []string{
 				`[Desktop Entry]`,
-				`Type=Application`,
-				`Name=AppArmor Notify`,
+				`Comment[en_US]=Receive on screen notifications of AppArmor denials`,
 				`Comment=Receive on screen notifications of AppArmor denials`,
-				`TryExec=aa-notify`,
 				`Exec=aa-notify -p -s 1 -w 60 -f /var/log/audit/audit.log`,
-				`StartupNotify=false`,
+				`GenericName[en_US]=`,
+				`GenericName=`,
+				`Icon=preferences-security-apparmor`,
+				`MimeType=`,
+				`Name[en_US]=AppArmor Notify`,
+				`Name=AppArmor Notify`,
 				`NoDisplay=true`,
+				`Path=`,
+				`StartupNotify=false`,
+				`Terminal=false`,
+				`TerminalOptions=`,
+				`TryExec=aa-notify`,
+				`Type=Application`,
+				`X-DBUS-ServiceName=`,
+				`X-DBUS-StartupType=`,
+				`X-KDE-SubstituteUID=false`,
+				`X-KDE-Username=`,
 			}
 
 			log.Println(`Creating autostart for AppArmor Notify service`)

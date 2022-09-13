@@ -172,9 +172,10 @@ func user(c *conf.Config) {
 	i.UserLogo()
 	i.UserLocale(c)
 	i.UserPackages(c)
-	i.UserPWAs(c)
-	i.UserShell(c)
 	i.UserKeyring(c)
+	i.UserPWAs(c)
+	i.UserVariables(c)
+	i.UserShell(c)
 	clear()
 
 	log.Println(`

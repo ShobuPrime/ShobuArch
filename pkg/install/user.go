@@ -278,6 +278,138 @@ func UserPWAs(c *conf.Config) {
 	z.Arch_chroot(&cmd_list, true, c)
 }
 
+func UserVariables(c *conf.Config) {
+
+	log.Println(`
+	-------------------------------------------------------------------------
+                    Configuring User Variables
+	-------------------------------------------------------------------------
+	`)
+
+	log.Println("Configuring Environmental Variables")
+
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
+	log.Printf("Changing directory to %q", config_dir)
+	if err := os.Chdir(config_dir); err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Printf("Making environment.d directory")
+	if err := os.MkdirAll("environment.d", 0755); err != nil {
+		log.Fatalln(err)
+	}
+
+	environment_config := filepath.Join(config_dir, "environment.d", "environment.conf")
+
+	config_settings := []string{
+		`MOZ_ENABLE_WAYLAND=1`,
+		`MOZ_DBUS_REMOTE=1`,
+	}
+	log.Println(`Creating "environment.conf"`)
+	f, err := os.OpenFile(environment_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Saving settings`)
+	if _, err := f.Write([]byte(strings.Join(config_settings, "\n"))); err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Closing file`)
+	if err := f.Close(); err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("Configuring Electron")
+
+	electron_config := filepath.Join(config_dir, "electron-flags.conf")
+
+	config_settings = []string{
+		`--enable-features=WaylandWindowDecorations`,
+		`--ozone-platform-hint=auto`,
+	}
+	log.Println(`Creating "electron-flags.conf"`)
+	f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Saving settings`)
+	if _, err := f.Write([]byte(strings.Join(config_settings, "\n"))); err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Closing file`)
+	if err := f.Close(); err != nil {
+		log.Fatalln(err)
+	}
+
+	electron_config = filepath.Join(config_dir, "electron19-flags.conf")
+
+	config_settings = []string{
+		`--enable-features=UseOzonePlatform`,
+		`--ozone-platform=wayland`,
+	}
+	log.Println(`Creating "electron19-flags.conf"`)
+	f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Saving settings`)
+	if _, err := f.Write([]byte(strings.Join(config_settings, "\n"))); err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Closing file`)
+	if err := f.Close(); err != nil {
+		log.Fatalln(err)
+	}
+
+	for i := range c.Pacman.Packages {
+		switch c.Pacman.Packages[i] {
+		case "code":
+			log.Println("Configuring Visual Studio Code")
+
+			electron_config := filepath.Join(config_dir, "code-flags.conf")
+
+			config_settings = []string{
+				`--enable-features=UseOzonePlatform`,
+				`--ozone-platform=wayland`,
+			}
+			log.Println(`Creating "electron-flags.conf"`)
+			f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Saving settings`)
+			if _, err := f.Write([]byte(strings.Join(config_settings, "\n"))); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Closing file`)
+			if err := f.Close(); err != nil {
+				log.Fatalln(err)
+			}
+		}
+	}
+
+	log.Println(`Enforcing permissions`)
+	//os.Chown(filepath.Base(keepass_config), 1000, 1000)
+	cmd := []string{
+		`chown`,
+		`-R`,
+		fmt.Sprintf(`%s:%s`, c.User.Username, c.User.Username),
+		fmt.Sprintf(`/home/%s/`, c.User.Username),
+	}
+	z.Arch_chroot(&cmd, false, c)
+
+	log.Println("Done!")
+	// Return to original directory
+	if err := os.Chdir(pwd); err != nil {
+		log.Fatalln(err)
+	}
+}
+
 func UserShell(c *conf.Config) {
 
 	log.Println(`
