@@ -200,7 +200,7 @@ func UserPackages(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	cmd_list := []string{`yay`, `-Syyu`, `--needed`, `--noconfirm`}
+	cmd_list := []string{c.Pacman.AUR.Helper, `-Syyu`, `--needed`, `--noconfirm`}
 	for i := range c.Pacman.AUR.Packages {
 		cmd_list = append(cmd_list, c.Pacman.AUR.Packages[i])
 	}
@@ -210,7 +210,7 @@ func UserPackages(c *conf.Config) {
 		switch c.Pacman.AUR.Packages[i] {
 		case "bcompare":
 			log.Println("Service menus for Beyond Compare 4")
-			cmd_list = []string{`yay`, `-Syyu`, `--needed`, `--noconfirm`}
+			cmd_list = []string{c.Pacman.AUR.Helper, `-Syyu`, `--needed`, `--noconfirm`}
 			switch c.Desktop.Environment {
 			case "cinnamon":
 				cmd_list = append(cmd_list, `bcompare-cinnamon`)
