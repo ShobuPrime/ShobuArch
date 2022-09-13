@@ -53,12 +53,16 @@ func PCIUSB(lsusb *string) *LSUSB {
 	usb_list := strings.Split(*lsusb, "\n")
 
 	for i := range usb_list {
-		device.Bus = usb_list[i][:7]
-		device.Device = usb_list[i][8:19]
-		device.ID = usb_list[i][20:32]
-		device.Description = usb_list[i][33:]
-		usb_struct.USBDevices = append(usb_struct.USBDevices, device)
-		device = USBDevice{}
+		switch usb_list[i] {
+		case "":
+		default:
+			device.Bus = usb_list[i][:7]
+			device.Device = usb_list[i][8:19]
+			device.ID = usb_list[i][20:32]
+			device.Description = usb_list[i][33:]
+			usb_struct.USBDevices = append(usb_struct.USBDevices, device)
+			device = USBDevice{}
+		}
 	}
 
 	return usb_struct

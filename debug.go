@@ -18,8 +18,10 @@
 package main
 
 import (
+	//"fmt"
+
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
-	//i "github.com/ShobuPrime/ShobuArch/pkg/install"
+	//u "github.com/ShobuPrime/ShobuArch/pkg/util"
 )
 
 func debug() {
@@ -77,5 +79,5 @@ func debug() {
 	_ = cdb
 
 	// Call functions you would like to test
-	// i.UserKeyring(&c)
+	//fmt.Println(u.PrettyJson(u.ListUSB()))
 }
