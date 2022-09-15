@@ -839,7 +839,7 @@ func SetupFlatpaks(c *conf.Config) {
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --socket=session-bus`, fp_override_cmd, c.Flatpak.Packages[i]))
 		}
 	}
-	log.Panicln("Appending systemd-nspawn 'Get out of Jail for free' command")
+	log.Println("Appending systemd-nspawn 'Get out of Jail for free' command")
 	cmd_list = append(cmd_list, `sudo poweroff`)
 
 	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container")
@@ -967,6 +967,20 @@ func SetupEFI(c *conf.Config) {
 		z.Arch_chroot(&cmd, false, c)
 
 		switch c.Storage.Filesystem {
+		case "btrfs":
+			var uuid_command string
+			if strings.HasPrefix(c.Storage.SystemDisk, "/dev/nvme") {
+				uuid_command = fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
+			} else {
+				uuid_command = fmt.Sprintf(`lsblk -dno UUID %v2`, c.Storage.SystemDisk)
+			}
+			root_uuid := strings.TrimRight(strings.TrimSpace(z.Shell(&uuid_command)), "\n")
+
+			cmd := []string{
+				`awk`,
+				fmt.Sprintf(`BEGIN{ printf "options root=UUID=%v rootflags=subvol=@\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid),
+			}
+			z.Arch_chroot(&cmd, false, c)
 		case "luks":
 			
 			var uuid_command string
@@ -1016,17 +1030,17 @@ func SetupEFI(c *conf.Config) {
 	}
 
 	switch c.Storage.Filesystem {
-	case "luks":
+	case "btrfs", "luks":
+		cmd := []string{`sed`, `-i`, `s/MODULES=()/MODULES=(btrfs)/g`, `/etc/mkinitcpio.conf`}
+		z.Arch_chroot(&cmd, false, c)
+
 		// HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems)
 		switch c.Bootloader {
 		case "systemd-boot":
-			cmd := []string{`sed`, `-i`, `s/MODULES=()/MODULES=(btrfs)/g`, `/etc/mkinitcpio.conf`}
-			z.Arch_chroot(&cmd, false, c)
-
 			cmd = []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev systemd autodetect keyboard modconf block sd-encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
 			z.Arch_chroot(&cmd, false, c)
 		default:
-			cmd := []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
+			cmd = []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
 			z.Arch_chroot(&cmd, false, c)
 		}
 	case "zfs":

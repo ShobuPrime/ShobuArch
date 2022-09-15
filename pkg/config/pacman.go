@@ -541,6 +541,7 @@ func Flatpak(c *Config) {
 			"com.github.liferooter.textpieces",  // Transform text without random websites
 			"com.github.tchx84.Flatseal",        // Manage Flatpak permissions
 			"com.gitlab.bitseater.meteo",        // Weather forecast app
+			"com.github.wwmm.easyeffects",       // Audio Effects for PipeWire Applications
 			//"com.obsproject.Studio",           // Live streaming and video recording software
 			"com.steamgriddb.steam-rom-manager", // Manage ROMs in Steam
 			"com.snes9x.Snes9x",                 // Super Nintendo Emulator
