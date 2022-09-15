@@ -512,7 +512,7 @@ func AUR(c *Config) {
 			"polychromatic",               // RGB management GUI for Razer Devices
 			"razer-nari-pipewire-profile", // Razer Nari headsets pipewire profile
 			"sddm-sugar-dark",             // "Sweetest" Dark theme for SDDM
-			"synology-drive",              // Powerful private cloud storage with no recurring fees
+			//"synology-drive",            // Powerful private cloud storage with no recurring fees
 			"system-monitoring-center",    // Windows Task Manager Clone
 		)
 
@@ -535,8 +535,8 @@ func Flatpak(c *Config) {
 		c.Flatpak.Packages = append(c.Flatpak.Packages,
 			"com.belmoussaoui.Obfuscate",        // Censor private information from images
 			//"com.brave.Browser",               // Web browser from Brave
-			//"com.microsoft.Edge",              // Microsoft Edge Chromium Browser
-			//"com.getmailspring.Mailspring",    // Email client
+			"com.microsoft.Edge",                // Microsoft Edge Chromium Browser
+			"com.getmailspring.Mailspring",      // Email client
 			"com.github.alainm23.planner",       // Never worry about forgetting things again
 			"com.github.liferooter.textpieces",  // Transform text without random websites
 			"com.github.tchx84.Flatseal",        // Manage Flatpak permissions
@@ -545,7 +545,7 @@ func Flatpak(c *Config) {
 			"com.steamgriddb.steam-rom-manager", // Manage ROMs in Steam
 			"com.snes9x.Snes9x",                 // Super Nintendo Emulator
 			"com.stepmania.StepMania",           // Rhythm and Dance Game (DDR for PC)
-			//"com.synology.SynologyDrive",      // Powerful private cloud storage with no recurring fees
+			"com.synology.SynologyDrive",        // Powerful private cloud storage with no recurring fees
 			"com.usebottles.bottles",            // Sandox Windows Applications in Linux
 			"im.riot.Riot",                      // Element -- Matrix Chat Client
 			"io.github.antimicrox.antimicrox",   // Map gamepad buttons

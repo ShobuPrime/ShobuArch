@@ -36,6 +36,7 @@ type Config struct {
 	Format     string   `json:"-" yaml:"-"`
 	Kernel     string   `json:"kernel" yaml:"kernel"`
 	Bootloader string   `json:"bootloader" yaml:"bootloader"`
+	Modules    []string `json:"-" yaml:"-"`
 	Hostname   string   `json:"hostname,omitempty" yaml:"hostname,omitempty"`
 	Timezone   string   `json:"timezone,omitempty" yaml:"timezone,omitempty"`
 	User       User     `json:"user" yaml:"user"`

@@ -219,8 +219,6 @@ func main() {
 	MainLogo()
 	c := conf.Config{}
 
-	debug()
-
 	// https://gobyexample.com/command-line-flags
 	method_flag := flag.String("method", "m", `'a': Automated, 'm': Manual`)
 	config_flag := flag.String("config", "n", `'y': Load config, 'n': Fresh config`)
@@ -244,7 +242,7 @@ func main() {
 		log.Println("Manual installation detected.")
 		prompt := promptui.Select{
 			Label: "Start fresh, or load existing config?",
-			Items: []string{"Start fresh", "Load config"},
+			Items: []string{"Start fresh", "Load config", "Debug"},
 		}
 		_, prompt_choice, err := prompt.Run()
 		if err != nil {
@@ -254,7 +252,9 @@ func main() {
 
 		getFormat(&c)
 
-		if *config_flag == "y" || prompt_choice == "Load config" {
+		if prompt_choice == "Debug" {
+			debug()
+		} else if *config_flag == "y" || prompt_choice == "Load config" {
 			// Future release: load directory and use recursive ui to find config in file system
 			// Or, we can accept filename as flag, config as singleline json, etc.
 			conf.LoadConfig(&c)

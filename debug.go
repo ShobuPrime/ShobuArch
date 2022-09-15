@@ -18,10 +18,11 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
-	//u "github.com/ShobuPrime/ShobuArch/pkg/util"
+	i "github.com/ShobuPrime/ShobuArch/pkg/install"
+	u "github.com/ShobuPrime/ShobuArch/pkg/util"
 )
 
 func debug() {
@@ -29,8 +30,11 @@ func debug() {
 	// Change values as you'd like here, and call relevant functions below
 	cdb := conf.Config{
 		Format:   "YAML",
+		Bootloader: "",
 		Kernel:   "linux-zen",
+		Hostname: "",
 		Timezone: "",
+		Modules: []string{``},
 		User: conf.User{
 			Username: "shobuprime",
 			Password: "demo",
@@ -47,6 +51,8 @@ func debug() {
 			MirrorDisk:    "",
 			MirrorDiskID:  "",
 			Filesystem:    "",
+			EncryptionKey: "",
+			EncryptionUUID: "",
 		},
 		Desktop: conf.Desktop{
 			Environment: "",
@@ -55,14 +61,18 @@ func debug() {
 		Pacman: conf.Pacman{
 			AUR: conf.AURs{
 				Helper:   "",
-				Packages: []string{""},
+				Packages: []string{``},
 			},
 			Packages: []string{
 				`keepassxc`,
 			},
 		},
 		Flatpak: conf.Flatpaks{
-			Packages: []string{``},
+			Packages: []string{
+				`com.brave.Browser`,
+				`com.microsoft.Edge`,
+				`com.synology.SynologyDrive`,
+			},
 		},
 		PWA: conf.PWAs{
 			Sites: []conf.Site{
@@ -79,5 +89,7 @@ func debug() {
 	_ = cdb
 
 	// Call functions you would like to test
-	//fmt.Println(u.PrettyJson(u.ListUSB()))
+	fmt.Println(u.PrettyJson(u.ListUSB()))
+	fmt.Println(u.PrettyJson(u.ListPCI()))
+	i.SetupFlatpaks(&cdb)
 }

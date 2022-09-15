@@ -130,3 +130,58 @@ func Arch_chroot(cmd_args *[]string, runuser bool, c *conf.Config) string {
 
 	return string(output_log)
 }
+
+func Systemd_nspawn(cmd_args *[]string, boot bool, c *conf.Config) string {
+
+	log.Println("Preparing systemd-nspawn command---------------------------")
+
+	systemd_nspawn := []string{`systemd-nspawn`, `-D`, `/mnt`}
+
+	switch boot {
+	case true:
+		systemd_nspawn = []string{"systemd-nspawn", `-nb`, `-D`, `/mnt`}
+	}
+
+	cmd := []string{}
+	cmd = append(cmd, systemd_nspawn...)
+	cmd = append(cmd, *cmd_args...)
+
+	program := exec.Command(cmd[0], cmd[1:]...)
+	stdout, err := program.StdoutPipe()
+	if err != nil {
+		log.Println(err)
+	}
+
+	stderr, err := program.StderrPipe()
+	if err != nil {
+		log.Println(err)
+	}
+
+	combined_output := io.MultiReader(stdout, stderr)
+
+	err = program.Start()
+	log.Printf("Executing: %q\n", program)
+	if err != nil {
+		log.Println(err)
+	}
+
+	output_log := ""
+
+	// print the output of the subprocess
+	// scanner := bufio.NewScanner(stdout)
+	scanner := bufio.NewScanner(combined_output)
+	for scanner.Scan() {
+		m := scanner.Text()
+		output_log += m + "\n"
+		log.Printf("%s\n", m)
+	}
+
+	err = program.Wait()
+	if err != nil {
+		log.Println(err)
+	}
+
+	fmt.Println()
+
+	return string(output_log)
+}

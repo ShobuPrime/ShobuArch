@@ -769,20 +769,128 @@ func SetupFlatpaks(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
+	log.Println("Preparing environment for automatic systemd-nspawn scripts")
+	// Grab current directory
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = os.MkdirAll(`/mnt/etc/systemd/system/console-getty.service.d/`, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	config_dir := filepath.Join("/", "mnt", "etc", "systemd", "system", "console-getty.service.d")
+	log.Printf("Changing directory to %q", config_dir)
+	if err := os.Chdir(config_dir); err != nil {
+		log.Fatalln(err)
+	}
+
+	// autologin.conf
+	autologin_config := filepath.Join(config_dir, "autologin.conf")
+
+	autologin_settings := []string{
+		`[Service]`,
+		`ExecStart=`,
+		fmt.Sprintf(`ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --keep-baud --autologin %s - 115200,38400,9600 $TERM`, c.User.Username),
+	}
+
+	log.Println(`Creating autologin.conf for systemd-nspawn container...`)
+	f, err := os.OpenFile(autologin_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Saving settings`)
+	if _, err := f.Write([]byte(strings.Join(autologin_settings, "\n"))); err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Closing file`)
+	if err := f.Close(); err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("Done!")
+
+	log.Println("Contents:")
+	cmd := []string{`cat`, autologin_config}
+	z.Arch_chroot(&cmd, false, c)
+
+	log.Println("Returning to original directory")
+	// Return to original directory
+	if err := os.Chdir(pwd); err != nil {
+		log.Fatalln(err)
+	}
+
+	log.Println("Compiling Flatpak commands...")
+	fp_install_cmd := `sudo flatpak install --assumeyes flathub`
+	fp_override_cmd := `sudo flatpak override`
+	cmd_list := []string{}
 	for i := range c.Flatpak.Packages {
-		cmd_list := []string{`flatpak`, `install`, `--assumeyes`, `flathub`, c.Flatpak.Packages[i]}
-		z.Arch_chroot(&cmd_list, false, c)
+		cmd_list = append(cmd_list, fmt.Sprintf(`%s %s`, fp_install_cmd, c.Flatpak.Packages[i]))
 
 		switch c.Flatpak.Packages[i] {
 		case "com.brave.Browser", "com.google.Chrome", "com.microsoft.Edge":
 			log.Println("Chromium browser Flatpak detected!")
 			log.Println("Adding permissions for Progressive Web Apps")
-			cmd_list = []string{`flatpak`, `override`, c.Flatpak.Packages[i], fmt.Sprintf(`--filesystem=/home/%s/.local/share/applications`, c.User.Username)}
-			z.Arch_chroot(&cmd_list, false, c)
-
-			cmd_list = []string{`flatpak`, `override`, c.Flatpak.Packages[i], fmt.Sprintf(`--filesystem=/home/%s/.local/share/icons`, c.User.Username)}
-			z.Arch_chroot(&cmd_list, false, c)
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.local/share/applications`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.local/share/icons`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
+		case "com.getmailspring.Mailspring":
+			log.Println("Adding permissions for Freedesktop.org Secret Service Integration")
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --socket=session-bus`, fp_override_cmd, c.Flatpak.Packages[i]))
 		}
+	}
+
+	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container")
+	// Get current directory
+	pwd, err = os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	systemd_autorun_dir := filepath.Join("/", "mnt", "etc", "profile.d")
+	log.Printf("Changing directory to %q", systemd_autorun_dir)
+	if err := os.Chdir(systemd_autorun_dir); err != nil {
+		log.Fatalln(err)
+	}
+
+	flatpak_script := filepath.Join(systemd_autorun_dir, "install_flatpaks.sh")
+
+	log.Println(`Creating install_flatpaks.sh for systemd-nspawn container...`)
+	f, err = os.OpenFile(flatpak_script, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	if err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Saving settings`)
+	if _, err := f.Write([]byte(strings.Join(cmd_list, "\n"))); err != nil {
+		log.Fatalln(err)
+	}
+	log.Println(`Closing file`)
+	if err := f.Close(); err != nil {
+		log.Fatalln(err)
+	}
+	log.Println("Making executable")
+	cmd = []string{`chmod`, `+x`, flatpak_script}
+
+	log.Println("Done!")
+	log.Println("Returning to original directory")
+	// Return to original directory
+	if err := os.Chdir(pwd); err != nil {
+		log.Fatalln(err)
+	}
+	z.Arch_chroot(&cmd, false, c)
+
+	log.Println("Installing Flatpaks via systemd-nspawn")
+	z.Systemd_nspawn(&[]string{}, true, c)
+
+	log.Println("Cleaning up cruft...")
+	err = os.RemoveAll(config_dir)
+	if err != nil {
+		log.Fatalln(err)
+	}
+
+	err = os.Remove(flatpak_script)
+	if err != nil {
+		log.Fatalln(err)
 	}
 }
 
