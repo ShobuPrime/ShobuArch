@@ -839,6 +839,8 @@ func SetupFlatpaks(c *conf.Config) {
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --socket=session-bus`, fp_override_cmd, c.Flatpak.Packages[i]))
 		}
 	}
+	log.Panicln("Appending systemd-nspawn 'Get out of Jail for free' command")
+	cmd_list = append(cmd_list, `sudo poweroff`)
 
 	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container")
 	// Get current directory
