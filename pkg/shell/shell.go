@@ -139,7 +139,7 @@ func Systemd_nspawn(cmd_args *[]string, boot bool, c *conf.Config) string {
 
 	switch boot {
 	case true:
-		systemd_nspawn = []string{"systemd-nspawn", `-nb`, `-D`, `/mnt`}
+		systemd_nspawn = []string{"systemd-nspawn", `-bnq`, `-D`, `/mnt`}
 	}
 
 	cmd := []string{}
