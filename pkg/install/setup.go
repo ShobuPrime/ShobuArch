@@ -834,9 +834,120 @@ func SetupFlatpaks(c *conf.Config) {
 			log.Println("Adding permissions for Progressive Web Apps")
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.local/share/applications`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.local/share/icons`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
+		case "com.github.wwmm.easyeffects":
+			log.Println("EasyEffects for PipeWire detected!")
+			log.Println("Configuring AutoStart")
+			user_config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
+			log.Printf("Changing directory to %q", user_config_dir)
+			if err := os.Chdir(user_config_dir); err != nil {
+				log.Fatalln(err)
+			}
+
+			// Easy Effects autostart
+			ee_config := filepath.Join(user_config_dir, "autostart", "com.github.wwmm.easyeffects.desktop")
+			
+			autostart_settings := []string{
+				`[Desktop Entry]`,
+				`Comment[en_US]=`,
+				`Comment=`,
+				`Exec=flatpak run --command=easyeffects com.github.wwmm.easyeffects --gapplication-service`,
+				`GenericName[en_US]=`,
+				`GenericName=`,
+				`Icon=com.github.wwmm.easyeffects`,
+				`MimeType=`,
+				`Name[en_US]=com.github.wwmm.easyeffects`,
+				`Name=com.github.wwmm.easyeffects`,
+				`Path=`,
+				`StartupNotify=true`,
+				`Terminal=false`,
+				`TerminalOptions=`,
+				`Type=Application`,
+				`X-DBUS-ServiceName=`,
+				`X-DBUS-StartupType=`,
+				`X-Flatpak=com.github.wwmm.easyeffects`,
+				`X-KDE-SubstituteUID=false`,
+				`X-KDE-Username=`,
+			}
+
+			log.Println(`Creating autostart entry for Easy Effects`)
+			f, err := os.OpenFile(ee_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Saving settings`)
+			if _, err := f.Write([]byte(strings.Join(autostart_settings, "\n"))); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Closing file`)
+			if err := f.Close(); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println("Done!")
+			log.Println("Returning to original directory")
+			// Return to original directory
+			if err := os.Chdir(pwd); err != nil {
+				log.Fatalln(err)
+			}
+
+			// Insert code for Dolby Atmos here
 		case "com.getmailspring.Mailspring":
+			log.Println("Mailspring Flatpak detected!")
 			log.Println("Adding permissions for Freedesktop.org Secret Service Integration")
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --socket=session-bus`, fp_override_cmd, c.Flatpak.Packages[i]))
+		case "com.synology.SynologyDrive":
+			log.Println("Synology Drive Flatpak detected!")
+			log.Println("Configuring AutoStart")
+			user_config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
+			log.Printf("Changing directory to %q", user_config_dir)
+			if err := os.Chdir(user_config_dir); err != nil {
+				log.Fatalln(err)
+			}
+
+			// Synology Drive autostart
+			sd_config := filepath.Join(user_config_dir, "autostart", "com.synology.SynologyDrive.desktop")
+			
+			autostart_settings := []string{
+				`[Desktop Entry]`,
+				`Comment[en_US]=`,
+				`Comment=`,
+				`Exec=flatpak run com.synology.SynologyDrive`,
+				`GenericName[en_US]=`,
+				`GenericName=`,
+				`Icon=com.synology.SynologyDrive`,
+				`MimeType=`,
+				`Name[en_US]=com.synology.SynologyDrive`,
+				`Name=com.synology.SynologyDrive`,
+				`Path=`,
+				`StartupNotify=true`,
+				`Terminal=false`,
+				`TerminalOptions=`,
+				`Type=Application`,
+				`X-DBUS-ServiceName=`,
+				`X-DBUS-StartupType=`,
+				`X-Flatpak=com.synology.SynologyDrive`,
+				`X-KDE-SubstituteUID=false`,
+				`X-KDE-Username=`,
+			}
+
+			log.Println(`Creating autostart entry for Synology Drive`)
+			f, err := os.OpenFile(sd_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Saving settings`)
+			if _, err := f.Write([]byte(strings.Join(autostart_settings, "\n"))); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Closing file`)
+			if err := f.Close(); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println("Done!")
+			log.Println("Returning to original directory")
+			// Return to original directory
+			if err := os.Chdir(pwd); err != nil {
+				log.Fatalln(err)
+			}
 		}
 	}
 	log.Println("Appending systemd-nspawn 'Get out of Jail for free' command")

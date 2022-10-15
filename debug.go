@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
-	i "github.com/ShobuPrime/ShobuArch/pkg/install"
+	//i "github.com/ShobuPrime/ShobuArch/pkg/install"
 	u "github.com/ShobuPrime/ShobuArch/pkg/util"
 )
 
@@ -91,5 +91,5 @@ func debug() {
 	// Call functions you would like to test
 	fmt.Println(u.PrettyJson(u.ListUSB()))
 	fmt.Println(u.PrettyJson(u.ListPCI()))
-	i.SetupFlatpaks(&cdb)
+	fmt.Println(u.PrettyJson(u.SecureBootStatus()))
 }

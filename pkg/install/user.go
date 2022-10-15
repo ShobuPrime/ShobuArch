@@ -410,6 +410,17 @@ func UserVariables(c *conf.Config) {
 	}
 }
 
+func UserAutostart(c *conf.Config) {
+
+	log.Println(`
+	-------------------------------------------------------------------------
+                Configuring User's AutoStart Programs
+	-------------------------------------------------------------------------
+	`)
+
+	
+}
+
 func UserShell(c *conf.Config) {
 
 	log.Println(`

@@ -555,7 +555,7 @@ func Flatpak(c *Config) {
 			"io.github.seadve.Kooha",            // Record your screen
 			"io.mgba.mGBA",                      // Nintendo Game Boy Advance Emulator
 			"net.davidotek.pupgui2",             // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
-			"net.filebot.Filebot",               // Ultimate TV and Movie Renamer
+			"net.filebot.FileBot",               // Ultimate TV and Movie Renamer
 			"net.kuribo64.melonDS",              // Nintendo DS and DSi emulator
 			"net.pcsx2.PCSX2",                   // Playstation 2 emulator
 			"org.citra_emu.citra",               // Nintendo 3DS emulator
