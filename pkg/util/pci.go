@@ -27,16 +27,17 @@ type LSPCI struct {
 }
 
 type PCIDevice struct {
-	Slot     string `json:"Slot,omitempty"`
-	Class    string `json:"Class,omitempty"`
-	Vendor   string `json:"Vendor,omitempty"`
-	Device   string `json:"Device,omitempty"`
-	SVendor  string `json:"SVendor,omitempty"`
-	SDevice  string `json:"SDevice,omitempty"`
-	Rev      string `json:"Rev,omitempty"` //int
-	ProgIf   string `json:"ProgIf,omitempty"`
-	PhySlot  string `json:"PhySlot,omitempty"`  //int
-	NUMANode string `json:"NUMANode,omitempty"` //int
+	Slot       string `json:"Slot,omitempty"`
+	Class      string `json:"Class,omitempty"`
+	Vendor     string `json:"Vendor,omitempty"`
+	Device     string `json:"Device,omitempty"`
+	SVendor    string `json:"SVendor,omitempty"`
+	SDevice    string `json:"SDevice,omitempty"`
+	Rev        string `json:"Rev,omitempty"` //int
+	ProgIf     string `json:"ProgIf,omitempty"`
+	PhySlot    string `json:"PhySlot,omitempty"`   //int
+	NUMANode   string `json:"NUMANode,omitempty"`  //int
+	IOMMUGroup string `json:"IOMMUGroup,omitempty"` //int
 }
 
 func ListPCI() *LSPCI {
@@ -80,8 +81,13 @@ func PCIJSON(lspci *string) *LSPCI {
 			device.PhySlot = strings.TrimPrefix(pci_list[i], "PhySlot:\t")
 		} else if strings.HasPrefix(pci_list[i], "NUMANode:\t") {
 			device.NUMANode = strings.TrimPrefix(pci_list[i], "NUMANode:\t")
+		} else if strings.HasPrefix(pci_list[i], "IOMMUGroup:\t") {
+			device.IOMMUGroup = strings.TrimPrefix(pci_list[i], "IOMMUGroup:\t")
 		} else if pci_list[i] == "" {
-			pci_struct.PCIDevices = append(pci_struct.PCIDevices, device)
+			// If device is not an empty struct, append
+			if (device != PCIDevice{}) {
+				pci_struct.PCIDevices = append(pci_struct.PCIDevices, device)
+			}
 			device = PCIDevice{}
 		}
 	}

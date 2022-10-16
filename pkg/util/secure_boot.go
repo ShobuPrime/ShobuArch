@@ -24,15 +24,15 @@ import (
 )
 
 type SBCTL struct {
-	Installed  string      `json:"Installed,omitempty"`
-	OwnerGUID  string      `json:"OwnerGUID,omitempty"`
-	SetupMode  string      `json:"SetupMode,omitempty"`
-	SecureBoot string      `json:"SecureBoot,omitempty"`
-	VendorKeys string      `json:"VendorKeys,omitempty"`
+	Installed  string `json:"Installed,omitempty"`
+	OwnerGUID  string `json:"OwnerGUID,omitempty"`
+	SetupMode  string `json:"SetupMode,omitempty"`
+	SecureBoot string `json:"SecureBoot,omitempty"`
+	VendorKeys string `json:"VendorKeys,omitempty"`
 }
 
 func SecureBootStatus() *SBCTL {
-	
+
 	log.Println("Grabbing Secure Boot Status...")
 
 	sbctl, _ := exec.Command(
@@ -129,6 +129,9 @@ func SBJSON(sbctl *string) *SBCTL {
 				sbctl_struct.VendorKeys = strings.TrimPrefix(sbctl_struct.VendorKeys, "✘ ")
 			}
 		} else if sbctl_status[i] == "" {
+			// Do nothing
+			do := "nothing"
+			_ = do
 		}
 	}
 

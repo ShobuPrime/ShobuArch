@@ -283,9 +283,9 @@ func SetupServices(c *conf.Config) {
 			cmd_list = append(cmd_list,
 				`bluetooth.service`,
 			)
-		case "virt-manager":
+		case "openssh":
 			cmd_list = append(cmd_list,
-				`libvirtd.service`,
+				`sshd`,
 			)
 		case "reflector":
 			cmd_list = append(cmd_list,
@@ -295,11 +295,18 @@ func SetupServices(c *conf.Config) {
 			cmd_list = append(cmd_list,
 				`sddm`,
 			)
-		case "openssh":
+		case "virt-manager":
 			cmd_list = append(cmd_list,
-				`sshd`,
+				`libvirtd.service`,
 			)
 		}
+	}
+
+	// Don't forget to enable TRIM for SSDs
+	if c.Storage.SystemDiskRota || strings.Contains(c.Storage.SystemDiskID, "SSD") {
+		cmd_list = append(cmd_list,
+			`fstrim.timer`,
+		)
 	}
 
 	z.Arch_chroot(&cmd_list, false, c)
@@ -491,20 +498,21 @@ func SetupBiometrics(c *conf.Config) {
 	cmd := []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`}
 
 	for i := range usb.USBDevices {
+
 		if strings.Contains(usb.USBDevices[i].Description, `Camera`) {
 			for j := range bio.Face {
 				if usb.USBDevices[i].ID == bio.Face[j] {
-					log.Println(`howdy compatible device found`)
+					log.Println(`howdy compatible device found: `, usb.USBDevices[i].ID)
 				}
 			}
 		}
 
 		if strings.Contains(usb.USBDevices[i].Description, `Fingerprint`) {
+			// https://wiki.archlinux.org/title/Fprint
 			for j := range bio.Fingerprint {
 				if usb.USBDevices[i].ID == bio.Fingerprint[j] {
-					log.Println(`fprint compatible device found`)
+					log.Println(`fprint compatible device found: `, usb.USBDevices[i].ID)
 					cmd = append(cmd, `fprintd`, `libfprint`)
-					
 				}
 			}
 		}
@@ -641,7 +649,7 @@ func SetupSecurityModules(c *conf.Config) {
 
 			// aa-notify autostart
 			aan_config := filepath.Join(config_dir, "autostart", "apparmor-notify.desktop")
-			
+
 			autostart_settings := []string{
 				`[Desktop Entry]`,
 				`Comment[en_US]=Receive on screen notifications of AppArmor denials`,
@@ -845,7 +853,7 @@ func SetupFlatpaks(c *conf.Config) {
 
 			// Easy Effects autostart
 			ee_config := filepath.Join(user_config_dir, "autostart", "com.github.wwmm.easyeffects.desktop")
-			
+
 			autostart_settings := []string{
 				`[Desktop Entry]`,
 				`Comment[en_US]=`,
@@ -905,7 +913,7 @@ func SetupFlatpaks(c *conf.Config) {
 
 			// Synology Drive autostart
 			sd_config := filepath.Join(user_config_dir, "autostart", "com.synology.SynologyDrive.desktop")
-			
+
 			autostart_settings := []string{
 				`[Desktop Entry]`,
 				`Comment[en_US]=`,
@@ -1093,7 +1101,7 @@ func SetupEFI(c *conf.Config) {
 			}
 			z.Arch_chroot(&cmd, false, c)
 		case "luks":
-			
+
 			var uuid_command string
 			if strings.HasPrefix(c.Storage.SystemDisk, "/dev/nvme") {
 				uuid_command = fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)

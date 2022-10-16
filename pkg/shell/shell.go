@@ -132,7 +132,7 @@ func Arch_chroot(cmd_args *[]string, runuser bool, c *conf.Config) string {
 }
 
 func Systemd_nspawn(cmd_args *[]string, boot bool, c *conf.Config) string {
-
+	// https://wiki.archlinux.org/title/Systemd-nspawn
 	log.Println("Preparing systemd-nspawn command---------------------------")
 
 	systemd_nspawn := []string{`systemd-nspawn`, `-D`, `/mnt`}

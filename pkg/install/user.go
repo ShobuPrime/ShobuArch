@@ -418,7 +418,6 @@ func UserAutostart(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	
 }
 
 func UserShell(c *conf.Config) {

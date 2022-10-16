@@ -21,7 +21,7 @@ import (
 	"fmt"
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
-	//i "github.com/ShobuPrime/ShobuArch/pkg/install"
+	i "github.com/ShobuPrime/ShobuArch/pkg/install"
 	u "github.com/ShobuPrime/ShobuArch/pkg/util"
 )
 
@@ -29,12 +29,12 @@ func debug() {
 
 	// Change values as you'd like here, and call relevant functions below
 	cdb := conf.Config{
-		Format:   "YAML",
+		Format:     "YAML",
 		Bootloader: "",
-		Kernel:   "linux-zen",
-		Hostname: "",
-		Timezone: "",
-		Modules: []string{``},
+		Kernel:     "linux-zen",
+		Hostname:   "",
+		Timezone:   "",
+		Modules:    []string{``},
 		User: conf.User{
 			Username: "shobuprime",
 			Password: "demo",
@@ -45,13 +45,13 @@ func debug() {
 			},
 		},
 		Storage: conf.Storage{
-			SystemDisk:    "",
-			SystemDiskID:  "",
-			MirrorInstall: false,
-			MirrorDisk:    "",
-			MirrorDiskID:  "",
-			Filesystem:    "",
-			EncryptionKey: "",
+			SystemDisk:     "",
+			SystemDiskID:   "",
+			MirrorInstall:  false,
+			MirrorDisk:     "",
+			MirrorDiskID:   "",
+			Filesystem:     "",
+			EncryptionKey:  "",
 			EncryptionUUID: "",
 		},
 		Desktop: conf.Desktop{
@@ -89,6 +89,7 @@ func debug() {
 	_ = cdb
 
 	// Call functions you would like to test
+	i.SetupBiometrics(&cdb)
 	fmt.Println(u.PrettyJson(u.ListUSB()))
 	fmt.Println(u.PrettyJson(u.ListPCI()))
 	fmt.Println(u.PrettyJson(u.SecureBootStatus()))

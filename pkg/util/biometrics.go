@@ -29,7 +29,7 @@ func BiometricIDs() *BioSupportedDevices {
 	bsd.Face = []string{
 		`04f2:b5ac`,
 		`04f2:b5cf`,
-		`04f2:bd60`,
+		`04f2:b6d0`,
 	}
 
 	bsd.Fingerprint = []string{
