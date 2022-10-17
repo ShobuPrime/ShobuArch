@@ -158,6 +158,7 @@ func setup(c *conf.Config) {
 	i.SetupAUR(c)
 	i.SetupFlatpaks(c)
 	i.SetupEFI(c)
+	i.SetupSecureBoot(c)
 
 	clear()
 

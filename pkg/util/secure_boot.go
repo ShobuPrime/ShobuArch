@@ -53,8 +53,19 @@ func SecureBootCreateKeys() {
 		"sbctl",
 		"create-keys",
 	).CombinedOutput()
-
 	log.Println(sbctl)
+
+	log.Println("Copying Secure Boot Keys to chroot...")
+
+	oldDir := "/usr/share/secureboot"
+	newDir := "/mnt/usr/share/secureboot"
+	
+	copy, _ := exec.Command(
+		"cp", "--recursive",
+		oldDir,
+		newDir,
+	).CombinedOutput()
+	log.Println(copy)
 }
 
 func SecureBootEnrollKeys() {

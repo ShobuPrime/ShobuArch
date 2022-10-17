@@ -497,6 +497,28 @@ func SetupBiometrics(c *conf.Config) {
 
 	cmd := []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`}
 
+	// PAM Module Config(s): kde[✓], system-local-login[✓], login[✓], su[✘], sudo[✓], sddm[✘]
+	pam_modules := []string{`login`, `system-local-login`, `sudo`}
+	pam_module := []string{}
+
+	switch c.Desktop.Environment {
+	case "kde":
+		pam_modules = append(pam_modules, `kde`)
+	}
+
+	// for i := range c.Pacman.Packages {
+	// 	switch c.Pacman.Packages[i] {
+	// 	case "sddm":
+	// 		pam_modules = append(pam_modules, `sddm`)
+	// 	}
+	// }
+
+	// Grab current directory
+	pwd, err := os.Getwd()
+	if err != nil {
+		log.Fatalln(err)
+	}
+
 	for i := range usb.USBDevices {
 
 		if strings.Contains(usb.USBDevices[i].Description, `Camera`) {
@@ -505,6 +527,9 @@ func SetupBiometrics(c *conf.Config) {
 					log.Println(`howdy compatible device found: `, usb.USBDevices[i].ID)
 				}
 			}
+
+			// To-do:
+			// - Add howdy PAM Authentication
 		}
 
 		if strings.Contains(usb.USBDevices[i].Description, `Fingerprint`) {
@@ -515,8 +540,98 @@ func SetupBiometrics(c *conf.Config) {
 					cmd = append(cmd, `fprintd`, `libfprint`)
 				}
 			}
+
+			log.Println("Configuring PAM Authentication modules for fprint")
+			pam_module_dir := filepath.Join("/", "mnt", "etc", "pam.d")
+			log.Printf("Changing directory to %q", pam_module_dir)
+			if err := os.Chdir(pam_module_dir); err != nil {
+				log.Fatalln(err)
+			}
+
+			for i := range pam_modules {
+				pam_config := filepath.Join(pam_module_dir, pam_modules[i])
+
+				switch pam_modules[i] {
+				case "kde":
+					pam_module = []string{
+						`#%PAM-1.0`,
+						``,
+						`auth            sufficient      pam_unix.so try_first_pass likeauth nullok`,
+						`auth            sufficient      pam_fprintd.so`,
+						``,
+						`auth            include         system-login`,
+						``,
+						`account         include         system-login`,
+						``,
+						`password        include         system-login`,
+						``,
+						`session         include         system-login`,
+					}
+				case "login":
+					pam_module = []string{
+						`#%PAM-1.0`,
+						``,
+						`auth            sufficient      pam_unix.so try_first_pass likeauth nullok`,
+						`auth            sufficient      pam_fprintd.so`,
+						``,
+						`auth       required     pam_securetty.so`,
+						`auth       requisite    pam_nologin.so`,
+						`auth       include      system-local-login`,
+						`account    include      system-local-login`,
+						`session    include      system-local-login`,
+						`password   include      system-local-login`,
+					}
+				case "system-local-login":
+					pam_module = []string{
+						`#%PAM-1.0`,
+						``,
+						`auth            sufficient      pam_unix.so try_first_pass likeauth nullok`,
+						`auth            sufficient      pam_fprintd.so`,
+						``,
+						`auth      include   system-login`,
+						`account   include   system-login`,
+						`password  include   system-login`,
+						`session   include   system-login`,
+					}
+				case "sudo":
+					pam_module = []string{
+						`#%PAM-1.0`,
+						``,
+						`auth            sufficient      pam_unix.so try_first_pass likeauth nullok`,
+						`auth            sufficient      pam_fprintd.so`,
+						``,
+						`auth            include         system-auth`,
+						`account         include         system-auth`,
+						`session         include         system-auth`,
+					}
+				}
+				log.Printf(`Adding fprint PAM Authentication for "%q"`, pam_modules[i])
+				f, err := os.OpenFile(pam_config, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+				if err != nil {
+					log.Fatalln(err)
+				}
+				log.Println(`Saving settings`)
+				if _, err := f.Write([]byte(strings.Join(pam_module, "\n"))); err != nil {
+					log.Fatalln(err)
+				}
+				log.Println(`Closing file`)
+				if err := f.Close(); err != nil {
+					log.Fatalln(err)
+				}
+			}
+
+			log.Println("Done!")
+			log.Println("Returning to original directory")
+			// Return to original directory
+			if err := os.Chdir(pwd); err != nil {
+				log.Fatalln(err)
+			}
 		}
 	}
+
+	// To-do:
+	// - Add more scalable way to handle a "sed-like" implementation in Go.
+	// --- howdy and fprint can conflict with current overwrite method
 }
 
 func SetupUser(c *conf.Config) {
@@ -625,6 +740,8 @@ func SetupSecurityModules(c *conf.Config) {
 		switch c.Pacman.Packages[i] {
 		case "apparmor":
 			log.Println("AppArmor Linux Security Module detected...")
+
+			// Grab current directory
 			pwd, err := os.Getwd()
 			if err != nil {
 				log.Fatalln(err)
@@ -675,7 +792,7 @@ func SetupSecurityModules(c *conf.Config) {
 			}
 
 			log.Println(`Creating autostart for AppArmor Notify service`)
-			f, err := os.OpenFile(aan_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			f, err := os.OpenFile(aan_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -778,6 +895,7 @@ func SetupFlatpaks(c *conf.Config) {
 	`)
 
 	log.Println("Preparing environment for automatic systemd-nspawn scripts")
+
 	// Grab current directory
 	pwd, err := os.Getwd()
 	if err != nil {
@@ -805,7 +923,7 @@ func SetupFlatpaks(c *conf.Config) {
 	}
 
 	log.Println(`Creating autologin.conf for systemd-nspawn container...`)
-	f, err := os.OpenFile(autologin_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	f, err := os.OpenFile(autologin_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -878,7 +996,7 @@ func SetupFlatpaks(c *conf.Config) {
 			}
 
 			log.Println(`Creating autostart entry for Easy Effects`)
-			f, err := os.OpenFile(ee_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			f, err := os.OpenFile(ee_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -938,7 +1056,7 @@ func SetupFlatpaks(c *conf.Config) {
 			}
 
 			log.Println(`Creating autostart entry for Synology Drive`)
-			f, err := os.OpenFile(sd_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			f, err := os.OpenFile(sd_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -962,6 +1080,7 @@ func SetupFlatpaks(c *conf.Config) {
 	cmd_list = append(cmd_list, `sudo poweroff`)
 
 	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container")
+	
 	// Get current directory
 	pwd, err = os.Getwd()
 	if err != nil {
@@ -977,7 +1096,7 @@ func SetupFlatpaks(c *conf.Config) {
 	flatpak_script := filepath.Join(systemd_autorun_dir, "install_flatpaks.sh")
 
 	log.Println(`Creating install_flatpaks.sh for systemd-nspawn container...`)
-	f, err = os.OpenFile(flatpak_script, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	f, err = os.OpenFile(flatpak_script, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -1170,4 +1289,45 @@ func SetupEFI(c *conf.Config) {
 
 	cmd := []string{`mkinitcpio`, `-p`, c.Kernel}
 	z.Arch_chroot(&cmd, false, c)
+}
+
+func SetupSecureBoot(c *conf.Config) {
+	log.Println(`
+	-------------------------------------------------------------------------
+                        Setup Secure Boot
+	-------------------------------------------------------------------------
+	`)
+
+	fmt.Println(u.PrettyJson(u.SecureBootStatus()))
+
+	sb_status := u.SecureBootStatus()
+
+	// Currently, paths [like most in this installer] are prefixed with the chroot mountpoint of `/mnt`
+	efi_files := []string{
+		`/mnt/boot/EFI/Linux/linux-linux.efi`,
+		`/mnt/boot/EFI/BOOT/BOOTX64.EFI`,
+		`/mnt/boot/vmlinuz-linux`,
+	}
+
+	switch c.Bootloader {
+	case "grub":
+		efi_files = append(efi_files, `/mnt/boot/EFI/GRUB/grubx64.efi`)
+	case "systemd":
+		efi_files = append(efi_files, `/mnt/boot/EFI/systemd/systemd-bootx64.efi`)
+	}
+
+	switch sb_status.SetupMode {
+	case "Enabled":
+		log.Println("`Setup Mode` is enabled for Secure Boot!")
+		u.SecureBootCreateKeys()
+		u.SecureBootEnrollKeys()
+
+		for i := range efi_files {
+			u.SecureBootSign(&efi_files[i])
+		}
+	}
+
+	// To-do:
+	// - Add post-install hook for kernel upgrades and auto-signing
+	// - Add DKMS Kernel Module Signing
 }

@@ -128,7 +128,7 @@ func UserKeyring(c *conf.Config) {
 				`Enabled=true`,
 			}
 			log.Println(`Creating "keepassxc.ini"`)
-			f, err := os.OpenFile(keepass_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			f, err := os.OpenFile(keepass_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 			if err != nil {
 				log.Fatalln(err)
 			}
@@ -311,7 +311,7 @@ func UserVariables(c *conf.Config) {
 		`MOZ_DBUS_REMOTE=1`,
 	}
 	log.Println(`Creating "environment.conf"`)
-	f, err := os.OpenFile(environment_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	f, err := os.OpenFile(environment_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -333,7 +333,7 @@ func UserVariables(c *conf.Config) {
 		`--ozone-platform-hint=auto`,
 	}
 	log.Println(`Creating "electron-flags.conf"`)
-	f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -353,7 +353,7 @@ func UserVariables(c *conf.Config) {
 		`--ozone-platform=wayland`,
 	}
 	log.Println(`Creating "electron19-flags.conf"`)
-	f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+	f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -378,7 +378,7 @@ func UserVariables(c *conf.Config) {
 				`--ozone-platform=wayland`,
 			}
 			log.Println(`Creating "electron-flags.conf"`)
-			f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_WRONLY|os.O_CREATE, 0755)
+			f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 			if err != nil {
 				log.Fatalln(err)
 			}
