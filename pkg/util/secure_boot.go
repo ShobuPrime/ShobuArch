@@ -53,19 +53,8 @@ func SecureBootCreateKeys() {
 		"sbctl",
 		"create-keys",
 	).CombinedOutput()
+
 	log.Println(sbctl)
-
-	log.Println("Copying Secure Boot Keys to chroot...")
-
-	oldDir := "/usr/share/secureboot"
-	newDir := "/mnt/usr/share/secureboot"
-	
-	copy, _ := exec.Command(
-		"cp", "--recursive",
-		oldDir,
-		newDir,
-	).CombinedOutput()
-	log.Println(copy)
 }
 
 func SecureBootEnrollKeys() {
@@ -82,16 +71,30 @@ func SecureBootEnrollKeys() {
 }
 
 func SecureBootSign(file *string) {
-
 	log.Printf("Signing %s with Secure Boot Keys", *file)
 
 	sbctl, _ := exec.Command(
 		"sbctl",
 		"sign",
+		"-s",
 		*file,
 	).CombinedOutput()
 
 	log.Println(sbctl)
+}
+
+func SecureBootCopy() {
+	log.Println("Copying Secure Boot Keys to chroot...")
+
+	oldDir := "/usr/share/secureboot"
+	newDir := "/mnt/usr/share/secureboot"
+	
+	copy, _ := exec.Command(
+		"cp", "--recursive",
+		oldDir,
+		newDir,
+	).CombinedOutput()
+	log.Println(copy)
 }
 
 func SBJSON(sbctl *string) *SBCTL {

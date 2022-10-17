@@ -1302,7 +1302,7 @@ func SetupSecureBoot(c *conf.Config) {
 
 	sb_status := u.SecureBootStatus()
 
-	// Currently, paths [like most in this installer] are prefixed with the chroot mountpoint of `/mnt`
+	// Currently, paths [like most references in this installer] are prefixed with the chroot mountpoint of `/mnt`
 	efi_files := []string{
 		`/mnt/boot/EFI/Linux/linux-linux.efi`,
 		`/mnt/boot/EFI/BOOT/BOOTX64.EFI`,
@@ -1318,16 +1318,27 @@ func SetupSecureBoot(c *conf.Config) {
 
 	switch sb_status.SetupMode {
 	case "Enabled":
-		log.Println("`Setup Mode` is enabled for Secure Boot!")
+		log.Println(`"Setup Mode" is enabled for Secure Boot!`)
 		u.SecureBootCreateKeys()
 		u.SecureBootEnrollKeys()
 
 		for i := range efi_files {
 			u.SecureBootSign(&efi_files[i])
 		}
+
+		u.SecureBootCopy()
+	case "Disabled":
+		log.Println(`WARNING: "Setup Mode" is disabled for Secure Boot!`)
+		log.Println(`WARNING: Ensure to delete all keys or enable Setup Mode in your System BIOS after installation`)
+		log.Println(`WARNING: After preparations, to use Secure Boot, please run the following commands:`)
+		for i := range efi_files {
+			log.Printf(`sudo sbctl sign -s %q\n`, strings.TrimPrefix(efi_files[i], "/mnt"))
+		}
 	}
 
 	// To-do:
 	// - Add post-install hook for kernel upgrades and auto-signing
 	// - Add DKMS Kernel Module Signing
+	// - Add function to detect TPM
+	// - Save encryption key to TPM if LUKS is enabled for Bitlocker-like experience
 }
