@@ -402,10 +402,10 @@ func SetupCustomRepos(c *conf.Config) {
 	}
 }
 
-func SetupMicrocode(c *conf.Config) {
+func SetupProcessor(c *conf.Config) {
 	log.Println(`
 	-------------------------------------------------------------------------
-                            Installing Microcode
+                            Setup Processor
 	-------------------------------------------------------------------------
 	`)
 
@@ -423,6 +423,46 @@ func SetupMicrocode(c *conf.Config) {
 			log.Printf("Detected CPU is: %q", cpu.Processor[i].Data)
 			cmd = append(cmd, `amd-ucode`)
 			z.Arch_chroot(&cmd, false, c)
+
+			// Grab current directory
+			pwd, err := os.Getwd()
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			config_dir := filepath.Join("/", "mnt", "etc", "modprobe.d",)
+			log.Printf("Changing directory to %q", config_dir)
+			if err := os.Chdir(config_dir); err != nil {
+				log.Fatalln(err)
+			}
+
+			// amd.conf
+			module_config := filepath.Join(config_dir, "amd.conf")
+
+			module_settings := []string{
+				`options amd_pstate replace=1`,
+			}
+		
+			log.Println(`Creating autologin.conf for systemd-nspawn container...`)
+			f, err := os.OpenFile(module_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+			if err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Saving settings`)
+			if _, err := f.Write([]byte(strings.Join(module_settings, "\n"))); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println(`Closing file`)
+			if err := f.Close(); err != nil {
+				log.Fatalln(err)
+			}
+			log.Println("Done!")
+		
+			log.Println("Returning to original directory")
+			// Return to original directory
+			if err := os.Chdir(pwd); err != nil {
+				log.Fatalln(err)
+			}
 		}
 	}
 }
@@ -757,6 +797,7 @@ func SetupSecurityModules(c *conf.Config) {
 
 			log.Println(`Enabling Audit service...`)
 			cmd = []string{`systemctl`, `enable`, `--now`, `auditd.service`}
+			z.Arch_chroot(&cmd, false, c)
 
 			config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
 			log.Printf("Changing directory to %q", config_dir)
@@ -1141,6 +1182,10 @@ func SetupEFI(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
+	// To-Do
+	// - Add more scalable way to handle a "sed-like" implementation in Go, or set up reading a file line-by-line
+	// Ex) Need a way to read /etc/mkinitcpio.conf and add `amd_pstate`` and `btrfs`` to MODULES=()
+
 	switch c.Bootloader {
 	case "grub": // GRand Unified Bootloader
 		cmd := []string{`sudo`, `pacman`, `-U`, `--needed`, `--noconfirm`, `grub`}
@@ -1341,4 +1386,5 @@ func SetupSecureBoot(c *conf.Config) {
 	// - Add DKMS Kernel Module Signing
 	// - Add function to detect TPM
 	// - Save encryption key to TPM if LUKS is enabled for Bitlocker-like experience
+	// --fmt.Sprintf(`export PASSWORD='%v' && systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0,7 %v`, c.Storage.EncryptionKey, disk1_part2),
 }

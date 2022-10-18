@@ -150,7 +150,7 @@ func setup(c *conf.Config) {
 	i.SetupBaseSystem(c)
 	i.SetupServices(c)
 	i.SetupCustomRepos(c)
-	i.SetupMicrocode(c)
+	i.SetupProcessor(c)
 	i.SetupGraphics(c)
 	i.SetupBiometrics(c)
 	i.SetupUser(c)

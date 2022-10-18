@@ -198,12 +198,6 @@ func FormatDisks(c *conf.Config) {
 			`btrfs subvolume create /mnt/@tmp`,
 			`btrfs subvolume create /mnt/@.snapshots`,
 			`umount /mnt`,
-			// fmt.Sprintf(`mount -o %v,subvol=@ %v /mnt`, mount_options, disk1_part2), // mountallsubvol
-			// `mkdir -p /mnt/{home,var,tmp,.snapshots}`,
-			// fmt.Sprintf(`mount -o %v,subvol=@home %v /mnt/home`, mount_options, disk1_part2),
-			// fmt.Sprintf(`mount -o %v,subvol=@tmp %v /mnt/tmp`, mount_options, disk1_part2),
-			// fmt.Sprintf(`mount -o %v,subvol=@var %v /mnt/var`, mount_options, disk1_part2),
-			// fmt.Sprintf(`mount -o %v,subvol=@.snapshots %v /mnt/.snapshots`, mount_options, disk1_part2),
 			fmt.Sprintf(`mount -o %v,subvol=@ /dev/mapper/luks_ROOT /mnt`, mount_options), // mountallsubvol
 			`mkdir -p /mnt/{home,var,tmp,.snapshots}`,
 			fmt.Sprintf(`mount -o %v,subvol=@home /dev/mapper/luks_ROOT /mnt/home`, mount_options),

@@ -103,45 +103,19 @@ func SBJSON(sbctl *string) *SBCTL {
 
 	sbctl_status := strings.Split(*sbctl, "\n")
 
+	// ✓ - sbctl has native JSON output
+	// ✘ - Doesn't work as of Release 0.9
 	for i := range sbctl_status {
 		if strings.HasPrefix(sbctl_status[i], "Installed:\t") {
-			sbctl_struct.Installed = strings.TrimPrefix(sbctl_status[i], "Installed:\t")
-
-			switch strings.HasPrefix(sbctl_struct.Installed, "✓ ") {
-			case true:
-				sbctl_struct.Installed = strings.TrimPrefix(sbctl_struct.Installed, "✓ ")
-			case false:
-				sbctl_struct.Installed = strings.TrimPrefix(sbctl_struct.Installed, "✘ ")
-			}
+			sbctl_struct.Installed = (strings.TrimPrefix(sbctl_status[i], "Installed:\t"))[4:]
 		} else if strings.HasPrefix(sbctl_status[i], "Owner GUID:\t") {
 			sbctl_struct.OwnerGUID = strings.TrimPrefix(sbctl_status[i], "Owner GUID:\t")
 		} else if strings.HasPrefix(sbctl_status[i], "Setup Mode:\t") {
-			sbctl_struct.SetupMode = strings.TrimPrefix(sbctl_status[i], "Setup Mode:\t")
-
-			switch strings.HasPrefix(sbctl_struct.SetupMode, "✓ ") {
-			case true:
-				sbctl_struct.SetupMode = strings.TrimPrefix(sbctl_struct.SetupMode, "✓ ")
-			case false:
-				sbctl_struct.SetupMode = strings.TrimPrefix(sbctl_struct.SetupMode, "✘ ")
-			}
+			sbctl_struct.SetupMode = (strings.TrimPrefix(sbctl_status[i], "Setup Mode:\t"))[4:]
 		} else if strings.HasPrefix(sbctl_status[i], "Secure Boot:\t") {
-			sbctl_struct.SecureBoot = strings.TrimPrefix(sbctl_status[i], "Secure Boot:\t")
-
-			switch strings.HasPrefix(sbctl_struct.SecureBoot, "✓ ") {
-			case true:
-				sbctl_struct.SecureBoot = strings.TrimPrefix(sbctl_struct.SecureBoot, "✓ ")
-			case false:
-				sbctl_struct.SecureBoot = strings.TrimPrefix(sbctl_struct.SecureBoot, "✘ ")
-			}
+			sbctl_struct.SecureBoot = (strings.TrimPrefix(sbctl_status[i], "Secure Boot:\t"))[4:]
 		} else if strings.HasPrefix(sbctl_status[i], "Vendor Keys:\t") {
 			sbctl_struct.VendorKeys = strings.TrimPrefix(sbctl_status[i], "Vendor Keys:\t")
-
-			switch strings.HasPrefix(sbctl_struct.Installed, "✓ ") {
-			case true:
-				sbctl_struct.VendorKeys = strings.TrimPrefix(sbctl_struct.VendorKeys, "✓ ")
-			case false:
-				sbctl_struct.VendorKeys = strings.TrimPrefix(sbctl_struct.VendorKeys, "✘ ")
-			}
 		} else if sbctl_status[i] == "" {
 			// Do nothing
 			do := "nothing"
