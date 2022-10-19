@@ -424,45 +424,15 @@ func SetupProcessor(c *conf.Config) {
 			cmd = append(cmd, `amd-ucode`)
 			z.Arch_chroot(&cmd, false, c)
 
-			// Grab current directory
-			pwd, err := os.Getwd()
-			if err != nil {
-				log.Fatalln(err)
-			}
+			module_dir := filepath.Join("/", "mnt", "etc", "modprobe.d",)
+			module_config := "amd.conf"
 
-			config_dir := filepath.Join("/", "mnt", "etc", "modprobe.d",)
-			log.Printf("Changing directory to %q", config_dir)
-			if err := os.Chdir(config_dir); err != nil {
-				log.Fatalln(err)
-			}
-
-			// amd.conf
-			module_config := filepath.Join(config_dir, "amd.conf")
-
-			module_settings := []string{
+			module_contents := []string{
 				`options amd_pstate replace=1`,
 			}
 		
-			log.Println(`Creating autologin.conf for systemd-nspawn container...`)
-			f, err := os.OpenFile(module_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Saving settings`)
-			if _, err := f.Write([]byte(strings.Join(module_settings, "\n"))); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Closing file`)
-			if err := f.Close(); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println("Done!")
-		
-			log.Println("Returning to original directory")
-			// Return to original directory
-			if err := os.Chdir(pwd); err != nil {
-				log.Fatalln(err)
-			}
+			log.Printf(`Creating %q...`, module_config)
+			u.WriteFile(&module_dir, &module_config, &module_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 	}
 }
@@ -553,12 +523,6 @@ func SetupBiometrics(c *conf.Config) {
 	// 	}
 	// }
 
-	// Grab current directory
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	for i := range usb.USBDevices {
 
 		if strings.Contains(usb.USBDevices[i].Description, `Camera`) {
@@ -583,13 +547,9 @@ func SetupBiometrics(c *conf.Config) {
 
 			log.Println("Configuring PAM Authentication modules for fprint")
 			pam_module_dir := filepath.Join("/", "mnt", "etc", "pam.d")
-			log.Printf("Changing directory to %q", pam_module_dir)
-			if err := os.Chdir(pam_module_dir); err != nil {
-				log.Fatalln(err)
-			}
 
 			for i := range pam_modules {
-				pam_config := filepath.Join(pam_module_dir, pam_modules[i])
+				pam_file := pam_modules[i]
 
 				switch pam_modules[i] {
 				case "kde":
@@ -646,25 +606,7 @@ func SetupBiometrics(c *conf.Config) {
 					}
 				}
 				log.Printf(`Adding fprint PAM Authentication for "%q"`, pam_modules[i])
-				f, err := os.OpenFile(pam_config, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
-				if err != nil {
-					log.Fatalln(err)
-				}
-				log.Println(`Saving settings`)
-				if _, err := f.Write([]byte(strings.Join(pam_module, "\n"))); err != nil {
-					log.Fatalln(err)
-				}
-				log.Println(`Closing file`)
-				if err := f.Close(); err != nil {
-					log.Fatalln(err)
-				}
-			}
-
-			log.Println("Done!")
-			log.Println("Returning to original directory")
-			// Return to original directory
-			if err := os.Chdir(pwd); err != nil {
-				log.Fatalln(err)
+				u.WriteFile(&pam_module_dir, &pam_file, &pam_module, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 			}
 		}
 	}
@@ -781,12 +723,6 @@ func SetupSecurityModules(c *conf.Config) {
 		case "apparmor":
 			log.Println("AppArmor Linux Security Module detected...")
 
-			// Grab current directory
-			pwd, err := os.Getwd()
-			if err != nil {
-				log.Fatalln(err)
-			}
-
 			log.Println(`Installing Audit framework...`)
 			cmd = append(cmd,
 				`audit`,
@@ -799,16 +735,12 @@ func SetupSecurityModules(c *conf.Config) {
 			cmd = []string{`systemctl`, `enable`, `--now`, `auditd.service`}
 			z.Arch_chroot(&cmd, false, c)
 
-			config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
-			log.Printf("Changing directory to %q", config_dir)
-			if err := os.Chdir(config_dir); err != nil {
-				log.Fatalln(err)
-			}
+			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
 
 			// aa-notify autostart
-			aan_config := filepath.Join(config_dir, "autostart", "apparmor-notify.desktop")
+			autostart_file := "apparmor-notify.desktop"
 
-			autostart_settings := []string{
+			autostart_contents := []string{
 				`[Desktop Entry]`,
 				`Comment[en_US]=Receive on screen notifications of AppArmor denials`,
 				`Comment=Receive on screen notifications of AppArmor denials`,
@@ -833,24 +765,7 @@ func SetupSecurityModules(c *conf.Config) {
 			}
 
 			log.Println(`Creating autostart for AppArmor Notify service`)
-			f, err := os.OpenFile(aan_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Saving settings`)
-			if _, err := f.Write([]byte(strings.Join(autostart_settings, "\n"))); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Closing file`)
-			if err := f.Close(); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println("Done!")
-			log.Println("Returning to original directory")
-			// Return to original directory
-			if err := os.Chdir(pwd); err != nil {
-				log.Fatalln(err)
-			}
+			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 	}
 }
@@ -937,56 +852,23 @@ func SetupFlatpaks(c *conf.Config) {
 
 	log.Println("Preparing environment for automatic systemd-nspawn scripts")
 
-	// Grab current directory
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
-	err = os.MkdirAll(`/mnt/etc/systemd/system/console-getty.service.d/`, 0755)
+	err := os.MkdirAll(`/mnt/etc/systemd/system/console-getty.service.d/`, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	config_dir := filepath.Join("/", "mnt", "etc", "systemd", "system", "console-getty.service.d")
-	log.Printf("Changing directory to %q", config_dir)
-	if err := os.Chdir(config_dir); err != nil {
-		log.Fatalln(err)
-	}
+	autologin_dir := filepath.Join("/", "mnt", "etc", "systemd", "system", "console-getty.service.d")
 
-	// autologin.conf
-	autologin_config := filepath.Join(config_dir, "autologin.conf")
+	autologin_file := "autologin.conf"
 
-	autologin_settings := []string{
+	autologin_contents := []string{
 		`[Service]`,
 		`ExecStart=`,
 		fmt.Sprintf(`ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --keep-baud --autologin %s - 115200,38400,9600 $TERM`, c.User.Username),
 	}
 
 	log.Println(`Creating autologin.conf for systemd-nspawn container...`)
-	f, err := os.OpenFile(autologin_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Saving settings`)
-	if _, err := f.Write([]byte(strings.Join(autologin_settings, "\n"))); err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Closing file`)
-	if err := f.Close(); err != nil {
-		log.Fatalln(err)
-	}
-	log.Println("Done!")
-
-	log.Println("Contents:")
-	cmd := []string{`cat`, autologin_config}
-	z.Arch_chroot(&cmd, false, c)
-
-	log.Println("Returning to original directory")
-	// Return to original directory
-	if err := os.Chdir(pwd); err != nil {
-		log.Fatalln(err)
-	}
+	u.WriteFile(&autologin_dir, &autologin_file, &autologin_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 	log.Println("Compiling Flatpak commands...")
 	fp_install_cmd := `sudo flatpak install --assumeyes flathub`
@@ -1004,16 +886,10 @@ func SetupFlatpaks(c *conf.Config) {
 		case "com.github.wwmm.easyeffects":
 			log.Println("EasyEffects for PipeWire detected!")
 			log.Println("Configuring AutoStart")
-			user_config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
-			log.Printf("Changing directory to %q", user_config_dir)
-			if err := os.Chdir(user_config_dir); err != nil {
-				log.Fatalln(err)
-			}
 
-			// Easy Effects autostart
-			ee_config := filepath.Join(user_config_dir, "autostart", "com.github.wwmm.easyeffects.desktop")
-
-			autostart_settings := []string{
+			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
+			autostart_file := "com.github.wwmm.easyeffects.desktop"
+			autostart_contents := []string{
 				`[Desktop Entry]`,
 				`Comment[en_US]=`,
 				`Comment=`,
@@ -1036,25 +912,7 @@ func SetupFlatpaks(c *conf.Config) {
 				`X-KDE-Username=`,
 			}
 
-			log.Println(`Creating autostart entry for Easy Effects`)
-			f, err := os.OpenFile(ee_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Saving settings`)
-			if _, err := f.Write([]byte(strings.Join(autostart_settings, "\n"))); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Closing file`)
-			if err := f.Close(); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println("Done!")
-			log.Println("Returning to original directory")
-			// Return to original directory
-			if err := os.Chdir(pwd); err != nil {
-				log.Fatalln(err)
-			}
+			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 			// Insert code for Dolby Atmos here
 		case "com.getmailspring.Mailspring":
@@ -1064,16 +922,10 @@ func SetupFlatpaks(c *conf.Config) {
 		case "com.synology.SynologyDrive":
 			log.Println("Synology Drive Flatpak detected!")
 			log.Println("Configuring AutoStart")
-			user_config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
-			log.Printf("Changing directory to %q", user_config_dir)
-			if err := os.Chdir(user_config_dir); err != nil {
-				log.Fatalln(err)
-			}
-
-			// Synology Drive autostart
-			sd_config := filepath.Join(user_config_dir, "autostart", "com.synology.SynologyDrive.desktop")
-
-			autostart_settings := []string{
+			
+			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
+			autostart_file := "com.synology.SynologyDrive.desktop"
+			autostart_contents := []string{
 				`[Desktop Entry]`,
 				`Comment[en_US]=`,
 				`Comment=`,
@@ -1096,25 +948,7 @@ func SetupFlatpaks(c *conf.Config) {
 				`X-KDE-Username=`,
 			}
 
-			log.Println(`Creating autostart entry for Synology Drive`)
-			f, err := os.OpenFile(sd_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Saving settings`)
-			if _, err := f.Write([]byte(strings.Join(autostart_settings, "\n"))); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Closing file`)
-			if err := f.Close(); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println("Done!")
-			log.Println("Returning to original directory")
-			// Return to original directory
-			if err := os.Chdir(pwd); err != nil {
-				log.Fatalln(err)
-			}
+			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 	}
 	log.Println("Appending systemd-nspawn 'Get out of Jail for free' command")
@@ -1122,54 +956,27 @@ func SetupFlatpaks(c *conf.Config) {
 
 	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container")
 	
-	// Get current directory
-	pwd, err = os.Getwd()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	systemd_autorun_dir := filepath.Join("/", "mnt", "etc", "profile.d")
-	log.Printf("Changing directory to %q", systemd_autorun_dir)
-	if err := os.Chdir(systemd_autorun_dir); err != nil {
-		log.Fatalln(err)
-	}
 
-	flatpak_script := filepath.Join(systemd_autorun_dir, "install_flatpaks.sh")
+	flatpak_script := "install_flatpaks.sh"
 
 	log.Println(`Creating install_flatpaks.sh for systemd-nspawn container...`)
-	f, err = os.OpenFile(flatpak_script, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Saving settings`)
-	if _, err := f.Write([]byte(strings.Join(cmd_list, "\n"))); err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Closing file`)
-	if err := f.Close(); err != nil {
-		log.Fatalln(err)
-	}
+	u.WriteFile(&systemd_autorun_dir, &flatpak_script, &cmd_list, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+	
 	log.Println("Making executable")
-	cmd = []string{`chmod`, `+x`, flatpak_script}
-
-	log.Println("Done!")
-	log.Println("Returning to original directory")
-	// Return to original directory
-	if err := os.Chdir(pwd); err != nil {
-		log.Fatalln(err)
-	}
+	cmd := []string{`chmod`, `+x`, filepath.Join(systemd_autorun_dir, flatpak_script)}
 	z.Arch_chroot(&cmd, false, c)
 
 	log.Println("Installing Flatpaks via systemd-nspawn")
 	z.Systemd_nspawn(&[]string{}, true, c)
 
 	log.Println("Cleaning up cruft...")
-	err = os.RemoveAll(config_dir)
+	err = os.RemoveAll(autologin_dir)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
-	err = os.Remove(flatpak_script)
+	err = os.Remove(filepath.Join(systemd_autorun_dir, flatpak_script))
 	if err != nil {
 		log.Fatalln(err)
 	}
@@ -1181,6 +988,9 @@ func SetupEFI(c *conf.Config) {
                         Adding EFI Configs
 	-------------------------------------------------------------------------
 	`)
+
+	kernel_options := []string{}
+	_ = kernel_options
 
 	// To-Do
 	// - Add more scalable way to handle a "sed-like" implementation in Go, or set up reading a file line-by-line

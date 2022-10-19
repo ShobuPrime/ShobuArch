@@ -27,6 +27,7 @@ import (
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
 	z "github.com/ShobuPrime/ShobuArch/pkg/shell"
+	u "github.com/ShobuPrime/ShobuArch/pkg/util"
 )
 
 func UserLogo() {
@@ -287,64 +288,36 @@ func UserVariables(c *conf.Config) {
 	`)
 
 	log.Println("Configuring Environmental Variables")
-
-	pwd, err := os.Getwd()
-	if err != nil {
-		log.Fatalln(err)
-	}
-
 	config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
-	log.Printf("Changing directory to %q", config_dir)
-	if err := os.Chdir(config_dir); err != nil {
-		log.Fatalln(err)
-	}
+	environment_dir := filepath.Join(config_dir, "environment.d")
 
 	log.Printf("Making environment.d directory")
-	if err := os.MkdirAll("environment.d", 0755); err != nil {
+	if err := os.MkdirAll(environment_dir, 0755); err != nil {
 		log.Fatalln(err)
 	}
 
-	environment_config := filepath.Join(config_dir, "environment.d", "environment.conf")
+	environment_config := "environment.conf"
 
 	config_settings := []string{
 		`MOZ_ENABLE_WAYLAND=1`,
 		`MOZ_DBUS_REMOTE=1`,
 	}
+
 	log.Println(`Creating "environment.conf"`)
-	f, err := os.OpenFile(environment_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Saving settings`)
-	if _, err := f.Write([]byte(strings.Join(config_settings, "\n"))); err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Closing file`)
-	if err := f.Close(); err != nil {
-		log.Fatalln(err)
-	}
+	u.WriteFile(&environment_dir, &environment_config, &config_settings, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+
 
 	log.Println("Configuring Electron")
 
-	electron_config := filepath.Join(config_dir, "electron-flags.conf")
+	electron_config := "electron-flags.conf"
 
 	config_settings = []string{
 		`--enable-features=WaylandWindowDecorations`,
 		`--ozone-platform-hint=auto`,
 	}
+
 	log.Println(`Creating "electron-flags.conf"`)
-	f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Saving settings`)
-	if _, err := f.Write([]byte(strings.Join(config_settings, "\n"))); err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Closing file`)
-	if err := f.Close(); err != nil {
-		log.Fatalln(err)
-	}
+	u.WriteFile(&environment_dir, &electron_config, &config_settings, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 	electron_config = filepath.Join(config_dir, "electron19-flags.conf")
 
@@ -353,43 +326,21 @@ func UserVariables(c *conf.Config) {
 		`--ozone-platform=wayland`,
 	}
 	log.Println(`Creating "electron19-flags.conf"`)
-	f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-	if err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Saving settings`)
-	if _, err := f.Write([]byte(strings.Join(config_settings, "\n"))); err != nil {
-		log.Fatalln(err)
-	}
-	log.Println(`Closing file`)
-	if err := f.Close(); err != nil {
-		log.Fatalln(err)
-	}
+	u.WriteFile(&environment_dir, &electron_config, &config_settings, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 	for i := range c.Pacman.Packages {
 		switch c.Pacman.Packages[i] {
 		case "code":
 			log.Println("Configuring Visual Studio Code")
 
-			electron_config := filepath.Join(config_dir, "code-flags.conf")
+			electron_config := "code-flags.conf"
 
 			config_settings = []string{
 				`--enable-features=UseOzonePlatform`,
 				`--ozone-platform=wayland`,
 			}
-			log.Println(`Creating "electron-flags.conf"`)
-			f, err = os.OpenFile(electron_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-			if err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Saving settings`)
-			if _, err := f.Write([]byte(strings.Join(config_settings, "\n"))); err != nil {
-				log.Fatalln(err)
-			}
-			log.Println(`Closing file`)
-			if err := f.Close(); err != nil {
-				log.Fatalln(err)
-			}
+			log.Println(`Creating "code-flags.conf"`)
+			u.WriteFile(&environment_dir, &electron_config, &config_settings, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 	}
 
@@ -402,12 +353,6 @@ func UserVariables(c *conf.Config) {
 		fmt.Sprintf(`/home/%s/`, c.User.Username),
 	}
 	z.Arch_chroot(&cmd, false, c)
-
-	log.Println("Done!")
-	// Return to original directory
-	if err := os.Chdir(pwd); err != nil {
-		log.Fatalln(err)
-	}
 }
 
 func UserAutostart(c *conf.Config) {
