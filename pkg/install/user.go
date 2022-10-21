@@ -319,7 +319,7 @@ func UserVariables(c *conf.Config) {
 	log.Println(`Creating "electron-flags.conf"`)
 	u.WriteFile(&environment_dir, &electron_config, &config_settings, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
-	electron_config = filepath.Join(config_dir, "electron19-flags.conf")
+	electron_config = "electron19-flags.conf"
 
 	config_settings = []string{
 		`--enable-features=UseOzonePlatform`,
@@ -343,6 +343,10 @@ func UserVariables(c *conf.Config) {
 			u.WriteFile(&environment_dir, &electron_config, &config_settings, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 	}
+
+	// To-Do:
+	// For some applications, like bcompare, we need to make sure to export to PATH if not done already
+	// ex) export PATH = /home/<username>/.cache/<aur_helper>/clone/bcompare/src/install/bin/bcompare:$PATH
 
 	log.Println(`Enforcing permissions`)
 	//os.Chown(filepath.Base(keepass_config), 1000, 1000)

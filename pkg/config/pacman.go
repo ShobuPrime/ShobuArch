@@ -508,7 +508,7 @@ func AUR(c *Config) {
 			"firefox-pwa-bin",             // Install, manage and use PWAs in Firefox (native component)
 			"macchina-bin",                // A system information fetcher/frontend, with an (unhealthy) emphasis on performance
 			//"morgen-bin",                // Modern, intuitive and smart calendar application (Successor to MineTime)
-			"nerd-dictation-git",          // Simple, hackable offline speech to text - using the VOSK-API.
+			//"nerd-dictation-git",        // Simple, hackable offline speech to text - using the VOSK-API.
 			"openrazer-meta",              // Razer device drivers
 			"polychromatic",               // RGB management GUI for Razer Devices
 			"razer-nari-pipewire-profile", // Razer Nari headsets pipewire profile

@@ -735,11 +735,9 @@ func SetupSecurityModules(c *conf.Config) {
 			cmd = []string{`systemctl`, `enable`, `--now`, `auditd.service`}
 			z.Arch_chroot(&cmd, false, c)
 
+			log.Println(`Creating autostart for AppArmor Notify service`)
 			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
-
-			// aa-notify autostart
 			autostart_file := "apparmor-notify.desktop"
-
 			autostart_contents := []string{
 				`[Desktop Entry]`,
 				`Comment[en_US]=Receive on screen notifications of AppArmor denials`,
@@ -763,8 +761,6 @@ func SetupSecurityModules(c *conf.Config) {
 				`X-KDE-SubstituteUID=false`,
 				`X-KDE-Username=`,
 			}
-
-			log.Println(`Creating autostart for AppArmor Notify service`)
 			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 	}
@@ -852,22 +848,19 @@ func SetupFlatpaks(c *conf.Config) {
 
 	log.Println("Preparing environment for automatic systemd-nspawn scripts")
 
-	err := os.MkdirAll(`/mnt/etc/systemd/system/console-getty.service.d/`, 0755)
+	log.Println(`Creating AutoLogin for systemd-nspawn container...`)
+	autologin_dir := filepath.Join("/", "mnt", "etc", "systemd", "system", "console-getty.service.d")
+	err := os.MkdirAll(autologin_dir, 0755)
 	if err != nil {
 		log.Fatal(err)
 	}
 
-	autologin_dir := filepath.Join("/", "mnt", "etc", "systemd", "system", "console-getty.service.d")
-
 	autologin_file := "autologin.conf"
-
 	autologin_contents := []string{
 		`[Service]`,
 		`ExecStart=`,
 		fmt.Sprintf(`ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --keep-baud --autologin %s - 115200,38400,9600 $TERM`, c.User.Username),
 	}
-
-	log.Println(`Creating autologin.conf for systemd-nspawn container...`)
 	u.WriteFile(&autologin_dir, &autologin_file, &autologin_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 	log.Println("Compiling Flatpak commands...")
@@ -885,7 +878,7 @@ func SetupFlatpaks(c *conf.Config) {
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.local/share/icons`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
 		case "com.github.wwmm.easyeffects":
 			log.Println("EasyEffects for PipeWire detected!")
-			log.Println("Configuring AutoStart")
+			log.Println("Configuring AutoStart for EasyEffects")
 
 			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
 			autostart_file := "com.github.wwmm.easyeffects.desktop"
@@ -911,7 +904,6 @@ func SetupFlatpaks(c *conf.Config) {
 				`X-KDE-SubstituteUID=false`,
 				`X-KDE-Username=`,
 			}
-
 			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 			// Insert code for Dolby Atmos here
@@ -921,7 +913,7 @@ func SetupFlatpaks(c *conf.Config) {
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --socket=session-bus`, fp_override_cmd, c.Flatpak.Packages[i]))
 		case "com.synology.SynologyDrive":
 			log.Println("Synology Drive Flatpak detected!")
-			log.Println("Configuring AutoStart")
+			log.Println("Configuring AutoStart for Synology Drive")
 			
 			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
 			autostart_file := "com.synology.SynologyDrive.desktop"
@@ -947,7 +939,6 @@ func SetupFlatpaks(c *conf.Config) {
 				`X-KDE-SubstituteUID=false`,
 				`X-KDE-Username=`,
 			}
-
 			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 	}
@@ -957,10 +948,9 @@ func SetupFlatpaks(c *conf.Config) {
 	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container")
 	
 	systemd_autorun_dir := filepath.Join("/", "mnt", "etc", "profile.d")
-
 	flatpak_script := "install_flatpaks.sh"
 
-	log.Println(`Creating install_flatpaks.sh for systemd-nspawn container...`)
+	log.Println(`Creating Flatpak script for systemd-nspawn container...`)
 	u.WriteFile(&systemd_autorun_dir, &flatpak_script, &cmd_list, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	
 	log.Println("Making executable")
@@ -971,11 +961,13 @@ func SetupFlatpaks(c *conf.Config) {
 	z.Systemd_nspawn(&[]string{}, true, c)
 
 	log.Println("Cleaning up cruft...")
+	log.Println("Deleting: ", autologin_dir)
 	err = os.RemoveAll(autologin_dir)
 	if err != nil {
 		log.Fatalln(err)
 	}
 
+	log.Println("Deleting: ", filepath.Join(systemd_autorun_dir, flatpak_script))
 	err = os.Remove(filepath.Join(systemd_autorun_dir, flatpak_script))
 	if err != nil {
 		log.Fatalln(err)
@@ -989,25 +981,54 @@ func SetupEFI(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	kernel_options := []string{}
-	_ = kernel_options
+	var uuid_command string
+	if strings.HasPrefix(c.Storage.SystemDisk, "/dev/nvme") {
+		uuid_command = fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
+	} else {
+		uuid_command = fmt.Sprintf(`lsblk -dno UUID %v2`, c.Storage.SystemDisk)
+	}
+	root_uuid := strings.TrimRight(strings.TrimSpace(z.Shell(&uuid_command)), "\n")
 
-	// To-Do
-	// - Add more scalable way to handle a "sed-like" implementation in Go, or set up reading a file line-by-line
-	// Ex) Need a way to read /etc/mkinitcpio.conf and add `amd_pstate`` and `btrfs`` to MODULES=()
+	switch c.Storage.Filesystem {
+	case "btrfs":
+		c.Modules = append(c.Modules, "btrfs")
+		c.Parameters = append(c.Parameters, fmt.Sprintf(`root=UUID=%v rootflags=subvol=@`, root_uuid))
+	case "luks":
+		c.Parameters = append(c.Parameters, fmt.Sprintf(`rd.luks.name=%v=luks_ROOT root=/dev/mapper/luks_ROOT rootflags=subvol=@ rd.luks.options=%v=timeout=15s,discard,quiet,rw`, root_uuid, root_uuid))
+	case "zfs":
+		c.Parameters = append(c.Parameters, `root=ZFS=zroot/ROOT/default`)
+	}
+
+	cpu := u.ListCPU()
+
+	for i := range cpu.Processor {
+		switch cpu.Processor[i].Data {
+		case "GenuineIntel":
+			c.Modules = append(c.Modules, `intel_pstate`)
+			c.Parameters = append(c.Parameters, `intel_pstate=active`)
+		case "AuthenticAMD":
+			c.Modules = append(c.Modules, `amd_pstate`)
+			c.Parameters = append(c.Parameters, `amd_pstate.replace=1`)
+		}
+	}
 
 	switch c.Bootloader {
 	case "grub": // GRand Unified Bootloader
-		cmd := []string{`sudo`, `pacman`, `-U`, `--needed`, `--noconfirm`, `grub`}
+		cmd := []string{`sudo`, `pacman`, `-Syy`, `--needed`, `--noconfirm`, c.Bootloader}
 		z.Arch_chroot(&cmd, false, c)
 
-		cmd = []string{`sed`, `-i`, `s/quiet/quiet video=1920x1080/g`, `/etc/default/grub`}
-		z.Arch_chroot(&cmd, false, c)
+		grub_path := filepath.Join("/", "mnt", "etc", "default")
+		grub_file := `grub`
+		grub_contents := u.ReadFile(&grub_path, &grub_file)
 
-		switch c.Storage.Filesystem {
-		case "zfs":
-			cmd = []string{`sed`, `-i`, `s/GRUB_CMDLINE_LINUX=""/GRUB_CMDLINE_LINUX="root=ZFS=zroot\/ROOT\/default"/g`, `/etc/default/grub`}
-			z.Arch_chroot(&cmd, false, c)
+		for line := range *grub_contents {
+			switch {
+			case strings.HasPrefix((*grub_contents)[line], `GRUB_CMDLINE_LINUX=""`):
+				(*grub_contents)[line] = 
+					fmt.Sprintf("GRUB_CMDLINE_LINUX=loglevel 3 quiet video=1920x1080 %v", strings.Join(c.Parameters, " "))
+			case strings.HasPrefix((*grub_contents)[line], `#GRUB_ENABLE_CRYPTODISK=`):
+				(*grub_contents)[line] = strings.TrimPrefix((*grub_contents)[line], "#")
+			}
 		}
 
 		cmd = []string{`grub-install`, `--target=x86_64-efi`, `--efi-directory=/boot`, `--bootloader-id=ArchLinux`}
@@ -1019,128 +1040,99 @@ func SetupEFI(c *conf.Config) {
 		cmd := []string{`bootctl`, `--path=/boot`, `install`}
 		z.Arch_chroot(&cmd, false, c)
 
-		cmd = []string{`touch`, `/boot/loader/entries/arch.conf`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{
-			`awk`,
-			`BEGIN{ printf "title ArchLinux\n" >> "/boot/loader/entries/arch.conf" }`,
+		// Build boot entry for Arch
+		boot_entry_dir := filepath.Join("/", "mnt", "boot", "loader", "entries")
+		boot_entry := "arch.conf"
+		boot_config := []string{
+			`title ArchLinux`,
+			fmt.Sprintf(`linux /vmlinuz-%v`, c.Kernel),
 		}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{
-			`awk`,
-			fmt.Sprintf(`BEGIN{ printf "linux /vmlinuz-%v\n" >> "/boot/loader/entries/arch.conf" }`, c.Kernel),
-		}
-		z.Arch_chroot(&cmd, false, c)
-
-		cpu := u.ListCPU()
 
 		for i := range cpu.Processor {
 			switch cpu.Processor[i].Data {
 			case "GenuineIntel":
-				cmd := []string{
-					`awk`,
-					`BEGIN{ printf "initrd \/intel-ucode.img\n" >> "/boot/loader/entries/arch.conf" }`,
-				}
-				z.Arch_chroot(&cmd, false, c)
+				boot_config = append(boot_config, `initrd /intel-ucode.img`)
 			case "AuthenticAMD":
-				cmd := []string{
-					`awk`,
-					`BEGIN{ printf "initrd \/amd-ucode.img\n" >> "/boot/loader/entries/arch.conf" }`,
-				}
-				z.Arch_chroot(&cmd, false, c)
+				boot_config = append(boot_config, `initrd /amd-ucode.img`)
 			}
 		}
 
-		cmd = []string{
-			`awk`,
-			fmt.Sprintf(`BEGIN{ printf "initrd \/initramfs-%v.img\n" >> "/boot/loader/entries/arch.conf" }`, c.Kernel),
+		boot_config = append(boot_config, fmt.Sprintf(`initrd /initramfs-%v.img`, c.Kernel))
+		boot_config = append(boot_config, fmt.Sprintf(`options %v`, strings.Join(c.Parameters, " ")))
+		u.WriteFile(&boot_entry_dir, &boot_entry, &boot_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+
+		// Configure system-d bootloader
+		boot_loader_dir := filepath.Join("/", "mnt", "boot", "loader")
+		boot_loader := "loader.conf"
+		boot_loader_config := []string{
+			fmt.Sprintf(`default %v`, boot_entry),
+			`timeout 3`,
+			`console-mode max`,
+			`editor 0`,
 		}
-		z.Arch_chroot(&cmd, false, c)
-
-		switch c.Storage.Filesystem {
-		case "btrfs":
-			var uuid_command string
-			if strings.HasPrefix(c.Storage.SystemDisk, "/dev/nvme") {
-				uuid_command = fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
-			} else {
-				uuid_command = fmt.Sprintf(`lsblk -dno UUID %v2`, c.Storage.SystemDisk)
-			}
-			root_uuid := strings.TrimRight(strings.TrimSpace(z.Shell(&uuid_command)), "\n")
-
-			cmd := []string{
-				`awk`,
-				fmt.Sprintf(`BEGIN{ printf "options root=UUID=%v rootflags=subvol=@\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid),
-			}
-			z.Arch_chroot(&cmd, false, c)
-		case "luks":
-
-			var uuid_command string
-			if strings.HasPrefix(c.Storage.SystemDisk, "/dev/nvme") {
-				uuid_command = fmt.Sprintf(`lsblk -dno UUID %vp2`, c.Storage.SystemDisk)
-			} else {
-				uuid_command = fmt.Sprintf(`lsblk -dno UUID %v2`, c.Storage.SystemDisk)
-			}
-			root_uuid := strings.TrimRight(strings.TrimSpace(z.Shell(&uuid_command)), "\n")
-
-			cmd := []string{
-				`awk`,
-				fmt.Sprintf(`BEGIN{ printf "options rd.luks.name=%v=luks_ROOT root=\/dev\/mapper\/luks_ROOT rootflags=subvol=@ rd.luks.options=%v=timeout=15s,discard,quiet,rw\n" >> "/boot/loader/entries/arch.conf" }`, root_uuid, root_uuid),
-			}
-			z.Arch_chroot(&cmd, false, c)
-		case "zfs":
-			cmd := []string{
-				`awk`,
-				`BEGIN{ printf "root=ZFS=zroot\/ROOT\/default\n" >> "/boot/loader/entries/arch.conf" }`,
-			}
-			z.Arch_chroot(&cmd, false, c)
-		}
-
-		cmd = []string{
-			`awk`,
-			`BEGIN{ printf "default arch.conf\n" >> "/boot/loader/loader.conf" }`,
-		}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{
-			`awk`,
-			`BEGIN{ printf "timeout 3\n" >> "/boot/loader/loader.conf" }`,
-		}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{
-			`awk`,
-			`BEGIN{ printf "console-mode max\n" >> "/boot/loader/loader.conf" }`,
-		}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{
-			`awk`,
-			`BEGIN{ printf "editor 0\n" >> "/boot/loader/loader.conf" }`,
-		}
-		z.Arch_chroot(&cmd, false, c)
+		u.WriteFile(&boot_loader_dir, &boot_loader, &boot_loader_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	}
 
+	// Configure mkinitcpio
+	mkinitcpio_dir := filepath.Join("/", "mnt", "etc")
+	mkinitcpio_conf := "mkinitcpio.conf"
+
+	mkinitcpio_contents := u.ReadFile(&mkinitcpio_dir, &mkinitcpio_conf)
+
+	// Determine HOOKS
 	switch c.Storage.Filesystem {
 	case "btrfs", "luks":
-		cmd := []string{`sed`, `-i`, `s/MODULES=()/MODULES=(btrfs)/g`, `/etc/mkinitcpio.conf`}
-		z.Arch_chroot(&cmd, false, c)
-
-		// HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems)
 		switch c.Bootloader {
 		case "systemd-boot":
-			cmd = []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev systemd autodetect keyboard modconf block sd-encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
-			z.Arch_chroot(&cmd, false, c)
+			c.Hooks = []string{
+				`base`,
+				`udev`,
+				`systemd`,
+				`autodetect`,
+				`keyboard`,
+				`modconf`,
+				`block`,
+				`sd-encrypt`,
+				`filesystems`,
+				`shutdown`,
+			}
 		default:
-			cmd = []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard encrypt filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
-			z.Arch_chroot(&cmd, false, c)
+			c.Hooks = []string{
+				`base`,
+				`udev`,
+				`autodetect`,
+				`modconf`,
+				`block`,
+				`keyboard`,
+				`encrypt`,
+				`filesystems`,
+				`shutdown`,
+			}
 		}
 	case "zfs":
-		// HOOKS=(base udev autodetect modconf block keyboard zfs filesystems)
-		cmd := []string{`sed`, `-i`, `s/HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)/HOOKS=(base udev autodetect modconf block keyboard zfs filesystems shutdown)/g`, `/etc/mkinitcpio.conf`}
-		z.Arch_chroot(&cmd, false, c)
+		c.Hooks = []string{
+			`base`,
+			`udev`,
+			`autodetect`,
+			`modconf`,
+			`block`,
+			`keyboard`,
+			`zfs`,
+			`filesystems`,
+			`shutdown`,
+		}
 	}
+
+	// Save to file
+	for line := range *mkinitcpio_contents {
+		switch {
+		case strings.HasPrefix((*mkinitcpio_contents)[line], `MODULES=()`):
+			(*mkinitcpio_contents)[line] = fmt.Sprintf(`MODULES=(%v)`, strings.Join(c.Modules, " "))
+		case strings.HasPrefix((*mkinitcpio_contents)[line], `HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)`):
+			(*mkinitcpio_contents)[line] = fmt.Sprintf(`HOOKS=(%v)`, strings.Join(c.Hooks, " "))
+		}
+	}
+	u.WriteFile(&mkinitcpio_dir, &mkinitcpio_conf, mkinitcpio_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 	cmd := []string{`mkinitcpio`, `-p`, c.Kernel}
 	z.Arch_chroot(&cmd, false, c)

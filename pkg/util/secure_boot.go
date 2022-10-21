@@ -54,7 +54,7 @@ func SecureBootCreateKeys() {
 		"create-keys",
 	).CombinedOutput()
 
-	log.Println(sbctl)
+	log.Println(string(sbctl))
 }
 
 func SecureBootEnrollKeys() {
@@ -67,7 +67,7 @@ func SecureBootEnrollKeys() {
 		"--microsoft",
 	).CombinedOutput()
 
-	log.Println(sbctl)
+	log.Println(string(sbctl))
 }
 
 func SecureBootSign(file *string) {
@@ -80,13 +80,13 @@ func SecureBootSign(file *string) {
 		*file,
 	).CombinedOutput()
 
-	log.Println(sbctl)
+	log.Println(string(sbctl))
 }
 
 func SecureBootCopy() {
 	log.Println("Copying Secure Boot Keys to chroot...")
 
-	oldDir := "/usr/share/secureboot"
+	oldDir := "/usr/share/secureboot/."
 	newDir := "/mnt/usr/share/secureboot"
 	
 	copy, _ := exec.Command(
@@ -94,7 +94,7 @@ func SecureBootCopy() {
 		oldDir,
 		newDir,
 	).CombinedOutput()
-	log.Println(copy)
+	log.Println(string(copy))
 }
 
 func SBJSON(sbctl *string) *SBCTL {
