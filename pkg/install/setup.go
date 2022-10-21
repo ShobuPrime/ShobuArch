@@ -1082,37 +1082,23 @@ func SetupEFI(c *conf.Config) {
 	// Determine HOOKS
 	switch c.Storage.Filesystem {
 	case "btrfs", "luks":
-		switch c.Bootloader {
-		case "systemd-boot":
-			c.Hooks = []string{
-				`base`,
-				`udev`,
-				`systemd`,
-				`autodetect`,
-				`keyboard`,
-				`modconf`,
-				`block`,
-				`sd-encrypt`,
-				`filesystems`,
-				`shutdown`,
-			}
-		default:
-			c.Hooks = []string{
-				`base`,
-				`udev`,
-				`autodetect`,
-				`modconf`,
-				`block`,
-				`keyboard`,
-				`encrypt`,
-				`filesystems`,
-				`shutdown`,
-			}
+		c.Hooks = []string{
+			`base`,
+			`udev`,
+			`systemd`,
+			`autodetect`,
+			`keyboard`,
+			`modconf`,
+			`block`,
+			`sd-encrypt`,
+			`filesystems`,
+			`shutdown`,
 		}
 	case "zfs":
 		c.Hooks = []string{
 			`base`,
 			`udev`,
+			`systemd`,
 			`autodetect`,
 			`modconf`,
 			`block`,
@@ -1145,9 +1131,8 @@ func SetupSecureBoot(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	fmt.Println(u.PrettyJson(u.SecureBootStatus()))
-
 	sb_status := u.SecureBootStatus()
+	log.Println(u.PrettyJson(sb_status))
 
 	// Currently, paths [like most references in this installer] are prefixed with the chroot mountpoint of `/mnt`
 	efi_files := []string{
@@ -1174,12 +1159,30 @@ func SetupSecureBoot(c *conf.Config) {
 		}
 
 		u.SecureBootCopy()
+
+		switch c.Storage.Filesystem {
+		case "luks":
+			var disk1_part2 string
+			switch strings.HasPrefix(c.Storage.SystemDisk, "/dev/nvme") {
+			case true:
+				disk1_part2 = fmt.Sprintf(`%vp2`, c.Storage.SystemDisk)
+			case false:
+				disk1_part2 = fmt.Sprintf(`%v2`, c.Storage.SystemDisk)
+			}
+			cmd := fmt.Sprintf(`export PASSWORD='%v' && systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0,7 %v`, c.Storage.EncryptionKey, disk1_part2)
+			z.Shell(&cmd)
+		}
 	case "Disabled":
 		log.Println(`WARNING: "Setup Mode" is disabled for Secure Boot!`)
 		log.Println(`WARNING: Ensure to delete all keys or enable Setup Mode in your System BIOS after installation`)
 		log.Println(`WARNING: After preparations, to use Secure Boot, please run the following commands:`)
 		for i := range efi_files {
 			log.Printf(`sudo sbctl sign -s %q\n`, strings.TrimPrefix(efi_files[i], "/mnt"))
+		}
+
+		switch c.Storage.Filesystem {
+		case "luks":
+			log.Println(`EXTRA: Run "systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0,7" to save LUKS key to TPM`)
 		}
 	}
 
@@ -1188,5 +1191,5 @@ func SetupSecureBoot(c *conf.Config) {
 	// - Add DKMS Kernel Module Signing
 	// - Add function to detect TPM
 	// - Save encryption key to TPM if LUKS is enabled for Bitlocker-like experience
-	// --fmt.Sprintf(`export PASSWORD='%v' && systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0,7 %v`, c.Storage.EncryptionKey, disk1_part2),
+	// --,
 }

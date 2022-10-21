@@ -80,12 +80,6 @@ func PostInstallCleanup(c *conf.Config) {
 	if err != nil {
 		log.Fatalln(err)
 	}
-
-	// cmd = []string{fmt.Sprintf(`cp ./shobuarch.log /mnt/home/%s/Desktop/shobuarch.log`, c.User.Username)}
-	// z.Shell(&cmd[0])
-
-	// cmd = []string{fmt.Sprintf(`cp ./shobuarch_config.%s /mnt/home/%s/Desktop/shobuarch_config.%s`, strings.ToLower(c.Format), c.User.Username, strings.ToLower(c.Format))}
-	// z.Shell(&cmd[0])
 }
 
 func PostInstallUnmount(c *conf.Config) {
@@ -130,7 +124,7 @@ func PostInstallUnmount(c *conf.Config) {
 	switch c.Storage.Filesystem {
 	case "luks":
 		cmd_list = append(cmd_list,
-			`umount -A /dev/mapper/ROOT`,
+			`umount -A /dev/mapper/luks_ROOT`,
 		)
 	case "zfs":
 		cmd_list = append(cmd_list,
