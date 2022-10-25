@@ -18,7 +18,6 @@
 package util
 
 import (
-	"fmt"
 	"log"
 	"os/exec"
 	"strings"
@@ -46,53 +45,42 @@ func SecureBootStatus() *SBCTL {
 	return SBJSON(&sbctl_status)
 }
 
-func SecureBootCreateKeys() {
+func SecureBootCreateKeys() *[]string {
 
 	log.Println("Creating Secure Boot keys...")
 
-	sbctl, _ := exec.Command(
+	sbctl := []string{
 		"sbctl",
 		"create-keys",
-	).CombinedOutput()
+	}
 
-	log.Println(string(sbctl))
+	return &sbctl
 }
 
-func SecureBootEnrollKeys() {
+func SecureBootEnrollKeys() *[]string {
 
 	log.Println("Enrolling Secure Boot keys...")
 
-	sbctl, _ := exec.Command(
+	sbctl := []string{
 		"sbctl",
 		"enroll-keys",
 		"--microsoft",
-	).CombinedOutput()
+	}
 
-	log.Println(string(sbctl))
+	return &sbctl
 }
 
-func SecureBootSign(file *string) {
+func SecureBootSign(file *string) *[]string {
 	log.Printf("Signing %s with Secure Boot Keys", *file)
 
-	sbctl, _ := exec.Command(
-		fmt.Sprintf(`sbctl sign -s %v`, *file),
-	).CombinedOutput()
+	sbctl := []string{
+		`sbctl`,
+		`sign`,
+		`-s`,
+		*file,
+	}
 
-	log.Println(string(sbctl))
-}
-
-func SecureBootCopy() {
-	log.Println("Copying Secure Boot Keys to chroot...")
-
-	oldDir := "/usr/share/secureboot/."
-	newDir := "/mnt/usr/share/secureboot"
-	
-	copy, _ := exec.Command(
-		"cp", "--recursive",
-		oldDir,
-		newDir,
-	).CombinedOutput()
-	log.Println(string(copy))
+	return &sbctl
 }
 
 func SBJSON(sbctl *string) *SBCTL {

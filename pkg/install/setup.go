@@ -1042,6 +1042,10 @@ func SetupEFI(c *conf.Config) {
 
 		cmd = []string{`grub-mkconfig`, `-o`, `/boot/grub/grub.cfg`}
 		z.Arch_chroot(&cmd, false, c)
+
+		grub_path = filepath.Join("/", "mnt", "boot", "grub")
+		grub_file = `grub.cfg`
+		u.ReadFile(&grub_path, &grub_file)
 	case "systemd-boot":
 		cmd := []string{`bootctl`, `--path=/boot`, `install`}
 		z.Arch_chroot(&cmd, false, c)
@@ -1143,28 +1147,28 @@ func SetupSecureBoot(c *conf.Config) {
 	sb_status := u.SecureBootStatus()
 	log.Println(u.PrettyJson(sb_status))
 
-	// Currently, paths [like most references in this installer] are prefixed with the chroot mountpoint of `/mnt`
+	// Paths are not prefixed with `/mnt` since we are using chroot
 	efi_files := []string{
-		`/mnt/boot/EFI/Linux/linux-linux.efi`,
-		`/mnt/boot/EFI/BOOT/BOOTX64.EFI`,
-		`/mnt/boot/vmlinuz-linux`,
+		`/boot/EFI/Linux/linux-linux.efi`,
+		`/boot/EFI/BOOT/BOOTX64.EFI`,
+		`/boot/vmlinuz-linux`,
 	}
 
 	switch c.Bootloader {
 	case "grub":
-		efi_files = append(efi_files, `/mnt/boot/EFI/GRUB/grubx64.efi`)
+		efi_files = append(efi_files, `/boot/EFI/GRUB/grubx64.efi`)
 	case "systemd-boot":
-		efi_files = append(efi_files, `/mnt/boot/EFI/systemd/systemd-bootx64.efi`)
+		efi_files = append(efi_files, `/boot/EFI/systemd/systemd-bootx64.efi`)
 	}
 
 	switch sb_status.SetupMode {
 	case "Enabled":
 		log.Println(`"Setup Mode" is enabled for Secure Boot!`)
-		u.SecureBootCreateKeys()
-		u.SecureBootEnrollKeys()
+		z.Arch_chroot(u.SecureBootCreateKeys(), false, c)
+		z.Arch_chroot(u.SecureBootEnrollKeys(), false, c)
 
 		for i := range efi_files {
-			u.SecureBootSign(&efi_files[i])
+			z.Arch_chroot(u.SecureBootSign(&efi_files[i]), false, c)
 		}
 
 		switch c.Storage.Filesystem {
@@ -1180,8 +1184,6 @@ func SetupSecureBoot(c *conf.Config) {
 			cmd := fmt.Sprintf(`export PASSWORD='%v' && systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=0,7 %v`, c.Storage.EncryptionKey, disk1_part2)
 			z.Shell(&cmd)
 		}
-
-		u.SecureBootCopy()
 	case "Disabled":
 		log.Println(`WARNING: "Setup Mode" is disabled for Secure Boot!`)
 		log.Println(`WARNING: Ensure to delete all keys or enable Setup Mode in your System BIOS after installation`)

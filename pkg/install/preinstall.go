@@ -20,10 +20,12 @@ package install
 import (
 	"fmt"
 	"log"
+	"path/filepath"
 	"strings"
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
 	z "github.com/ShobuPrime/ShobuArch/pkg/shell"
+	u "github.com/ShobuPrime/ShobuArch/pkg/util"
 )
 
 func PreInstallLogo() {
@@ -302,4 +304,8 @@ func ArchInstall(c *conf.Config) {
 	for i := range cmd_list {
 		z.Shell(&cmd_list[i])
 	}
+
+	fstab_path := filepath.Join("/", "mnt", "etc")
+	fstab_file := `fstab`
+	u.ReadFile(&fstab_path, &fstab_file)
 }
