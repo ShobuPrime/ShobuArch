@@ -1030,7 +1030,7 @@ func SetupEFI(c *conf.Config) {
 				(*grub_contents)[line] = strings.TrimPrefix((*grub_contents)[line], "#")
 			}
 		}
-		u.WriteFile(&grub_path, &grub_file, grub_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+		u.WriteFile(&grub_path, &grub_file, grub_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 		u.ReadFile(&grub_path, &grub_file)
 
 		cmd = []string{`grub-install`, `--target=x86_64-efi`, `--efi-directory=/boot`, `--bootloader-id=ArchLinux`}
@@ -1061,7 +1061,7 @@ func SetupEFI(c *conf.Config) {
 
 		boot_config = append(boot_config, fmt.Sprintf(`initrd /initramfs-%v.img`, c.Kernel))
 		boot_config = append(boot_config, fmt.Sprintf(`options %v`, strings.Join(c.Parameters, " ")))
-		u.WriteFile(&boot_entry_dir, &boot_entry, &boot_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+		u.WriteFile(&boot_entry_dir, &boot_entry, &boot_config, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 		u.ReadFile(&boot_entry_dir, &boot_entry)
 
 		// Configure system-d bootloader
@@ -1073,7 +1073,7 @@ func SetupEFI(c *conf.Config) {
 			`console-mode max`,
 			`editor 0`,
 		}
-		u.WriteFile(&boot_loader_dir, &boot_loader, &boot_loader_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+		u.WriteFile(&boot_loader_dir, &boot_loader, &boot_loader_config, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 		u.ReadFile(&boot_loader_dir, &boot_loader)
 	}
 
@@ -1122,7 +1122,8 @@ func SetupEFI(c *conf.Config) {
 			(*mkinitcpio_contents)[line] = fmt.Sprintf(`HOOKS=(%v)`, strings.Join(c.Hooks, " "))
 		}
 	}
-	u.WriteFile(&mkinitcpio_dir, &mkinitcpio_conf, mkinitcpio_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+	u.WriteFile(&mkinitcpio_dir, &mkinitcpio_conf, mkinitcpio_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+	u.ReadFile(&mkinitcpio_dir, &mkinitcpio_conf)
 
 	cmd := []string{`mkinitcpio`, `-p`, c.Kernel}
 	z.Arch_chroot(&cmd, false, c)
