@@ -18,6 +18,7 @@
 package util
 
 import (
+	"fmt"
 	"log"
 	"os/exec"
 	"strings"
@@ -74,10 +75,7 @@ func SecureBootSign(file *string) {
 	log.Printf("Signing %s with Secure Boot Keys", *file)
 
 	sbctl, _ := exec.Command(
-		"sbctl",
-		"sign",
-		"-s",
-		*file,
+		fmt.Sprintf(`sbctl sign -s %v`, *file),
 	).CombinedOutput()
 
 	log.Println(string(sbctl))

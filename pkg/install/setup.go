@@ -1030,6 +1030,8 @@ func SetupEFI(c *conf.Config) {
 				(*grub_contents)[line] = strings.TrimPrefix((*grub_contents)[line], "#")
 			}
 		}
+		u.WriteFile(&grub_path, &grub_file, grub_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+		u.ReadFile(&grub_path, &grub_file)
 
 		cmd = []string{`grub-install`, `--target=x86_64-efi`, `--efi-directory=/boot`, `--bootloader-id=ArchLinux`}
 		z.Arch_chroot(&cmd, false, c)
@@ -1060,6 +1062,7 @@ func SetupEFI(c *conf.Config) {
 		boot_config = append(boot_config, fmt.Sprintf(`initrd /initramfs-%v.img`, c.Kernel))
 		boot_config = append(boot_config, fmt.Sprintf(`options %v`, strings.Join(c.Parameters, " ")))
 		u.WriteFile(&boot_entry_dir, &boot_entry, &boot_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+		u.ReadFile(&boot_entry_dir, &boot_entry)
 
 		// Configure system-d bootloader
 		boot_loader_dir := filepath.Join("/", "mnt", "boot", "loader")
@@ -1071,6 +1074,7 @@ func SetupEFI(c *conf.Config) {
 			`editor 0`,
 		}
 		u.WriteFile(&boot_loader_dir, &boot_loader, &boot_loader_config, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+		u.ReadFile(&boot_loader_dir, &boot_loader)
 	}
 
 	// Configure mkinitcpio
@@ -1144,7 +1148,7 @@ func SetupSecureBoot(c *conf.Config) {
 	switch c.Bootloader {
 	case "grub":
 		efi_files = append(efi_files, `/mnt/boot/EFI/GRUB/grubx64.efi`)
-	case "systemd":
+	case "systemd-boot":
 		efi_files = append(efi_files, `/mnt/boot/EFI/systemd/systemd-bootx64.efi`)
 	}
 
@@ -1158,8 +1162,6 @@ func SetupSecureBoot(c *conf.Config) {
 			u.SecureBootSign(&efi_files[i])
 		}
 
-		u.SecureBootCopy()
-
 		switch c.Storage.Filesystem {
 		case "luks":
 			var disk1_part2 string
@@ -1169,9 +1171,12 @@ func SetupSecureBoot(c *conf.Config) {
 			case false:
 				disk1_part2 = fmt.Sprintf(`%v2`, c.Storage.SystemDisk)
 			}
-			cmd := fmt.Sprintf(`export PASSWORD='%v' && systemd-cryptenroll --tpm2-device=auto --tpm2-pcrs=0,7 %v`, c.Storage.EncryptionKey, disk1_part2)
+
+			cmd := fmt.Sprintf(`export PASSWORD='%v' && systemd-cryptenroll --wipe-slot=tpm2 --tpm2-device=auto --tpm2-pcrs=0,7 %v`, c.Storage.EncryptionKey, disk1_part2)
 			z.Shell(&cmd)
 		}
+
+		u.SecureBootCopy()
 	case "Disabled":
 		log.Println(`WARNING: "Setup Mode" is disabled for Secure Boot!`)
 		log.Println(`WARNING: Ensure to delete all keys or enable Setup Mode in your System BIOS after installation`)
@@ -1191,5 +1196,4 @@ func SetupSecureBoot(c *conf.Config) {
 	// - Add DKMS Kernel Module Signing
 	// - Add function to detect TPM
 	// - Save encryption key to TPM if LUKS is enabled for Bitlocker-like experience
-	// --,
 }
