@@ -1026,7 +1026,7 @@ func SetupEFI(c *conf.Config) {
 			switch {
 			case strings.HasPrefix((*grub_contents)[line], `GRUB_CMDLINE_LINUX=""`):
 				(*grub_contents)[line] = 
-					fmt.Sprintf("GRUB_CMDLINE_LINUX=loglevel 3 quiet video=1920x1080 %v", strings.Join(c.Parameters, " "))
+					fmt.Sprintf("GRUB_CMDLINE_LINUX=\"loglevel 3 quiet video=1920x1080 %v\"", strings.Join(c.Parameters, " "))
 			case strings.HasPrefix((*grub_contents)[line], `#GRUB_ENABLE_CRYPTODISK=`):
 				switch c.Storage.Filesystem {
 				case "luks":
