@@ -994,6 +994,7 @@ func SetupEFI(c *conf.Config) {
 		c.Modules = append(c.Modules, "btrfs")
 		c.Parameters = append(c.Parameters, fmt.Sprintf(`root=UUID=%v rootflags=subvol=@`, root_uuid))
 	case "luks":
+		c.Modules = append(c.Modules, "btrfs") // Since `luks` is currently treated as `btrfs`
 		c.Parameters = append(c.Parameters, fmt.Sprintf(`rd.luks.name=%v=luks_ROOT root=/dev/mapper/luks_ROOT rootflags=subvol=@ rd.luks.options=%v=timeout=15s,discard,quiet,rw`, root_uuid, root_uuid))
 	case "zfs":
 		c.Parameters = append(c.Parameters, `root=ZFS=zroot/ROOT/default`)
@@ -1027,7 +1028,10 @@ func SetupEFI(c *conf.Config) {
 				(*grub_contents)[line] = 
 					fmt.Sprintf("GRUB_CMDLINE_LINUX=loglevel 3 quiet video=1920x1080 %v", strings.Join(c.Parameters, " "))
 			case strings.HasPrefix((*grub_contents)[line], `#GRUB_ENABLE_CRYPTODISK=`):
-				(*grub_contents)[line] = strings.TrimPrefix((*grub_contents)[line], "#")
+				switch c.Storage.Filesystem {
+				case "luks":
+					(*grub_contents)[line] = strings.TrimPrefix((*grub_contents)[line], "#")
+				}
 			}
 		}
 		u.WriteFile(&grub_path, &grub_file, grub_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
