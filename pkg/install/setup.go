@@ -1026,7 +1026,7 @@ func SetupEFI(c *conf.Config) {
 			switch {
 			case strings.HasPrefix((*grub_contents)[line], `GRUB_CMDLINE_LINUX=""`):
 				(*grub_contents)[line] = 
-					fmt.Sprintf("GRUB_CMDLINE_LINUX=\"loglevel 3 quiet video=1920x1080 %v\"", strings.Join(c.Parameters, " "))
+					fmt.Sprintf("GRUB_CMDLINE_LINUX=\"loglevel 3 video=1920x1080 %v\"", strings.Join(c.Parameters, " "))
 			case strings.HasPrefix((*grub_contents)[line], `#GRUB_ENABLE_CRYPTODISK=`):
 				switch c.Storage.Filesystem {
 				case "luks":
@@ -1147,19 +1147,19 @@ func SetupSecureBoot(c *conf.Config) {
 	sb_status := u.SecureBootStatus()
 	log.Println(u.PrettyJson(sb_status))
 
-	// Paths are not prefixed with `/mnt` since we are using chroot
-	efi_files := []string{
-		`/boot/EFI/Linux/linux-linux.efi`,
-		`/boot/EFI/BOOT/BOOTX64.EFI`,
-		`/boot/vmlinuz-linux`,
-	}
+	efi_files := []string{}
 
+	// Paths are not prefixed with `/mnt` since we are using chroot
 	switch c.Bootloader {
 	case "grub":
-		efi_files = append(efi_files, `/boot/EFI/GRUB/grubx64.efi`)
+		efi_files = append(efi_files, `/boot/EFI/ArchLinux/grubx64.efi`)
 	case "systemd-boot":
+		efi_files = append(efi_files, `/boot/EFI/BOOT/BOOTX64.EFI`)
+		efi_files = append(efi_files, fmt.Sprintf(`/boot/Linux/linux-%v`, c.Kernel))
 		efi_files = append(efi_files, `/boot/EFI/systemd/systemd-bootx64.efi`)
 	}
+
+	efi_files = append(efi_files, fmt.Sprintf(`linux /vmlinuz-%v`, c.Kernel))
 
 	switch sb_status.SetupMode {
 	case "Enabled":
@@ -1201,6 +1201,4 @@ func SetupSecureBoot(c *conf.Config) {
 	// To-do:
 	// - Add post-install hook for kernel upgrades and auto-signing
 	// - Add DKMS Kernel Module Signing
-	// - Add function to detect TPM
-	// - Save encryption key to TPM if LUKS is enabled for Bitlocker-like experience
 }
