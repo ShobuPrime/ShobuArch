@@ -1159,7 +1159,7 @@ func SetupSecureBoot(c *conf.Config) {
 		efi_files = append(efi_files, `/boot/EFI/systemd/systemd-bootx64.efi`)
 	}
 
-	efi_files = append(efi_files, fmt.Sprintf(`linux /vmlinuz-%v`, c.Kernel))
+	efi_files = append(efi_files, fmt.Sprintf(`/boot/vmlinuz-%v`, c.Kernel))
 
 	switch sb_status.SetupMode {
 	case "Enabled":

@@ -367,6 +367,54 @@ func UserAutostart(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
+	for i := range c.Pacman.Packages {
+		switch c.Pacman.Packages[i] {
+		case "keepassxc":
+			log.Println(`Creating autostart for KeePassXC`)
+			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
+			autostart_file := "org.keepassxc.KeePassXC.desktop"
+			autostart_contents := []string{
+				`[Desktop Entry]`,
+				`Name=KeePassXC`,
+				`GenericName=Password Manager`,
+				`Exec=/usr/bin/keepassxc`,
+				`TryExec=/usr/bin/keepassxc`,
+				`Icon=keepassxc`,
+				`StartupWMClass=keepassxc`,
+				`StartupNotify=true`,
+				`Terminal=false`,
+				`Type=Application`,
+				`Version=1.0`,
+				`Categories=Utility;Security;Qt;`,
+				`MimeType=application/x-keepass2;`,
+				`X-GNOME-Autostart-enabled=true`,
+				`X-GNOME-Autostart-Delay=2`,
+				`X-KDE-autostart-after=panel`,
+				`X-LXQt-Need-Tray=true`,
+			}
+			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite			
+		}
+	}
+
+	for i := range c.Pacman.AUR.Packages {
+		switch c.Pacman.AUR.Packages[i] {
+		case "enpass":
+			log.Println(`Creating autostart for Enpass`)
+			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
+			autostart_file := "Enpass.desktop"
+			autostart_contents := []string{
+				`[Desktop Entry]`,
+				`Type=Application`,
+				`Name=Enpass`,
+				`Exec= /opt/enpass/Enpass -minimize`,
+				`Icon=enpass.png`,
+				`Comment=The best password manager`,
+				`X-GNOME-Autostart-Delay=12`,
+				`X-GNOME-Autostart-enabled=true`,
+			}
+			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+		}
+	}
 }
 
 func UserShell(c *conf.Config) {
