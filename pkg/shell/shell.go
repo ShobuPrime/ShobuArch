@@ -23,6 +23,7 @@ import (
 	"io"
 	"log"
 	"os/exec"
+	"strings"
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
 )
@@ -172,8 +173,8 @@ func Systemd_nspawn(cmd_args *[]string, boot bool, c *conf.Config) string {
 	scanner := bufio.NewScanner(combined_output)
 	for scanner.Scan() {
 		m := scanner.Text()
-		output_log += m + "\n"
-		log.Printf("%s\n", m)
+		output_log += strings.TrimSpace(m) + "\n"
+		log.Printf("%s\n", strings.TrimSpace(m))
 	}
 
 	err = program.Wait()

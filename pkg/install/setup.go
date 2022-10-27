@@ -866,7 +866,7 @@ func SetupFlatpaks(c *conf.Config) {
 	log.Println("Compiling Flatpak commands...")
 	fp_install_cmd := `sudo flatpak install --assumeyes flathub`
 	fp_override_cmd := `sudo flatpak override`
-	cmd_list := []string{}
+	cmd_list := []string{`sleep 3`}
 	for i := range c.Flatpak.Packages {
 		cmd_list = append(cmd_list, fmt.Sprintf(`%s %s`, fp_install_cmd, c.Flatpak.Packages[i]))
 
@@ -954,8 +954,8 @@ func SetupFlatpaks(c *conf.Config) {
 	u.WriteFile(&systemd_autorun_dir, &flatpak_script, &cmd_list, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 	
 	log.Println("Making executable")
-	cmd := []string{`chmod`, `+x`, filepath.Join(systemd_autorun_dir, flatpak_script)}
-	z.Arch_chroot(&cmd, false, c)
+	cmd := fmt.Sprintf(`chmod +x %v`, filepath.Join(systemd_autorun_dir, flatpak_script))
+	z.Shell(&cmd)
 
 	log.Println("Installing Flatpaks via systemd-nspawn")
 	z.Systemd_nspawn(&[]string{}, true, c)
@@ -1155,7 +1155,7 @@ func SetupSecureBoot(c *conf.Config) {
 		efi_files = append(efi_files, `/boot/EFI/ArchLinux/grubx64.efi`)
 	case "systemd-boot":
 		efi_files = append(efi_files, `/boot/EFI/BOOT/BOOTX64.EFI`)
-		efi_files = append(efi_files, fmt.Sprintf(`/boot/Linux/linux-%v`, c.Kernel))
+		efi_files = append(efi_files, fmt.Sprintf(`/boot/Linux/linux-%v.efi`, c.Kernel))
 		efi_files = append(efi_files, `/boot/EFI/systemd/systemd-bootx64.efi`)
 	}
 
