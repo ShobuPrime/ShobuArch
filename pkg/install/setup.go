@@ -1155,7 +1155,7 @@ func SetupSecureBoot(c *conf.Config) {
 		efi_files = append(efi_files, `/boot/EFI/ArchLinux/grubx64.efi`)
 	case "systemd-boot":
 		efi_files = append(efi_files, `/boot/EFI/BOOT/BOOTX64.EFI`)
-		efi_files = append(efi_files, fmt.Sprintf(`/boot/Linux/linux-%v.efi`, c.Kernel))
+		efi_files = append(efi_files, fmt.Sprintf(`/boot/EFI/Linux/linux-%v.efi`, c.Kernel))
 		efi_files = append(efi_files, `/boot/EFI/systemd/systemd-bootx64.efi`)
 	}
 
