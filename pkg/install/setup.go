@@ -940,6 +940,14 @@ func SetupFlatpaks(c *conf.Config) {
 				`X-KDE-Username=`,
 			}
 			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+		case "com.usebottles.bottles":
+			log.Println("Bottles Flatpak detected!")
+			log.Println("Adding permissionns for Desktop/Steam Entries")
+
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=xdg-data/applications`, fp_override_cmd, c.Flatpak.Packages[i]))
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.local/share/Steam`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.var/app/com.valvesoftware.Steam/data/Steam`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/Applications`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
 		}
 	}
 	log.Println("Appending systemd-nspawn 'Get out of Jail for free' command")

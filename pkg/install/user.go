@@ -19,6 +19,7 @@ package install
 
 import (
 	"encoding/base64"
+	"encoding/json"
 	"fmt"
 	"log"
 	"os"
@@ -262,21 +263,47 @@ func UserPWAs(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	cmd_list := []string{`firefoxpwa`, `site`, `install`}
+
+	cmd_list := []string{}
+
+	pwa_struct := &u.FIREFOX_PWA{}
+
+	log.Println("Configuring separate profiles for each PWA...")
+	create_profile := []string{`firefoxpwa`, `profile`, `create`, `--name`}
 
 	for i := range c.PWA.Sites {
-		cmd_list = append(cmd_list,
-			fmt.Sprintf(`%s/%s`, c.PWA.Sites[i].StartUrl, c.PWA.Sites[i].Manifest),
-			`--start-url`,
-			c.PWA.Sites[i].StartUrl,
-			`--name`,
-			c.PWA.Sites[i].Name,
-			`--description`,
-			c.PWA.Sites[i].Description,
-		)
+		cmd_list = append(create_profile, c.PWA.Sites[i].Name)
+		z.Arch_chroot(&cmd_list, true, c)
 	}
 
-	z.Arch_chroot(&cmd_list, true, c)
+	log.Println("Reading PWA Config...")
+	pwa_path := filepath.Join("/", "mnt", "home", c.User.Username, ".local", "share", "firefoxpwa")
+	pwa_file := `config.json`
+	firefoxpwa_config := u.ReadFile(&pwa_path, &pwa_file)
+
+	_ = json.Unmarshal([]byte(strings.Join(*firefoxpwa_config, "\n")), pwa_struct)
+	log.Println(u.PrettyJson(pwa_struct))
+
+	log.Println("Installing PWAs into their respective profiles...")
+	for _, profile := range pwa_struct.Profiles {
+		cmd_list = []string{`firefoxpwa`, `site`, `install`}
+		for i := range c.PWA.Sites {
+			if profile.Name == c.PWA.Sites[i].Name {
+				cmd_list = append(cmd_list,
+					fmt.Sprintf(`%s/%s`, c.PWA.Sites[i].StartUrl, c.PWA.Sites[i].Manifest),
+					`--start-url`,
+					c.PWA.Sites[i].StartUrl,
+					`--name`,
+					c.PWA.Sites[i].Name,
+					`--description`,
+					c.PWA.Sites[i].Description,
+					`--profile`,
+					profile.Ulid,
+				)
+			}
+		}
+		z.Arch_chroot(&cmd_list, true, c)
+	}
 }
 
 func UserVariables(c *conf.Config) {
@@ -413,6 +440,49 @@ func UserAutostart(c *conf.Config) {
 				`X-GNOME-Autostart-enabled=true`,
 			}
 			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+		}
+	}
+}
+
+func UserDotFiles(c *conf.Config) {
+	log.Println(`
+	-------------------------------------------------------------------------
+                    Configuring User DotFiles
+	-------------------------------------------------------------------------
+	`)
+
+	for i := range c.Pacman.AUR.Packages {
+		switch c.Pacman.AUR.Packages[i] {
+		case "code":
+			log.Println(`Creating config for VSCode...`)
+			code_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "Code - OSS", "User")
+			code_file := "settings.json"
+			code_contents := []string{
+				`{`,
+				`	"files.autoSave": "afterDelay",`,
+				`	"go.toolsManagement.autoUpdate": true,`,
+				`	"git.autofetch": true,`,
+				`	"launch": {`,
+				`		"configurations": [`,
+				`			{`,
+				`				"name": "Launch Package",`,
+				`				"type": "go",`,
+				`				"request": "launch",`,
+				`				"mode": "auto",`,
+				`				"program": "${fileDirname}",`,
+				`				"console": "integratedTerminal"`,
+				`			},`,
+				`		],`,
+				`		"compounds": []`,
+				`	},`,
+				`	"debug.allowBreakpointsEverywhere": true,`,
+				`	"git.confirmSync": false,`,
+				`	"git.enableSmartCommit": true,`,
+				`	"diffEditor.ignoreTrimWhitespace": false,`,
+				`}`,
+
+			}
+			u.WriteFile(&code_dir, &code_file, &code_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 		}
 	}
 }

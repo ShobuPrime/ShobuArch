@@ -18,11 +18,11 @@
 package main
 
 import (
-	"fmt"
+	//"fmt"
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
 	//i "github.com/ShobuPrime/ShobuArch/pkg/install"
-	u "github.com/ShobuPrime/ShobuArch/pkg/util"
+	//u "github.com/ShobuPrime/ShobuArch/pkg/util"
 )
 
 func debug() {
@@ -77,10 +77,16 @@ func debug() {
 		PWA: conf.PWAs{
 			Sites: []conf.Site{
 				{
-					Name:        "",
-					Description: "",
-					StartUrl:    "",
-					Manifest:    "",
+					Name:        "Messages",
+					Description: "Simple, helpful messaging by Google",
+					StartUrl:    "https://messages.google.com/web",
+					Manifest:    "manifest.json",
+				},
+				{
+					Name:        "YouTube",
+					Description: "Share your videos with friends, family, and the world.",
+					StartUrl:    "https://www.youtube.com",
+					Manifest:    "manifest.webmanifest",
 				},
 			},
 		},
@@ -90,7 +96,8 @@ func debug() {
 
 	// Call functions you would like to test
 	// i.SetupBiometrics(&cdb)
-	fmt.Println(u.PrettyJson(u.ListUSB()))
-	fmt.Println(u.PrettyJson(u.ListPCI()))
-	fmt.Println(u.PrettyJson(u.SecureBootStatus()))
+	// fmt.Println(u.PrettyJson(u.ListUSB()))
+	// fmt.Println(u.PrettyJson(u.ListPCI()))
+	// fmt.Println(u.PrettyJson(u.SecureBootStatus()))
+	// i.UserPWAs(&cdb)
 }

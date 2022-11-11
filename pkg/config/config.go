@@ -107,7 +107,7 @@ type PWAs struct {
 type Site struct {
 	Name        string `json:"name" yaml:"name"`
 	Description string `json:"description" yaml:"description"`
-	StartUrl    string `json:"start_url" yaml:"start_url"`
+	StartUrl    string `json:"start_url,omitempty" yaml:"start_url,omitempty"`
 	Manifest    string `json:"manifest" yaml:"manifest"`
 }
 
