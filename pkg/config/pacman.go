@@ -34,7 +34,7 @@ func BasePkgs(c *Config) {
 		"flatpak",                // Sandboxed desktop applications on Linux.
 		"fwupd",                  // Daemon to update some devices' firmware
 		"go",                     // Core compiler tools for the Go programming language
-		"keepassxc",              // Cross-platform community-driven port of Keepass password manager
+		//"keepassxc",            // Cross-platform community-driven port of Keepass password manager
 		"libdbusmenu-glib",       // Library for passing menus over DBus
 		"lib32-pipewire",         // Low-latency audio/video router and processor -- 32bit
 		"lib32-pipewire-jack",    // Pipewire JACK support -- 32bit
@@ -513,7 +513,7 @@ func AUR(c *Config) {
 			"polychromatic",               // RGB management GUI for Razer Devices
 			"razer-nari-pipewire-profile", // Razer Nari headsets pipewire profile
 			"sddm-sugar-dark",             // "Sweetest" Dark theme for SDDM
-			"system-monitoring-center",    // Windows Task Manager Clone
+			//"system-monitoring-center",  // Windows Task Manager Clone
 		)
 
 		switch c.Storage.Filesystem {
@@ -533,43 +533,45 @@ func Flatpak(c *Config) {
 	case "MINIMAL":
 	case "FULL":
 		c.Flatpak.Packages = append(c.Flatpak.Packages,
-			"com.belmoussaoui.Obfuscate",        // Censor private information from images
-			//"com.brave.Browser",               // Web browser from Brave
-			"com.microsoft.Edge",                // Microsoft Edge Chromium Browser
-			"com.getmailspring.Mailspring",      // Email client
-			"com.github.alainm23.planner",       // Never worry about forgetting things again
-			"com.github.liferooter.textpieces",  // Transform text without random websites
-			"com.github.tchx84.Flatseal",        // Manage Flatpak permissions
-			"com.gitlab.bitseater.meteo",        // Weather forecast app
-			"com.github.wwmm.easyeffects",       // Audio Effects for PipeWire Applications
-			//"com.obsproject.Studio",           // Live streaming and video recording software
-			"com.steamgriddb.steam-rom-manager", // Manage ROMs in Steam
-			"com.snes9x.Snes9x",                 // Super Nintendo Emulator
-			"com.stepmania.StepMania",           // Rhythm and Dance Game (DDR for PC)
-			"com.synology.SynologyDrive",        // Powerful private cloud storage with no recurring fees
-			"com.usebottles.bottles",            // Sandox Windows Applications in Linux
-			"im.riot.Riot",                      // Element -- Matrix Chat Client
-			"io.github.antimicrox.antimicrox",   // Map gamepad buttons
-			"io.github.peazip.PeaZip",           // File Archiver Utility (RAR, TAR, ZIP)
-			"io.github.simple64.simple64",       // Nintendo 64 Emulator
-			"io.github.seadve.Kooha",            // Record your screen
-			"io.mgba.mGBA",                      // Nintendo Game Boy Advance Emulator
-			"net.davidotek.pupgui2",             // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
-			"net.filebot.FileBot",               // Ultimate TV and Movie Renamer
-			"net.kuribo64.melonDS",              // Nintendo DS and DSi emulator
-			"net.pcsx2.PCSX2",                   // Playstation 2 emulator
-			"org.citra_emu.citra",               // Nintendo 3DS emulator
-			"org.DolphinEmu.dolphin-emu",        // Nintendo GameCube and Wii emulator
-			"org.gnome.Firmware",                // Install firmware on devices
-			//"org.gnome.Maps",                  // Find places around the world
-			"org.libreoffice.LibreOffice",       // LibreOffice productivity suite
-			"org.libretro.RetroArch",            // Frontend for emulators, game engines and media players
-			"org.mixxx.Mixxx",                   // DJ Mixing software (Traktor alternative)
-			"org.mozilla.Thunderbird",           // Email, RSS, and newsgroup client with integrated spam filter
-			//"org.onlyoffice.desktopeditors",   // OnlyOffice productivity suite
-			"org.ppsspp.PPSSPP",                 // PlayStation Portable emulator
-			"org.yuzu_emu.yuzu",                 // Nintendo Switch emulator
-			"tv.plex.PlexDesktop",               // Plex Client for desktop computers
+			"com.belmoussaoui.Obfuscate",                             // Censor private information from images
+			//"com.brave.Browser",                                    // Web browser from Brave
+			"com.microsoft.Edge",                                     // Microsoft Edge Chromium Browser
+			"com.getmailspring.Mailspring",                           // Email client
+			"com.github.alainm23.planner",                            // Never worry about forgetting things again
+			"com.github.liferooter.textpieces",                       // Transform text without random websites
+			"com.github.tchx84.Flatseal",                             // Manage Flatpak permissions
+			"com.gitlab.bitseater.meteo",                             // Weather forecast app
+			"com.github.wwmm.easyeffects",                            // Audio Effects for PipeWire Applications
+			//"com.obsproject.Studio",                                // Live streaming and video recording software
+			"com.steamgriddb.steam-rom-manager",                      // Manage ROMs in Steam
+			"com.snes9x.Snes9x",                                      // Super Nintendo Emulator
+			"com.stepmania.StepMania",                                // Rhythm and Dance Game (DDR for PC)
+			"com.synology.SynologyDrive",                             // Powerful private cloud storage with no recurring fees
+			"com.usebottles.bottles",                                 // Sandox Windows Applications in Linux
+			"im.riot.Riot",                                           // Element -- Matrix Chat Client
+			"io.github.antimicrox.antimicrox",                        // Map gamepad buttons
+			"io.github.hakandundar34coding.system-monitoring-center", // Multi-featured system monitor
+			"io.github.peazip.PeaZip",                                // File Archiver Utility (RAR, TAR, ZIP)
+			"io.github.simple64.simple64",                            // Nintendo 64 Emulator
+			"io.github.seadve.Kooha",                                 // Record your screen
+			"io.mgba.mGBA",                                           // Nintendo Game Boy Advance Emulator
+			"net.davidotek.pupgui2",                                  // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
+			"net.filebot.FileBot",                                    // Ultimate TV and Movie Renamer
+			"net.kuribo64.melonDS",                                   // Nintendo DS and DSi emulator
+			"net.pcsx2.PCSX2",                                        // Playstation 2 emulator
+			"org.citra_emu.citra",                                    // Nintendo 3DS emulator
+			"org.DolphinEmu.dolphin-emu",                             // Nintendo GameCube and Wii emulator
+			"org.gimp.GIMP",                                          // Create images and edit photographs
+			"org.gnome.Firmware",                                     // Install firmware on devices
+			//"org.gnome.Maps",                                       // Find places around the world
+			"org.libreoffice.LibreOffice",                            // LibreOffice productivity suite
+			"org.libretro.RetroArch",                                 // Frontend for emulators, game engines and media players
+			"org.mixxx.Mixxx",                                        // DJ Mixing software (Traktor alternative)
+			"org.mozilla.Thunderbird",                                // Email, RSS, and newsgroup client with integrated spam filter
+			//"org.onlyoffice.desktopeditors",                        // OnlyOffice productivity suite
+			"org.ppsspp.PPSSPP",                                      // PlayStation Portable emulator
+			"org.yuzu_emu.yuzu",                                      // Nintendo Switch emulator
+			"tv.plex.PlexDesktop",                                    // Plex Client for desktop computers
 		)
 	}
 
@@ -577,6 +579,15 @@ func Flatpak(c *Config) {
 }
 
 func PWA(c *Config) {
+
+	messages := Site{
+		Name: "Messages",
+		Description: "Simple, helpful messaging by Google",
+		StartUrl: "https://messages.google.com/web",
+		Manifest: "manifest.json",
+	}
+
+	c.PWA.Sites = append(c.PWA.Sites, messages)
 
 	youtube := Site{
 		Name:        "YouTube",
