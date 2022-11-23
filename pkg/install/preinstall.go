@@ -53,6 +53,10 @@ func Prerequisites(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
+	// Fix the following -- pacman: error while loading shared libraries: libcrypto.so.1.1: cannot open shared object file: No such file or directory
+	ssl_fix := `pacman -S --noconfirm openssl-1.1`
+	z.Shell(&ssl_fix)
+
 	prereqs := `pacman -Syy --noconfirm --needed btrfs-progs glibc gptfdisk sbctl sed sudo`
 	z.Shell(&prereqs)
 }
@@ -276,8 +280,9 @@ func ArchInstall(c *conf.Config) {
 
 	cmd_list := []string{}
 
+	// Temp: Adding openssl-1.1 to fix libcrypto.so.1.1 error
 	cmd_list = append(cmd_list,
-		fmt.Sprintf(`pacstrap /mnt --noconfirm --needed archlinux-keyring base base-devel dkms libnewt %s linux-firmware %s-docs %s-headers nano packagekit sbctl sed sudo vim sudo wget`, c.Kernel, c.Kernel, c.Kernel),
+		fmt.Sprintf(`pacstrap /mnt --noconfirm --needed archlinux-keyring base base-devel dkms libnewt %s linux-firmware %s-docs %s-headers nano openssl-1.1 packagekit sbctl sed sudo vim sudo wget`, c.Kernel, c.Kernel, c.Kernel),
 		`echo "keyserver hkp://keyserver.ubuntu.com" >> /mnt/etc/pacman.d/gnupg/gpg.conf`,
 		`cp /etc/pacman.d/mirrorlist /mnt/etc/pacman.d/mirrorlist`,
 	)
