@@ -176,6 +176,7 @@ func user(c *conf.Config) {
 	i.UserKeyring(c)
 	i.UserPWAs(c)
 	i.UserVariables(c)
+	i.UserDotFiles(c)
 	i.UserShell(c)
 	clear()
 

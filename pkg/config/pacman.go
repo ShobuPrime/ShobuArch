@@ -20,6 +20,7 @@ package config
 func BasePkgs(c *Config) {
 
 	c.Pacman.Packages = append(c.Pacman.Packages,
+		"apparmor",               // Mandatory Access Control (MAC) using Linux Security Module (LSM)
 		"cockpit",                // A systemd web based user interface for Linux servers
 		"cockpit-machines",       // Cockpit UI for virtual machines
 		"cockpit-packagekit",     // Packages UI for Cockpit
