@@ -18,11 +18,11 @@
 package main
 
 import (
-	//"fmt"
+	"fmt"
 
 	conf "github.com/ShobuPrime/ShobuArch/pkg/config"
-	//i "github.com/ShobuPrime/ShobuArch/pkg/install"
-	//u "github.com/ShobuPrime/ShobuArch/pkg/util"
+	// i "github.com/ShobuPrime/ShobuArch/pkg/install"
+	u "github.com/ShobuPrime/ShobuArch/pkg/util"
 )
 
 func debug() {
@@ -95,8 +95,9 @@ func debug() {
 	_ = cdb
 
 	// Call functions you would like to test
+	fmt.Println(u.PrettyJson(u.ListUSB()))
+	// u.BiometricIDs()
 	// i.SetupBiometrics(&cdb)
-	// fmt.Println(u.PrettyJson(u.ListUSB()))
 	// fmt.Println(u.PrettyJson(u.ListPCI()))
 	// fmt.Println(u.PrettyJson(u.SecureBootStatus()))
 	// i.UserPWAs(&cdb)

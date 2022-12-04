@@ -113,7 +113,7 @@ func SetupNetwork(c *conf.Config) {
 func SetupMirrors(c *conf.Config) {
 	log.Println(`
 	-------------------------------------------------------------------------
-			Setting up mirrors for optimal download 
+			Setting up mirrors for optimal download
 	-------------------------------------------------------------------------
 	`)
 
@@ -316,7 +316,7 @@ func SetupCustomRepos(c *conf.Config) {
 
 	log.Println(`
 	-------------------------------------------------------------------------
-			Setting up custom repositories 
+			Setting up custom repositories
 	-------------------------------------------------------------------------
 	`)
 
@@ -430,7 +430,7 @@ func SetupProcessor(c *conf.Config) {
 			module_contents := []string{
 				`options amd_pstate replace=1`,
 			}
-		
+
 			log.Printf(`Creating %q...`, module_config)
 			u.WriteFile(&module_dir, &module_config, &module_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
@@ -523,6 +523,10 @@ func SetupBiometrics(c *conf.Config) {
 	// 	}
 	// }
 
+	udev_rule_dir := filepath.Join("/", "mnt", "etc", "udev", "rules.d")
+	u2f_udev_file := "70-u2f.rules"
+	udev_rules := []string{`ACTION!="add|change", GOTO="fido_end"`}
+
 	for i := range usb.USBDevices {
 
 		if strings.Contains(usb.USBDevices[i].Description, `Camera`) {
@@ -607,9 +611,34 @@ func SetupBiometrics(c *conf.Config) {
 				}
 				log.Printf(`Adding fprint PAM Authentication for "%q"`, pam_modules[i])
 				u.WriteFile(&pam_module_dir, &pam_file, &pam_module, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+				u.ReadFile(&pam_module_dir, &pam_file)
 			}
 		}
+
+		for j := range bio.SecurityKey {
+			if usb.USBDevices[i].ID == bio.SecurityKey[j] {
+				log.Println(`fido compatible device found: `, usb.USBDevices[i].ID)
+				cmd = append(cmd, `libfido2`, `pam-u2f`)
+			}
+
+			// To-do:
+			// - Add FIDO PAM Authentication modules
+		}
 	}
+	z.Arch_chroot(&cmd, false, c)
+
+	log.Println(`Adding udev rules for FIDO U2F`)
+	// Examples:
+	// https://github.com/Yubico/libfido2/blob/main/udev/70-u2f.rules
+	// https://www.trustkeysolutions.com/support/
+	for i := range bio.SecurityKey {
+		udev_rules = append(udev_rules, ``,
+			fmt.Sprintf(`KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="%s", ATTRS{idProduct}=="%s", TAG+="uaccess", GROUP="plugdev", MODE="0660"`, strings.Split(bio.SecurityKey[i], ":")[0], strings.Split(bio.SecurityKey[i], ":")[1]),
+		)
+	}
+	udev_rules = append(udev_rules,``, `LABEL="fido_end"`)
+	u.WriteFile(&udev_rule_dir, &u2f_udev_file, &udev_rules, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
+	u.ReadFile(&udev_rule_dir, &u2f_udev_file)
 
 	// To-do:
 	// - Add more scalable way to handle a "sed-like" implementation in Go.

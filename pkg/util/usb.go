@@ -18,6 +18,7 @@
 package util
 
 import (
+	"fmt"
 	"os/exec"
 	"strings"
 )
@@ -66,4 +67,14 @@ func PCIUSB(lsusb *string) *LSUSB {
 	}
 
 	return usb_struct
+}
+
+func CombineIDs(vendor_id *string, products *[]string, ids *[]string) {
+
+	for _, product_id := range (*products) {
+		(*ids) = append(
+			(*ids),
+			fmt.Sprintf(`%s:%s`, (*vendor_id), product_id),
+		)
+	}
 }

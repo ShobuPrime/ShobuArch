@@ -20,6 +20,7 @@ package util
 type BioSupportedDevices struct {
 	Face        []string
 	Fingerprint []string
+	SecurityKey []string
 }
 
 func BiometricIDs() *BioSupportedDevices {
@@ -32,6 +33,7 @@ func BiometricIDs() *BioSupportedDevices {
 		`04f2:b6d0`,
 	}
 
+	// List of libfprint supported devices: https://fprint.freedesktop.org/supported-devices.html
 	bsd.Fingerprint = []string{
 		`045e:00bb`,
 		`045e:00bc`,
@@ -204,6 +206,203 @@ func BiometricIDs() *BioSupportedDevices {
 		`27c6:6a94`,
 		`298d:1010`,
 		`5501:08ff`,
+	}
+
+	// List of FIDO devs: https://github.com/Yubico/libfido2/blob/main/udev/fidodevs
+	fido_vendors := map[string]string{
+		"STMicro":     `0483`, // STMicroelectronics
+		"Infineon":    `058b`, // Infineon Technologies
+		"Synaptics":   `06cb`, // Synaptics Inc.
+		"Feitian":     `096e`, // Feitian Technologies Co., Ltd.
+		"Yubico":      `1050`, // Yubico AB
+		"Silicon":     `10c4`, // Silicon Laboratories, Inc.
+		"pid.codes":   `1209`, // pid.codes
+		"Google":      `18d1`, // Google Inc.
+		"VASCO":       `1a44`, // VASCO Data Security NV
+		"OpenMoko":    `1d50`, // OpenMoko, Inc.
+		"NEOWAVE":     `1e0d`, // NEOWAVE
+		"Excelsecu":   `1ea8`, // Shenzhen Excelsecu Data Technology Co., Ltd
+		"NXP":         `1fc9`, // NXP Semiconductors
+		"ClayLogic":   `20a0`, // Clay Logic
+		"Aladdin":     `24dc`, // Aladdin Software Security R.D.
+		"Plug‐up":     `2581`, // Plug‐up
+		"Bluink":      `2abe`, // Bluink Ltd
+		"LEDGER":      `2c97`, // LEDGER
+		"Hypersecu":   `2ccf`, // Hypersecu Information Systems, Inc.
+		"eWBM":        `311f`, // eWBM Co., Ltd. (TrustKey)
+		"GoTrustID":   `32a3`, // GoTrustID Inc.
+		"Unknown":     `4c4d`, // Unknown vendor
+		"SatoshiLabs": `534c`, // SatoshiLabs
+	}
+
+	for vendor, id := range fido_vendors {
+
+		switch vendor {
+		case "STMicro":
+			products := []string{
+				`a2ac`, // ellipticSecure MIRKey
+				`a2ca`, // Unknown product
+				`cdab`, // Unknown product
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Infineon":
+			products := []string{
+				`022d`, // Infineon FIDO
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Synaptics":
+			products := []string{
+				`0088`, // Kensington Verimark
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Feitian":
+			products := []string{
+				`0850`, // FS ePass FIDO
+				`0852`, // Unknown product
+				`0853`, // Unknown product
+				`0854`, // Unknown product
+				`0856`, // Unknown product
+				`0858`, // Unknown product
+				`085a`, // FS MultiPass FIDO U2F
+				`085b`, // Unknown product
+				`085d`, // Unknown product
+				`0866`, // BioPass FIDO2 K33
+				`0867`, // BioPass FIDO2 K43
+				`0880`, // Hypersecu HyperFIDO
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Yubico":
+			products := []string{
+				`0113`, // YubiKey NEO FIDO
+				`0114`, // YubiKey NEO OTP+FIDO
+				`0115`, // YubiKey NEO FIDO+CCID
+				`0116`, // YubiKey NEO OTP+FIDO+CCID
+				`0120`, // Security Key by Yubico
+				`0121`, // Unknown product
+				`0200`, // Gnubby U2F
+				`0402`, // YubiKey 4 FIDO
+				`0403`, // YubiKey 4 OTP+FIDO
+				`0406`, // YubiKey 4 FIDO+CCID
+				`0407`, // YubiKey 4 OTP+FIDO+CCID
+				`0410`, // YubiKey Plus
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Silicon":
+			products := []string{
+				`8acf`, // U2F Zero
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "pid.codes":
+			products := []string{
+				`5070`, // SoloKeys SoloHacker
+				`50b0`, // SoloKeys SoloBoot
+				`53c1`, // SatoshiLabs TREZOR
+				`beee`, // SoloKeys v2
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Google":
+			products := []string{
+				`5026`, // Google Titan U2F
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "VASCO":
+			products := []string{
+				`00bb`, // VASCO SecureClick
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "OpenMoko":
+			products := []string{
+				`60fc`, // OnlyKey (FIDO2/U2F)
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "NEOWAVE":
+			products := []string{
+				`f1ae`, // Neowave Keydo AES
+				`f1d0`, // Neowave Keydo
+
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Excelsecu":
+			products := []string{
+				`f025`, // Thethis Key
+				`fc25`, // ExcelSecu FIDO2 Security Key
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "NXP":
+			products := []string{
+				`f143`, // GoTrust Idem Key
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "ClayLogic":
+			products := []string{
+				`4287`, // Nitrokey FIDO U2F
+				`42b1`, // Nitrokey FIDO2
+				`42b2`, // Nitrokey 3C NFC
+				`42b3`, // Safetech SafeKey
+				`42d4`, // CanoKey
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Alladdin":
+			products := []string{
+				`0101`, // JaCarta U2F
+				`0501`, // JaCarta U2F
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Plug-up":
+			products := []string{
+				`f1d0`, // Happlink Security Key
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Bluink":
+			products := []string{
+				`1002`, // Bluink Key
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "LEDGER":
+			products := []string{
+				`0000`, // Ledger Blue
+				`0001`, // Ledger Nano S Old firmware
+				`0004`, // Ledger Nano X Old firmware
+				`0011`, // Ledger Blue
+				`0015`, // Ledger Blue Legacy
+				`1011`, // Ledger Nano S
+				`1015`, // Ledger Nano S Legacy
+				`4011`, // Ledger Nano X
+				`4015`, // Ledger Nano X Legacy
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "HyperSecu":
+			products := []string{
+				`0880`, // Hypersecu HyperFIDO
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "eWBM":
+			products := []string{
+				`4a2a`, // TrustKey Solutions FIDO2 G310H/G320H
+				`4a1a`, // TrustKey Solutions FIDO2 G310
+				`4c2a`, // TrustKey Solutions FIDO2 G320
+				`5c2f`, // eWBM FIDO2 Goldengate G500
+				`a6e9`, // TrustKey Solutions FIDO2 T120
+				`a7f9`, // TrustKey Solutions FIDO2 T110
+				`f47c`, // eWBM FIDO2 Goldengate G450
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "GoTrust":
+			products := []string{
+				`3201`, // Idem Key
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "Unknown":
+			products := []string{
+				`f703`, // Longmai mFIDO
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		case "SatoshiLabs":
+			products := []string{
+				`0001`, // SatoshiLabs TREZOR
+			}
+			CombineIDs(&id, &products, &bsd.SecurityKey)
+		}
 	}
 
 	return bsd
