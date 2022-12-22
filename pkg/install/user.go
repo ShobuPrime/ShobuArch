@@ -263,7 +263,6 @@ func UserPWAs(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-
 	cmd_list := []string{}
 
 	pwa_struct := &u.FIREFOX_PWA{}
@@ -332,7 +331,6 @@ func UserVariables(c *conf.Config) {
 
 	log.Println(`Creating "environment.conf"`)
 	u.WriteFile(&environment_dir, &environment_config, &config_settings, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-
 
 	log.Println("Configuring Electron")
 
@@ -419,7 +417,7 @@ func UserAutostart(c *conf.Config) {
 				`X-KDE-autostart-after=panel`,
 				`X-LXQt-Need-Tray=true`,
 			}
-			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite			
+			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 		}
 	}
 
@@ -465,24 +463,46 @@ func UserDotFiles(c *conf.Config) {
 				`	"launch": {`,
 				`		"configurations": [`,
 				`			{`,
-				`				"name": "Launch Package",`,
+				`				"name": "Launch Go",`,
 				`				"type": "go",`,
 				`				"request": "launch",`,
 				`				"mode": "auto",`,
 				`				"program": "${fileDirname}",`,
 				`				"console": "integratedTerminal"`,
 				`			},`,
+				`			{`,
+				`				"name": "Launch Python",`,
+				`				"type": "python",`,
+				`				"request": "launch",`,
+				`				"program": "${file}",`,
+				`				"console": "integratedTerminal"`,
+				`			}`,
 				`		],`,
 				`		"compounds": []`,
 				`	},`,
 				`	"debug.allowBreakpointsEverywhere": true,`,
 				`	"git.confirmSync": false,`,
 				`	"git.enableSmartCommit": true,`,
-				`	"diffEditor.ignoreTrimWhitespace": false,`,
+				`	"go.formatTool": "gofmt",`,
+				`	"go.formatFlags": [`,
+				`		"[\"-s\", \"-w\"]"`,
+				`	],`,
+				`	"python.formatting.provider": "black",`,
+				`	"editor.formatOnSave": true,`,
 				`}`,
-
 			}
 			u.WriteFile(&code_dir, &code_file, &code_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+
+			code_dir = filepath.Join("/", "mnt", "home", c.User.Username, ".vscode-oss", "Code - OSS", "User")
+			code_file = "settings.json"
+
+			// This configuration file allows you to pass permanent command line arguments to VS Code.
+			// https://github.com/microsoft/vscode-python/issues/20247#issuecomment-1350342224`
+			code_contents = []string{
+				`{`,
+				`"enable-proposed-api": ["ms-python.python"]`,
+				`}`,
+			}
 		}
 	}
 }
@@ -494,6 +514,16 @@ func UserShell(c *conf.Config) {
                     Configuring User Shell
 	-------------------------------------------------------------------------
 	`)
+
+	log.Println(`Enforcing permissions`)
+	//os.Chown(filepath.Base(keepass_config), 1000, 1000)
+	cmd := []string{
+		`chown`,
+		`-R`,
+		fmt.Sprintf(`%s:%s`, c.User.Username, c.User.Username),
+		fmt.Sprintf(`/home/%s/`, c.User.Username),
+	}
+	z.Arch_chroot(&cmd, false, c)
 
 	// To-do: Add Shell Option during `Fresh Start`
 	// Hard-coding ZSH shell

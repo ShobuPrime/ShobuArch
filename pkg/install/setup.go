@@ -424,7 +424,7 @@ func SetupProcessor(c *conf.Config) {
 			cmd = append(cmd, `amd-ucode`)
 			z.Arch_chroot(&cmd, false, c)
 
-			module_dir := filepath.Join("/", "mnt", "etc", "modprobe.d",)
+			module_dir := filepath.Join("/", "mnt", "etc", "modprobe.d")
 			module_config := "amd.conf"
 
 			module_contents := []string{
@@ -636,7 +636,7 @@ func SetupBiometrics(c *conf.Config) {
 			fmt.Sprintf(`KERNEL=="hidraw*", SUBSYSTEM=="hidraw", ATTRS{idVendor}=="%s", ATTRS{idProduct}=="%s", TAG+="uaccess", GROUP="plugdev", MODE="0660"`, strings.Split(bio.SecurityKey[i], ":")[0], strings.Split(bio.SecurityKey[i], ":")[1]),
 		)
 	}
-	udev_rules = append(udev_rules,``, `LABEL="fido_end"`)
+	udev_rules = append(udev_rules, ``, `LABEL="fido_end"`)
 	u.WriteFile(&udev_rule_dir, &u2f_udev_file, &udev_rules, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755)
 	u.ReadFile(&udev_rule_dir, &u2f_udev_file)
 
@@ -989,7 +989,7 @@ func SetupFlatpaks(c *conf.Config) {
 		case "com.synology.SynologyDrive":
 			log.Println("Synology Drive Flatpak detected!")
 			log.Println("Configuring AutoStart for Synology Drive")
-			
+
 			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
 			autostart_file := "com.synology.SynologyDrive.desktop"
 			autostart_contents := []string{
@@ -1023,19 +1023,52 @@ func SetupFlatpaks(c *conf.Config) {
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.local/share/Steam`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.var/app/com.valvesoftware.Steam/data/Steam`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/Applications`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
+		case "org.keepassxc.KeePassXC":
+			log.Println("KeePassXC Flatpak detected!")
+			log.Println("Configuring AutoStart for KeePassXC")
+
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=xdg-data/applications`, fp_override_cmd, c.Flatpak.Packages[i]))
+			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
+			autostart_file := "org.keepassxc.KeePassXC.desktop"
+			autostart_contents := []string{
+				`[Desktop Entry]`,
+				`Comment[en_US]=`,
+				`Comment=`,
+				`Exec=flatpak run org.keepassxc.KeePassXC`,
+				`GenericName[en_US]=`,
+				`GenericName=`,
+				`Icon=org.keepassxc.KeePassXC`,
+				`MimeType=`,
+				`Name[en_US]=org.keepassxc.KeePassXC`,
+				`Name=org.keepassxc.KeePassXC`,
+				`Path=`,
+				`StartupNotify=true`,
+				`Terminal=false`,
+				`TerminalOptions=`,
+				`Type=Application`,
+				`X-DBUS-ServiceName=`,
+				`X-DBUS-StartupType=`,
+				`X-Flatpak=org.keepassxc.KeePassXC`,
+				`X-KDE-SubstituteUID=false`,
+				`X-KDE-Username=`,
+			}
+			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+
+			log.Println("Adding permissions for Freedesktop.org Secret Service Integration")
+			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --socket=session-bus`, fp_override_cmd, c.Flatpak.Packages[i]))
 		}
 	}
 	log.Println("Appending systemd-nspawn 'Get out of Jail for free' command")
 	cmd_list = append(cmd_list, `sudo poweroff`)
 
 	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container")
-	
+
 	systemd_autorun_dir := filepath.Join("/", "mnt", "etc", "profile.d")
 	flatpak_script := "install_flatpaks.sh"
 
 	log.Println(`Creating Flatpak script for systemd-nspawn container...`)
 	u.WriteFile(&systemd_autorun_dir, &flatpak_script, &cmd_list, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
-	
+
 	log.Println("Making executable")
 	cmd := fmt.Sprintf(`chmod +x %v`, filepath.Join(systemd_autorun_dir, flatpak_script))
 	z.Shell(&cmd)
@@ -1115,7 +1148,7 @@ func SetupEFI(c *conf.Config) {
 		for line := range *grub_contents {
 			switch {
 			case strings.HasPrefix((*grub_contents)[line], `GRUB_CMDLINE_LINUX=""`):
-				(*grub_contents)[line] = 
+				(*grub_contents)[line] =
 					fmt.Sprintf("GRUB_CMDLINE_LINUX=\"loglevel 3 video=1920x1080 %v\"", strings.Join(c.Parameters, " "))
 			case strings.HasPrefix((*grub_contents)[line], `#GRUB_ENABLE_CRYPTODISK=`):
 				switch c.Storage.Filesystem {

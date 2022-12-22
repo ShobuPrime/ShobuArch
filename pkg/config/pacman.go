@@ -42,7 +42,7 @@ func BasePkgs(c *Config) {
 		"lib32-pipewire-v4l2",    // Pipewire V4L2 interceptor -- 32bit
 		"networkmanager",         // Network connection manager and user applications
 		"network-manager-applet", // Applet for managing network connections
-		"obs-studio",             // Free, open source software for live streaming and recording
+		//"obs-studio",             // Free, open source software for live streaming and recording
 		"openssh",                // Premier connectivity tool for remote login with the SSH protocol
 		"os-prober",              // Utility to detect other OSes on a set of drives
 		"packagekit",             // A system designed to make installation and updates of packages easier
@@ -51,6 +51,9 @@ func BasePkgs(c *Config) {
 		"pipewire-jack",          // Pipewire JACK support
 		"pipewire-pulse",         // Pipewire PulseAudio replacement
 		"pipewire-v4l2",          // Pipewire V4L2 interceptor
+		"python",                 // Next generation of the python high-level scripting language
+		"python-black",           // Uncompromising Python code formatter
+		"python-pip",             // The PyPA recommended tool for installing Python packages
 		"qemu-full",              // A generic and open source machine emulator and virtualizer
 		"qpwgraph",               // PipeWire Graph Qt GUI Interface
 		"reflector",              // A Python 3 module and script to retrieve and filter the latest Pacman mirror list.
@@ -127,7 +130,6 @@ func KDE(c *Config) {
 			"kde-network-meta",            // KDE network applications
 			"kdebugsettings",              // Enable/disable qCDebug
 			"kdegraphics-thumbnailers",    // Thumbnailers for various graphics file formats
-			"kdenlive",                    // Non-linear video editor for Linux
 			"kdeplasma-addons",            // All kind of addons to improve your Plasma experience
 			"kdialog",                     // Display dialog boxes from shell scripts
 			"kdf",                         // View Disk Usage
@@ -543,13 +545,14 @@ func Flatpak(c *Config) {
 			"com.github.tchx84.Flatseal",                             // Manage Flatpak permissions
 			"com.gitlab.bitseater.meteo",                             // Weather forecast app
 			"com.github.wwmm.easyeffects",                            // Audio Effects for PipeWire Applications
-			//"com.obsproject.Studio",                                // Live streaming and video recording software
+			"com.obsproject.Studio",                                  // Live streaming and video recording software
 			"com.steamgriddb.steam-rom-manager",                      // Manage ROMs in Steam
 			"com.snes9x.Snes9x",                                      // Super Nintendo Emulator
 			"com.stepmania.StepMania",                                // Rhythm and Dance Game (DDR for PC)
 			"com.synology.SynologyDrive",                             // Powerful private cloud storage with no recurring fees
 			"com.usebottles.bottles",                                 // Sandox Windows Applications in Linux
 			"im.riot.Riot",                                           // Element -- Matrix Chat Client
+			"in.srev.guiscrcpy",                                      // Android Screen Mirroring Software
 			"io.github.antimicrox.antimicrox",                        // Map gamepad buttons
 			"io.github.hakandundar34coding.system-monitoring-center", // Multi-featured system monitor
 			"io.github.peazip.PeaZip",                                // File Archiver Utility (RAR, TAR, ZIP)
@@ -565,6 +568,8 @@ func Flatpak(c *Config) {
 			"org.gimp.GIMP",                                          // Create images and edit photographs
 			"org.gnome.Firmware",                                     // Install firmware on devices
 			//"org.gnome.Maps",                                       // Find places around the world
+			"org.kde.kdenlive",                                       // Non-linear video editor for Linux
+			//"org.keepassxc.KeePassXC",                              // Cross-platform community-driven port of Keepass password manager
 			"org.libreoffice.LibreOffice",                            // LibreOffice productivity suite
 			"org.libretro.RetroArch",                                 // Frontend for emulators, game engines and media players
 			"org.mixxx.Mixxx",                                        // DJ Mixing software (Traktor alternative)

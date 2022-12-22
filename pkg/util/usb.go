@@ -71,7 +71,7 @@ func PCIUSB(lsusb *string) *LSUSB {
 
 func CombineIDs(vendor_id *string, products *[]string, ids *[]string) {
 
-	for _, product_id := range (*products) {
+	for _, product_id := range *products {
 		(*ids) = append(
 			(*ids),
 			fmt.Sprintf(`%s:%s`, (*vendor_id), product_id),
