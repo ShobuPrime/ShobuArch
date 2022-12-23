@@ -22,6 +22,7 @@ import (
 	"log"
 	"os"
 	"path/filepath"
+	"regexp"
 	"runtime"
 	"strconv"
 	"strings"
@@ -416,23 +417,24 @@ func SetupProcessor(c *conf.Config) {
 	for i := range cpu.Processor {
 		switch cpu.Processor[i].Data {
 		case "GenuineIntel":
-			log.Printf("Detected CPU is: %q", cpu.Processor[i].Data)
+			log.Printf("Detected CPU is: %q\n", cpu.Processor[i].Data)
 			cmd = append(cmd, `intel-ucode`)
 			z.Arch_chroot(&cmd, false, c)
 		case "AuthenticAMD":
-			log.Printf("Detected CPU is: %q", cpu.Processor[i].Data)
+			log.Printf("Detected CPU is: %q\n", cpu.Processor[i].Data)
 			cmd = append(cmd, `amd-ucode`)
 			z.Arch_chroot(&cmd, false, c)
 
-			module_dir := filepath.Join("/", "mnt", "etc", "modprobe.d")
-			module_config := "amd.conf"
+			// Note: amd_pstate is now built into the kernel as of Kernel 6.1
+			// module_dir := filepath.Join("/", "mnt", "etc", "modprobe.d")
+			// module_config := "amd.conf"
 
-			module_contents := []string{
-				`options amd_pstate replace=1`,
-			}
+			// module_contents := []string{
+			// 	`options amd_pstate replace=1`,
+			// }
 
-			log.Printf(`Creating %q...`, module_config)
-			u.WriteFile(&module_dir, &module_config, &module_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+			// log.Printf("Creating %q...\n", module_config)
+			// u.WriteFile(&module_dir, &module_config, &module_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 	}
 }
@@ -609,7 +611,7 @@ func SetupBiometrics(c *conf.Config) {
 						`session         include         system-auth`,
 					}
 				}
-				log.Printf(`Adding fprint PAM Authentication for "%q"`, pam_modules[i])
+				log.Printf("Adding fprint PAM Authentication for '%q'\n", pam_modules[i])
 				u.WriteFile(&pam_module_dir, &pam_file, &pam_module, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 				u.ReadFile(&pam_module_dir, &pam_file)
 			}
@@ -643,6 +645,64 @@ func SetupBiometrics(c *conf.Config) {
 	// To-do:
 	// - Add more scalable way to handle a "sed-like" implementation in Go.
 	// --- howdy and fprint can conflict with current overwrite method
+}
+
+func SetupMiscHardware(c *conf.Config) {
+
+	log.Println(`
+	-------------------------------------------------------------------------
+                        Detecting Misc Hardware
+	-------------------------------------------------------------------------
+	`)
+
+	// Define regular expression for RGB hardware
+	var (
+		rgbRegExp = regexp.MustCompile(`RGB|Aura|Fusion|Mystic Light|Polychrome`)
+	)
+
+	p := u.ListPCI()
+	usb := u.ListUSB()
+
+	for i := range p.PCIDevices {
+		// Do nothing for now
+		_ = i
+	}
+
+	for i := range usb.USBDevices {
+		switch {
+		case rgbRegExp.MatchString(usb.USBDevices[i].Description):
+			log.Printf("'%s' detected!\n", usb.USBDevices[i].Description)
+			log.Println("Installing RGB compatible packages(s) + udev rules")
+			c.Flatpak.Packages = append(c.Flatpak.Packages, `org.openrgb.OpenRGB`)
+
+			// OpenRGB Flatpak instructions: https://github.com/flathub/org.openrgb.OpenRGB
+			cmd := []string{`wget`, `https://gitlab.com/CalcProgrammer1/OpenRGB/-/jobs/artifacts/master/raw/60-openrgb.rules?job=Linux+64+AppImage&inline=false`, `/usr/lib/udev/rules.d/`}
+			z.Arch_chroot(&cmd, false, c)
+		case strings.Contains(usb.USBDevices[i].Description, `NZXT Kraken`):
+			log.Printf("'%s' detected!\n", usb.USBDevices[i].Description)
+
+			log.Println("NZXT Kraken X53/X63/X73 is currently not native to the mainline kernel")
+			log.Printf("Appending '%s' compatible package(s)\n", usb.USBDevices[i].Description)
+
+			// https://github.com/liquidctl/liquidtux#installing-with-dkms
+			c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages, `liquidtux-dkms-git`)
+		case strings.HasPrefix(usb.USBDevices[i].ID, "1532:"):
+			log.Printf("'%s' detected!\n", usb.USBDevices[i].Description)
+			log.Println("Appending Razer compatible package(s)")
+
+			c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
+				"openrazer-meta", // Razer device drivers
+				"polychromatic",  // RGB management GUI for Razer Devices
+			)
+		case strings.Contains(usb.USBDevices[i].Description, `Razer USA, Ltd Nari`):
+			log.Println("Appending Razer Nari compatible package(s)")
+
+			c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
+				"razer-nari-pipewire-profile", // Razer Nari headsets pipewire profile
+			)
+		}
+	}
+
 }
 
 func SetupUser(c *conf.Config) {
@@ -1125,7 +1185,8 @@ func SetupEFI(c *conf.Config) {
 			c.Parameters = append(c.Parameters, `intel_pstate=active`)
 		case "AuthenticAMD":
 			c.Modules = append(c.Modules, `amd_pstate`)
-			c.Parameters = append(c.Parameters, `amd_pstate.replace=1`)
+			// Note: `amd_pstate=active` not expected until around Kernel v6.3
+			c.Parameters = append(c.Parameters, `amd_pstate=passive`)
 		}
 	}
 
@@ -1133,6 +1194,21 @@ func SetupEFI(c *conf.Config) {
 		switch c.Pacman.Packages[i] {
 		case "apparmor":
 			c.Parameters = append(c.Parameters, `lsm=landlock,lockdown,yama,integrity,apparmor,bpf`)
+		}
+	}
+
+	p := u.ListPCI()
+
+	for i := range p.PCIDevices {
+		if p.PCIDevices[i].Class == "VGA compatible controller" {
+			switch p.PCIDevices[i].Vendor {
+			case "NVIDIA Corporation":
+				c.Modules = append(c.Modules, `nvidia`, `nvidia_modeset`, `nvidia_uvm`, `nvidia_drm`)
+			case "Advanced Micro Devices, Inc. [AMD]", "Advanced Micro Devices, Inc. [AMD/ATI]":
+				c.Modules = append(c.Modules, `amdgpu`)
+			case "Intel Corporation":
+				c.Modules = append(c.Modules, `i915`)
+			}
 		}
 	}
 

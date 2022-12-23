@@ -91,12 +91,12 @@ func UserKeyring(c *conf.Config) {
 			}
 
 			config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
-			log.Printf("Changing directory to %q", config_dir)
+			log.Printf("Changing directory to %q\n", config_dir)
 			if err := os.Chdir(config_dir); err != nil {
 				log.Fatalln(err)
 			}
 
-			log.Printf("Making Keepass directory")
+			log.Println("Making Keepass directory")
 			if err := os.MkdirAll("keepassxc", 0755); err != nil {
 				log.Fatalln(err)
 			}
@@ -153,7 +153,7 @@ func UserKeyring(c *conf.Config) {
 			}
 
 			user_home := filepath.Join("/", "mnt", "home", c.User.Username)
-			log.Printf("Changing directory to %q", user_home)
+			log.Printf("Changing directory to %q\n", user_home)
 			if err := os.Chdir(user_home); err != nil {
 				log.Fatalln(err)
 			}
@@ -317,7 +317,7 @@ func UserVariables(c *conf.Config) {
 	config_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config")
 	environment_dir := filepath.Join(config_dir, "environment.d")
 
-	log.Printf("Making environment.d directory")
+	log.Println("Making environment.d directory")
 	if err := os.MkdirAll(environment_dir, 0755); err != nil {
 		log.Fatalln(err)
 	}
@@ -483,6 +483,7 @@ func UserDotFiles(c *conf.Config) {
 				`	"debug.allowBreakpointsEverywhere": true,`,
 				`	"git.confirmSync": false,`,
 				`	"git.enableSmartCommit": true,`,
+				`	"diffEditor.ignoreTrimWhitespace": false,`,
 				`	"go.formatTool": "gofmt",`,
 				`	"go.formatFlags": [`,
 				`		"[\"-s\", \"-w\"]"`,
@@ -500,7 +501,7 @@ func UserDotFiles(c *conf.Config) {
 			// https://github.com/microsoft/vscode-python/issues/20247#issuecomment-1350342224`
 			code_contents = []string{
 				`{`,
-				`"enable-proposed-api": ["ms-python.python"]`,
+				`	"enable-proposed-api": ["ms-python.python"]`,
 				`}`,
 			}
 		}

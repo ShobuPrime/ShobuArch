@@ -153,6 +153,7 @@ func setup(c *conf.Config) {
 	i.SetupProcessor(c)
 	i.SetupGraphics(c)
 	i.SetupBiometrics(c)
+	i.SetupMiscHardware(c)
 	i.SetupUser(c)
 	i.SetupSecurityModules(c)
 	i.SetupAUR(c)

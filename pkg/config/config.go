@@ -21,10 +21,11 @@ import (
 	"bufio"
 	"encoding/json"
 	"fmt"
-	"gopkg.in/yaml.v2"
 	"log"
 	"os"
 	"strings"
+
+	"gopkg.in/yaml.v2"
 
 	u "github.com/ShobuPrime/ShobuArch/pkg/util"
 

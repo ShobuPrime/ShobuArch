@@ -102,3 +102,41 @@ func debug() {
 	// fmt.Println(u.PrettyJson(u.SecureBootStatus()))
 	// i.UserPWAs(&cdb)
 }
+
+	/*
+		--Generate Keyfile: https://wiki.archlinux.org/title/Dm-crypt/Device_encryption#Keyfiles
+			dd if=/dev/random of=/.luks/.ata-<drive>-part1 bs=32 count=1
+			cryptsetup luksAddKey /dev/sda1 /.luks/<key_file>.key
+
+		--Get UUID of parent partition
+			lsblk -dno UUID /dev/sda1
+
+		--Add entry to /etc/crypttab: https://kifarunix.com/automount-luks-encrypted-device-in-linux/
+			# <name>       <device>                                     <password>              <options>
+			luks_DATA      UUID=<uuid>    /.luks/ata-<drive>-part1
+
+		--Get UUID of encryped partition (Open device if not done so already)
+			cryptsetup open /dev/disk/by-id/ata-<drive>-part1 luks_DATA --key-file /.luks/ata-<drive>-part1
+			mount -o rw,noatime,compress=zstd:3,ssd,discard,space_cache=v2,commit=120,subvol=@ /dev/mapper/luks_DATA /mnt/ata-<drive>-part1
+			lsblk -dno UUID /dev/mapper/luks_DATA
+
+		--Print new fstab and verify if it looks ok before saving
+			genfstab -U /
+
+		--Unmount encrypted drive and run the following to verify if done correctly
+			mount -av
+
+
+		VSCode install extensions from CMD line (online):
+		code --list-extensions
+
+		golang.go
+		ms-python.python
+		ms-azuretools.vscode-docker
+		shardulm94.trailing-spaces
+
+		code --install-extension <name>
+
+		https://stackoverflow.com/questions/37071388/how-can-i-install-visual-studio-code-extensions-offline#38866913
+		https://marketplace.visualstudio.com/_apis/public/gallery/publishers/ms-python/vsextensions/python/2022.19.13351014/vspackage
+	*/
