@@ -513,7 +513,7 @@ func AUR(c *Config) {
 			"mcmojave-cursors",            // X-cursor theme inspired by macOS and based on capitaine-cursors
 			//"morgen-bin",                // Modern, intuitive and smart calendar application (Successor to MineTime)
 			//"nerd-dictation-git",        // Simple, hackable offline speech to text - using the VOSK-API.
-			"sddm-sugar-dark",             // "Sweetest" Dark theme for SDDM
+			//"sddm-sugar-dark",           // "Sweetest" Dark theme for SDDM
 			//"system-monitoring-center",  // Windows Task Manager Clone
 			"ttf-ms-win11-auto",           // Microsoft Windows 11 TrueType fonts
 		)

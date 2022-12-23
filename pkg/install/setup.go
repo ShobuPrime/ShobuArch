@@ -675,17 +675,39 @@ func SetupMiscHardware(c *conf.Config) {
 			log.Println("Installing RGB compatible packages(s) + udev rules")
 			c.Flatpak.Packages = append(c.Flatpak.Packages, `org.openrgb.OpenRGB`)
 
+			log.Println("Manually load 'i2c-dev' module to reduce RGB errors")
+			module_dir := filepath.Join("/", "mnt", "etc", "modules-load.d")
+			module_config := "i2c_dev.conf"
+
+			module_contents := []string{
+				`i2c-dev`,
+			}
+
+			log.Printf("Creating %q...\n", module_config)
+			u.WriteFile(&module_dir, &module_config, &module_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+
 			// OpenRGB Flatpak instructions: https://github.com/flathub/org.openrgb.OpenRGB
-			cmd := []string{`wget`, `https://gitlab.com/CalcProgrammer1/OpenRGB/-/jobs/artifacts/master/raw/60-openrgb.rules?job=Linux+64+AppImage&inline=false`, `/usr/lib/udev/rules.d/`}
+			cmd := []string{`wget`, `'https://gitlab.com/CalcProgrammer1/OpenRGB/-/jobs/artifacts/master/raw/60-openrgb.rules?job=Linux+64+AppImage&inline=false'`, `/usr/lib/udev/rules.d/`, `-O`, `60-openrgb.rules`}
 			z.Arch_chroot(&cmd, false, c)
 		case strings.Contains(usb.USBDevices[i].Description, `NZXT Kraken`):
 			log.Printf("'%s' detected!\n", usb.USBDevices[i].Description)
 
-			log.Println("NZXT Kraken X53/X63/X73 is currently not native to the mainline kernel")
-			log.Printf("Appending '%s' compatible package(s)\n", usb.USBDevices[i].Description)
-
+			log.Println("Note: [As of 12/23/22] NZXT Kraken X53/X63/X73 is not native to the mainline kernel")
 			// https://github.com/liquidctl/liquidtux#installing-with-dkms
 			c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages, `liquidtux-dkms-git`)
+
+			log.Println("Manually configuring to load at boot")
+			module_dir := filepath.Join("/", "mnt", "etc", "modules-load.d")
+			module_config := "nzxt.conf"
+
+			module_contents := []string{
+				`nzxt-kraken3`,
+			}
+
+			log.Printf("Creating %q...\n", module_config)
+			u.WriteFile(&module_dir, &module_config, &module_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+
+			log.Printf("Appending '%s' compatible package(s)\n", usb.USBDevices[i].Description)
 		case strings.HasPrefix(usb.USBDevices[i].ID, "1532:"):
 			log.Printf("'%s' detected!\n", usb.USBDevices[i].Description)
 			log.Println("Appending Razer compatible package(s)")
