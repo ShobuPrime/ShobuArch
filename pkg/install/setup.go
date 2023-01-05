@@ -1351,7 +1351,7 @@ func SetupEFI(c *conf.Config) {
 		switch {
 		case strings.HasPrefix((*mkinitcpio_contents)[line], `MODULES=()`):
 			(*mkinitcpio_contents)[line] = fmt.Sprintf(`MODULES=(%v)`, strings.Join(c.Modules, " "))
-		case strings.HasPrefix((*mkinitcpio_contents)[line], `HOOKS=(base udev autodetect modconf block filesystems keyboard fsck)`):
+		case strings.HasPrefix((*mkinitcpio_contents)[line], `HOOKS=(`):
 			(*mkinitcpio_contents)[line] = fmt.Sprintf(`HOOKS=(%v)`, strings.Join(c.Hooks, " "))
 		}
 	}
