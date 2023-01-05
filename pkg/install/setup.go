@@ -474,19 +474,23 @@ func SetupGraphics(c *conf.Config) {
 				cmd = append(cmd,
 					`lib32-libva-mesa-driver`,
 					`lib32-mesa`,
+					`lib32-vulkan-icd-loader`,
 					`lib32-vulkan-radeon`,
 					`libva-mesa-driver`,
 					`mesa`,
+					`vulkan-icd-loader`,
 					`vulkan-radeon`,
 					`xf86-video-amdgpu`,
 				)
 			case "Intel Corporation":
 				cmd = append(cmd,
 					`lib32-mesa`,
+					`lib32-vulkan-icd-loader`,
 					`lib32-vulkan-intel`,
 					`libva-intel-driver`,
 					`libva-utils`,
 					`mesa`,
+					`vulkan-icd-loader`,
 					`vulkan-intel`,
 					`xf86-video-intel`,
 				)

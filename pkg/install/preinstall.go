@@ -143,7 +143,7 @@ func FormatDisks(c *conf.Config) {
 	log.Println("Detecting SSD...")
 	if c.Storage.SystemDiskRota || strings.Contains(c.Storage.SystemDiskID, "SSD") {
 		// MOUNT_OPTIONS if SSD: noatime,compress=zstd,ssd,commit=120
-		mount_options = `discard,noatime,compress=zstd,ssd,commit=120`
+		mount_options = `discard=async,noatime,compress=zstd,ssd,commit=120`
 		log.Printf("SSD detected! MOUNT_OPTIONS=%v\n", mount_options)
 	} else {
 		// MOUNT_OPTIONS if HDD: noatime,compress=zstd,commit=120

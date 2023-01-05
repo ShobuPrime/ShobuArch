@@ -42,7 +42,6 @@ func BasePkgs(c *Config) {
 		"lib32-pipewire-v4l2",    // Pipewire V4L2 interceptor -- 32bit
 		"networkmanager",         // Network connection manager and user applications
 		"network-manager-applet", // Applet for managing network connections
-		//"obs-studio",             // Free, open source software for live streaming and recording
 		"openssh",                // Premier connectivity tool for remote login with the SSH protocol
 		"os-prober",              // Utility to detect other OSes on a set of drives
 		"packagekit",             // A system designed to make installation and updates of packages easier
@@ -506,7 +505,7 @@ func AUR(c *Config) {
 	case "FULL":
 		c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
 			"bcompare",                    // Beyond Compare 4
-			//"cockpit-navigator",         // File Browser for Cockpit
+			"cockpit-navigator-git",       // File Browser for Cockpit
 			"enpass-bin",                  // A multiplatform password manager
 			"firefox-pwa-bin",             // Install, manage and use PWAs in Firefox (native component)
 			"macchina-bin",                // A system information fetcher/frontend, with an (unhealthy) emphasis on performance
@@ -541,6 +540,8 @@ func Flatpak(c *Config) {
 			"com.getmailspring.Mailspring",                           // Email client
 			"com.github.alainm23.planner",                            // Never worry about forgetting things again
 			"com.github.liferooter.textpieces",                       // Transform text without random websites
+			"com.github.Matoking.protontricks",                       // Winetricks for Proton enabled games
+			"io.github.prateekmedia.appimagepool",                    // Simple, modern AppImageHub client
 			"com.github.tchx84.Flatseal",                             // Manage Flatpak permissions
 			"com.gitlab.bitseater.meteo",                             // Weather forecast app
 			"com.github.wwmm.easyeffects",                            // Audio Effects for PipeWire Applications
