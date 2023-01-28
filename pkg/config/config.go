@@ -410,55 +410,17 @@ func SelectDisk() (string, string, bool) {
 		lsblk.Blockdevices[i].Serial = strings.ReplaceAll(lsblk.Blockdevices[i].Serial, " ", "_")
 		device_list = append(device_list, lsblk.Blockdevices[i].Path+" --> "+lsblk.Blockdevices[i].Model+"-"+lsblk.Blockdevices[i].Serial)
 	}
+
 	prompt := promptui.Select{
-		Label: "Select Disk list method",
-		Items: []string{"By Path", "By ID", "Combined"},
+		Label: "Select Disk",
+		Items: device_list,
 	}
-
-	_, disk_list_method, err := prompt.Run()
-
+	i, choice, err := prompt.Run()
 	if err != nil {
 		log.Fatalf("Prompt failed %v\n", err)
 	}
-	log.Printf("Listing disks '%q'\n", disk_list_method)
-
-	switch disk_list_method {
-	case "By Path":
-		prompt = promptui.Select{
-			Label: "Select Disk",
-			Items: device_paths,
-		}
-		i, choice, err := prompt.Run()
-		if err != nil {
-			log.Fatalf("Prompt failed %v\n", err)
-		}
-		log.Printf("Selected disk: %v\n", choice)
-		return device_paths[i], device_ids[i], lsblk.Blockdevices[i].Rota
-	case "By ID":
-		prompt = promptui.Select{
-			Label: "Select Disk",
-			Items: device_ids,
-		}
-		i, choice, err := prompt.Run()
-		if err != nil {
-			log.Fatalf("Prompt failed %v\n", err)
-		}
-		log.Printf("Selected disk: %v\n", choice)
-		return device_paths[i], device_ids[i], lsblk.Blockdevices[i].Rota
-	case "Combined":
-		prompt = promptui.Select{
-			Label: "Select Disk",
-			Items: device_list,
-		}
-		i, choice, err := prompt.Run()
-		if err != nil {
-			log.Fatalf("Prompt failed %v\n", err)
-		}
-		log.Printf("Selected disk: %v\n", choice)
-		return device_paths[i], device_ids[i], lsblk.Blockdevices[i].Rota
-	}
-	// These values are never expected to be returned.
-	return "SystemDisk", "SystemDiskID", true
+	log.Printf("Selected disk: %v\n", choice)
+	return device_paths[i], device_ids[i], lsblk.Blockdevices[i].Rota
 }
 
 func SetTimezone(c *Config) {

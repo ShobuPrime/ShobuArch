@@ -98,25 +98,24 @@ func SetupNetwork(c *conf.Config) {
 	cmd = []string{`systemctl`, `enable`, `--now`, `NetworkManager`}
 	z.Arch_chroot(&cmd, false, c)
 
-	log.Println("Add parallel downloading")
-	cmd = []string{`sed`, `-i`, `s/^#ParallelDownloads/ParallelDownloads/g`, `/etc/pacman.conf`}
-	z.Arch_chroot(&cmd, false, c)
-
-	// This specific command is giving errors on Arch-Chroot. Using host shell with hard-coded mount point
-	log.Println("Enable multi-lib libraries")
-	bash := `sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf`
-	z.Shell(&bash)
-
 	cmd = []string{`pacman`, `-Syy`, `--noconfirm`, `--needed`}
 	z.Arch_chroot(&cmd, false, c)
 }
 
 func SetupMirrors(c *conf.Config) {
-	log.Println(`
-	-------------------------------------------------------------------------
-			Setting up mirrors for optimal download
-	-------------------------------------------------------------------------
-	`)
+	iso := "US"
+
+	log.Printf(`
+		-------------------------------------------------------------------------
+					Setting up %s mirrors for faster downloads
+		-------------------------------------------------------------------------
+	`, iso)
+
+	// cmd := `(curl -4 ifconfig.co/country-iso)`
+	// iso, _ := z.Shell(&cmd)
+
+	// Hard-coded ISO
+	// To-do: Fix receiving ISO from ifconfig
 
 	cmd := []string{`pacman`, `-Syy`, `--noconfirm`, `--needed`, `pacman-contrib`, `curl`}
 	z.Arch_chroot(&cmd, false, c)
@@ -125,6 +124,23 @@ func SetupMirrors(c *conf.Config) {
 	z.Arch_chroot(&cmd, false, c)
 
 	cmd = []string{`cp`, `/etc/pacman.d/mirrorlist`, `/etc/pacman.d.mirrorlist.bak`}
+	z.Arch_chroot(&cmd, false, c)
+
+	log.Println("Enabling parallel downloading...")
+	cmd = []string{`sed`, `-i`, `s/^#ParallelDownloads/ParallelDownloads/g`, `/etc/pacman.conf`}
+	z.Arch_chroot(&cmd, false, c)
+
+	// This specific command is giving errors on Arch-Chroot. Using host shell with hard-coded mount point
+	log.Println("Enabling multilib libraries...")
+	bash := `sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf`
+	z.Shell(&bash)
+
+	log.Println(`Backing up mirror list...`)
+	cmd = []string{`cp`, `/etc/pacman.d/mirrorlist`, `/etc/pacman.d/mirrorlist.backup`}
+	z.Arch_chroot(&cmd, false, c)
+
+	log.Println(`Detecting best mirrors...`)
+	cmd = []string{`reflector`, `-a`, `48`, `-c`, iso, `-f`, `5`, `-l`, `20`, `--sort rate`, `--save`, `/etc/pacman.d/mirrorlist`}
 	z.Arch_chroot(&cmd, false, c)
 }
 
@@ -181,10 +197,12 @@ func SetupLanguage(c *conf.Config) {
 	cmd = []string{`locale-gen`}
 	z.Arch_chroot(&cmd, false, c)
 
+	log.Println(`Setting TimeZone...`)
 	cmd = []string{`timedatectl`, `set-timezone`, c.Timezone}
 	z.Arch_chroot(&cmd, false, c)
 
-	cmd = []string{`timedatectl`, `set-ntp`, `1`}
+	log.Println(`Enabling Network Time Protocol...`)
+	cmd = []string{`timedatectl`, `set-ntp`, `true`}
 	z.Arch_chroot(&cmd, false, c)
 
 	cmd = []string{`touch`, `/etc/locale.conf`}
@@ -244,7 +262,7 @@ func SetupBaseSystem(c *conf.Config) {
 		z.Arch_chroot(&cmd_list, false, c)
 	}
 
-	log.Println("Add sudo no password rights")
+	log.Println("Adding sudo no password rights...")
 	cmd := []string{`sed`, `-i`, `s/^# %wheel ALL=(ALL) NOPASSWD: ALL/%wheel ALL=(ALL) NOPASSWD: ALL/g`, `/etc/sudoers`}
 	z.Arch_chroot(&cmd, false, c)
 
@@ -325,7 +343,7 @@ func SetupCustomRepos(c *conf.Config) {
 
 	switch c.Storage.Filesystem {
 	case "zfs":
-		log.Println("Adding custom repo to install ArchZFS")
+		log.Println("Adding custom repo to install ArchZFS...")
 		cmd = []string{`wget`, `https://archzfs.com/archzfs.gpg`}
 		z.Arch_chroot(&cmd, false, c)
 
@@ -633,7 +651,7 @@ func SetupBiometrics(c *conf.Config) {
 	}
 	z.Arch_chroot(&cmd, false, c)
 
-	log.Println(`Adding udev rules for FIDO U2F`)
+	log.Println(`Adding udev rules for FIDO U2F...`)
 	// Examples:
 	// https://github.com/Yubico/libfido2/blob/main/udev/70-u2f.rules
 	// https://www.trustkeysolutions.com/support/
@@ -661,7 +679,7 @@ func SetupMiscHardware(c *conf.Config) {
 
 	// Define regular expression for RGB hardware
 	var (
-		rgbRegExp = regexp.MustCompile(`RGB|Aura|Fusion|Mystic Light|Polychrome`)
+		rgbRegExp = regexp.MustCompile(`^RGB$|^Aura$|^Fusion$|^Mystic Light$|^Polychrome$`)
 	)
 
 	p := u.ListPCI()
@@ -676,7 +694,7 @@ func SetupMiscHardware(c *conf.Config) {
 		switch {
 		case rgbRegExp.MatchString(usb.USBDevices[i].Description):
 			log.Printf("'%s' detected!\n", usb.USBDevices[i].Description)
-			log.Println("Installing RGB compatible packages(s) + udev rules")
+			log.Println("Installing RGB compatible packages(s) + udev rules...")
 			c.Flatpak.Packages = append(c.Flatpak.Packages, `org.openrgb.OpenRGB`)
 
 			log.Println("Manually load 'i2c-dev' module to reduce RGB errors")
@@ -700,7 +718,7 @@ func SetupMiscHardware(c *conf.Config) {
 			// https://github.com/liquidctl/liquidtux#installing-with-dkms
 			c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages, `liquidtux-dkms-git`)
 
-			log.Println("Manually configuring to load at boot")
+			log.Println("Manually configuring to load at boot...")
 			module_dir := filepath.Join("/", "mnt", "etc", "modules-load.d")
 			module_config := "nzxt.conf"
 
@@ -711,17 +729,17 @@ func SetupMiscHardware(c *conf.Config) {
 			log.Printf("Creating %q...\n", module_config)
 			u.WriteFile(&module_dir, &module_config, &module_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 
-			log.Printf("Appending '%s' compatible package(s)\n", usb.USBDevices[i].Description)
+			log.Printf("Appending '%s' compatible package(s)...\n", usb.USBDevices[i].Description)
 		case strings.HasPrefix(usb.USBDevices[i].ID, "1532:"):
 			log.Printf("'%s' detected!\n", usb.USBDevices[i].Description)
-			log.Println("Appending Razer compatible package(s)")
+			log.Println("Appending Razer compatible package(s)...")
 
 			c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
 				"openrazer-meta", // Razer device drivers
 				"polychromatic",  // RGB management GUI for Razer Devices
 			)
 		case strings.Contains(usb.USBDevices[i].Description, `Razer USA, Ltd Nari`):
-			log.Println("Appending Razer Nari compatible package(s)")
+			log.Println("Appending Razer Nari compatible package(s)...")
 
 			c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
 				"razer-nari-pipewire-profile", // Razer Nari headsets pipewire profile
@@ -879,7 +897,7 @@ func SetupSecurityModules(c *conf.Config) {
 			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		}
 
-		log.Println(`Creating config for Audit daemon`)
+		log.Println(`Creating config for Audit daemon...`)
 		audit_dir := filepath.Join("/", "mnt", "etc", "audit")
 		audit_file := "auditd.conf"
 		audit_contents := []string{
@@ -958,7 +976,7 @@ func SetupAUR(c *conf.Config) {
 		z.Shell(&cmd_list[i])
 	}
 
-	log.Println("Making AUR Package")
+	log.Println("Making AUR Package...")
 	cmd = []string{`chmod`, `+x`, `/install_aur.sh`}
 	z.Arch_chroot(&cmd, false, c)
 
@@ -1007,7 +1025,7 @@ func SetupFlatpaks(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	log.Println("Preparing environment for automatic systemd-nspawn scripts")
+	log.Println("Preparing environment for automatic systemd-nspawn scripts...")
 
 	log.Println(`Creating AutoLogin for systemd-nspawn container...`)
 	autologin_dir := filepath.Join("/", "mnt", "etc", "systemd", "system", "console-getty.service.d")
@@ -1103,7 +1121,7 @@ func SetupFlatpaks(c *conf.Config) {
 			u.WriteFile(&autostart_dir, &autostart_file, &autostart_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 		case "com.usebottles.bottles":
 			log.Println("Bottles Flatpak detected!")
-			log.Println("Adding permissionns for Desktop/Steam Entries")
+			log.Println("Adding permissions for Desktop/Steam Entries")
 
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=xdg-data/applications`, fp_override_cmd, c.Flatpak.Packages[i]))
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --filesystem=/home/%s/.local/share/Steam`, fp_override_cmd, c.Flatpak.Packages[i], c.User.Username))
@@ -1144,10 +1162,10 @@ func SetupFlatpaks(c *conf.Config) {
 			cmd_list = append(cmd_list, fmt.Sprintf(`%s %s --socket=session-bus`, fp_override_cmd, c.Flatpak.Packages[i]))
 		}
 	}
-	log.Println("Appending systemd-nspawn 'Get out of Jail for free' command")
+	log.Println("Appending systemd-nspawn 'Get out of Jail for free' command...")
 	cmd_list = append(cmd_list, `sudo poweroff`)
 
-	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container")
+	log.Println("Ensuring Flatpak will automatically execute after mounting systemd-nspawn container...")
 
 	systemd_autorun_dir := filepath.Join("/", "mnt", "etc", "profile.d")
 	flatpak_script := "install_flatpaks.sh"
@@ -1155,11 +1173,11 @@ func SetupFlatpaks(c *conf.Config) {
 	log.Println(`Creating Flatpak script for systemd-nspawn container...`)
 	u.WriteFile(&systemd_autorun_dir, &flatpak_script, &cmd_list, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
-	log.Println("Making executable")
+	log.Println("Making executable...")
 	cmd := fmt.Sprintf(`chmod +x %v`, filepath.Join(systemd_autorun_dir, flatpak_script))
 	z.Shell(&cmd)
 
-	log.Println("Installing Flatpaks via systemd-nspawn")
+	log.Println("Installing Flatpaks via systemd-nspawn...")
 	z.Systemd_nspawn(&[]string{}, true, c)
 
 	log.Println("Cleaning up cruft...")

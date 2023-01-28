@@ -74,15 +74,14 @@ func Mirrors(c *conf.Config) {
 
 	cmd_list := []string{}
 
-	// fmt.Sprintf(`reflector -a 48 -c %s -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist`, iso)
 	cmd_list = append(cmd_list,
 		`timedatectl set-ntp true`,
 		`pacman -Syy --noconfirm archlinux-keyring`,
 		`pacman -Syy --noconfirm --needed pacman-contrib terminus-font`,
-		// `sed -n 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf`,
+		`sed -n 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf`,
 		`pacman -Syy --noconfirm --needed reflector rsync`,
-		//`cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.backup`,
-		//`reflector -a 48 -c US -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist`,
+		`cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak`,
+		fmt.Sprintf(`reflector -a 48 -c %s -f 5 -l 20 --sort rate --save /etc/pacman.d/mirrorlist`, iso),
 	)
 
 	for i := range cmd_list {

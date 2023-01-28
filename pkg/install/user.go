@@ -373,7 +373,7 @@ func UserVariables(c *conf.Config) {
 	// For some applications, like bcompare, we need to make sure to export to PATH if not done already
 	// ex) export PATH = /home/<username>/.cache/<aur_helper>/clone/bcompare/src/install/bin/bcompare:$PATH
 
-	log.Println(`Enforcing permissions`)
+	log.Println(`Enforcing permissions on home directory...`)
 	//os.Chown(filepath.Base(keepass_config), 1000, 1000)
 	cmd := []string{
 		`chown`,
@@ -382,6 +382,22 @@ func UserVariables(c *conf.Config) {
 		fmt.Sprintf(`/home/%s/`, c.User.Username),
 	}
 	z.Arch_chroot(&cmd, false, c)
+
+	log.Println(`Adding .zshrc aliases...`)
+	zshrc_dir := filepath.Join("/", "mnt", "home", c.User.Username)
+	zshrc_file := ".zshrc"
+
+	zshrc_contents := []string{
+		fmt.Sprintf(`alias ARCH_UP='%s -Syyu --needed --noconfirm; flatpak update --assumeyes'`, c.Pacman.AUR.Helper),
+		fmt.Sprintf(`alias DELETE_ORPHAN_PACKAGES='%s -Qtdq | %s -Rns -'; flatpak uninstall --assumeyes --unused`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
+		fmt.Sprintf(`alias LIST_ALL_PACKAGES='%s -Qq; flatpak list --columns=application | tail -n +1`, c.Pacman.AUR.Helper), // Ignore first line of output for Flatpak. Alternatives: awk '{if(NR>1)print}', sed -n '1!p'
+		fmt.Sprintf(`alias LIST_BROKEN_PACKAGES="%s -Qk | grep -v ' 0 missing files'"`, c.Pacman.AUR.Helper),
+		fmt.Sprintf(`#alias REPAIR_ALL_PACKAGES='for package in $(%s -Qq); do %s -S "$package" --noconfirm; done'`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
+		fmt.Sprintf(`alias REPAIR_ALL_PACKAGES='%s -Qq | %s -S -'; flatpak repair`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
+		fmt.Sprintf(`alias REPAIR_BROKEN_PACKAGES="%s -Qk | grep -v ' 0 missing files' | cut -d: -f1 | %s -S -"`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
+	}
+	u.WriteFile(&zshrc_dir, &zshrc_file, &zshrc_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
+	u.ReadFile(&zshrc_dir, &zshrc_file)
 }
 
 func UserAutostart(c *conf.Config) {
@@ -423,7 +439,7 @@ func UserAutostart(c *conf.Config) {
 
 	for i := range c.Pacman.AUR.Packages {
 		switch c.Pacman.AUR.Packages[i] {
-		case "enpass":
+		case "enpass", "enpass-bin":
 			log.Println(`Creating autostart for Enpass`)
 			autostart_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "autostart")
 			autostart_file := "Enpass.desktop"
@@ -449,9 +465,29 @@ func UserDotFiles(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	for i := range c.Pacman.AUR.Packages {
-		switch c.Pacman.AUR.Packages[i] {
+	for i := range c.Pacman.Packages {
+		switch c.Pacman.Packages[i] {
 		case "code":
+			// Install extensions
+			log.Println(`Installing VSCode Extensions`)
+			code_extensions := []string{
+				`golang.go`,
+				`ms-python.python`,
+				`shardulm94.trailing-spaces`,
+			}
+
+			for i := range code_extensions {
+				cmd := []string{
+					`code`,
+					`--install-extension`,
+					code_extensions[i],
+				}
+				z.Arch_chroot(&cmd, true, c)
+			}
+
+			cmd := []string{`code`, `--list-extensions`}
+			z.Arch_chroot(&cmd, true, c)
+
 			log.Println(`Creating config for VSCode...`)
 			code_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "Code - OSS", "User")
 			code_file := "settings.json"
@@ -494,8 +530,8 @@ func UserDotFiles(c *conf.Config) {
 			}
 			u.WriteFile(&code_dir, &code_file, &code_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 
-			code_dir = filepath.Join("/", "mnt", "home", c.User.Username, ".vscode-oss", "Code - OSS", "User")
-			code_file = "settings.json"
+			code_dir = filepath.Join("/", "mnt", "home", c.User.Username, ".vscode-oss")
+			code_file = "argv.json"
 
 			// This configuration file allows you to pass permanent command line arguments to VS Code.
 			// https://github.com/microsoft/vscode-python/issues/20247#issuecomment-1350342224`
@@ -504,6 +540,7 @@ func UserDotFiles(c *conf.Config) {
 				`	"enable-proposed-api": ["ms-python.python"]`,
 				`}`,
 			}
+			u.WriteFile(&code_dir, &code_file, &code_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 		}
 	}
 }
