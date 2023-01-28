@@ -811,6 +811,16 @@ func SetupUser(c *conf.Config) {
 		`Pictures`, `Public`, `Templates`, `Videos`,
 	}
 
+	for i := range c.Pacman.Packages {
+		switch c.Pacman.Packages[i] {
+		case "code":
+			user_directories = append(user_directories,
+				`.config/Code - OSS/User`,
+				`.vscode-oss`,
+			)
+		}
+	}
+
 	for i := range user_directories {
 		log.Println(user_directories[i])
 		err := os.MkdirAll(fmt.Sprintf(`/mnt/home/%s/%s`, c.User.Username, user_directories[i]), 0755)
