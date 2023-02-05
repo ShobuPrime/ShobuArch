@@ -509,11 +509,10 @@ func AUR(c *Config) {
 			"enpass-bin",                  // A multiplatform password manager
 			"firefox-pwa-bin",             // Install, manage and use PWAs in Firefox (native component)
 			"macchina-bin",                // A system information fetcher/frontend, with an (unhealthy) emphasis on performance
-			"mcmojave-cursors",            // X-cursor theme inspired by macOS and based on capitaine-cursors
+			//"mcmojave-cursors",          // X-cursor theme inspired by macOS and based on capitaine-cursors (Currently refuses to install via chroot)
 			//"morgen-bin",                // Modern, intuitive and smart calendar application (Successor to MineTime)
 			//"nerd-dictation-git",        // Simple, hackable offline speech to text - using the VOSK-API.
 			//"sddm-sugar-dark",           // "Sweetest" Dark theme for SDDM
-			//"system-monitoring-center",  // Windows Task Manager Clone
 			"ttf-ms-win11-auto",           // Microsoft Windows 11 TrueType fonts
 		)
 
@@ -545,6 +544,7 @@ func Flatpak(c *Config) {
 			"com.github.tchx84.Flatseal",                             // Manage Flatpak permissions
 			"com.gitlab.bitseater.meteo",                             // Weather forecast app
 			"com.github.wwmm.easyeffects",                            // Audio Effects for PipeWire Applications
+			"com.leinardi.gst",                                       // System utility designed to stress and monitor various hardware components
 			"com.obsproject.Studio",                                  // Live streaming and video recording software
 			"com.steamgriddb.steam-rom-manager",                      // Manage ROMs in Steam
 			"com.snes9x.Snes9x",                                      // Super Nintendo Emulator
@@ -559,6 +559,8 @@ func Flatpak(c *Config) {
 			"io.github.simple64.simple64",                            // Nintendo 64 Emulator
 			"io.github.seadve.Kooha",                                 // Record your screen
 			"io.mgba.mGBA",                                           // Nintendo Game Boy Advance Emulator
+			"md.obsidian.Obsidian",                                   // Markdown-based knowledge base
+			"media.emby.EmbyTheater",                                 // Emby (Media Server) client for desktop computers
 			"net.davidotek.pupgui2",                                  // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
 			"net.filebot.FileBot",                                    // Ultimate TV and Movie Renamer
 			"net.kuribo64.melonDS",                                   // Nintendo DS and DSi emulator
@@ -577,7 +579,8 @@ func Flatpak(c *Config) {
 			//"org.onlyoffice.desktopeditors",                        // OnlyOffice productivity suite
 			"org.ppsspp.PPSSPP",                                      // PlayStation Portable emulator
 			"org.yuzu_emu.yuzu",                                      // Nintendo Switch emulator
-			"tv.plex.PlexDesktop",                                    // Plex Client for desktop computers
+			"tv.plex.PlexDesktop",                                    // Plex client for desktop computers
+			"tv.plex.PlexHTPC",                                       // Plex HTPC client for the big screen
 		)
 	}
 

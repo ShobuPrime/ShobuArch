@@ -327,6 +327,7 @@ func UserVariables(c *conf.Config) {
 	config_settings := []string{
 		`MOZ_ENABLE_WAYLAND=1`,
 		`MOZ_DBUS_REMOTE=1`,
+		`AMD_VULKAN_ICD=RADV`, // https://wiki.archlinux.org/title/Vulkan#Selecting_via_environment_variable
 	}
 
 	log.Println(`Creating "environment.conf"`)
@@ -389,11 +390,11 @@ func UserVariables(c *conf.Config) {
 
 	zshrc_contents := []string{
 		fmt.Sprintf(`alias ARCH_UP='%s -Syyu --needed --noconfirm; flatpak update --assumeyes'`, c.Pacman.AUR.Helper),
-		fmt.Sprintf(`alias DELETE_ORPHAN_PACKAGES='%s -Qtdq | %s -Rns -'; flatpak uninstall --assumeyes --unused`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
-		fmt.Sprintf(`alias LIST_ALL_PACKAGES='%s -Qq; flatpak list --columns=application | tail -n +1`, c.Pacman.AUR.Helper), // Ignore first line of output for Flatpak. Alternatives: awk '{if(NR>1)print}', sed -n '1!p'
+		fmt.Sprintf(`alias DELETE_ORPHAN_PACKAGES='%s -Qtdq | %s -Rns -; flatpak uninstall --assumeyes --unused'`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
+		fmt.Sprintf(`alias LIST_ALL_PACKAGES='%s -Qq; flatpak list --columns=application | tail -n +1'`, c.Pacman.AUR.Helper), // Ignore first line of output for Flatpak. Alternatives: awk '{if(NR>1)print}', sed -n '1!p'
 		fmt.Sprintf(`alias LIST_BROKEN_PACKAGES="%s -Qk | grep -v ' 0 missing files'"`, c.Pacman.AUR.Helper),
 		fmt.Sprintf(`#alias REPAIR_ALL_PACKAGES='for package in $(%s -Qq); do %s -S "$package" --noconfirm; done'`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
-		fmt.Sprintf(`alias REPAIR_ALL_PACKAGES='%s -Qq | %s -S -'; flatpak repair`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
+		fmt.Sprintf(`alias REPAIR_ALL_PACKAGES='%s -Qq | %s -S -; flatpak repair'`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
 		fmt.Sprintf(`alias REPAIR_BROKEN_PACKAGES="%s -Qk | grep -v ' 0 missing files' | cut -d: -f1 | %s -S -"`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
 	}
 	u.WriteFile(&zshrc_dir, &zshrc_file, &zshrc_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
@@ -465,28 +466,78 @@ func UserDotFiles(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
+	log.Println("Preparing environment for automatic systemd-nspawn scripts...")
+
+	log.Println(`Creating AutoLogin for systemd-nspawn container...`)
+	autologin_dir := filepath.Join("/", "mnt", "etc", "systemd", "system", "console-getty.service.d")
+	err := os.MkdirAll(autologin_dir, 0755)
+	if err != nil {
+		log.Fatal(err)
+	}
+
+	autologin_file := "autologin.conf"
+	autologin_contents := []string{
+		`[Service]`,
+		`ExecStart=`,
+		fmt.Sprintf(`ExecStart=-/sbin/agetty -o '-p -f -- \\u' --noclear --keep-baud --autologin %s - 115200,38400,9600 $TERM`, c.User.Username),
+	}
+	u.WriteFile(&autologin_dir, &autologin_file, &autologin_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+
+	log.Println("Compiling VSCode extension commands...")
+	cmd_list := []string{`sleep 3`}
 	for i := range c.Pacman.Packages {
 		switch c.Pacman.Packages[i] {
 		case "code":
 			// Install extensions
 			log.Println(`Installing VSCode Extensions`)
-			code_extensions := []string{
-				`golang.go`,
-				`ms-python.python`,
-				`shardulm94.trailing-spaces`,
+			code_extensions := []string{`shardulm94.trailing-spaces`,}
+			for i := range c.Pacman.Packages {
+				switch c.Pacman.Packages[i] {
+				case "docker":
+					code_extensions = append(code_extensions, `ms-azuretools.vscode-docker`)
+				case "go":
+					code_extensions = append(code_extensions, `golang.go`)
+				case "python":
+					code_extensions = append(code_extensions, `ms-python.python`)
+				}
 			}
 
 			for i := range code_extensions {
-				cmd := []string{
-					`code`,
-					`--install-extension`,
-					code_extensions[i],
-				}
-				z.Arch_chroot(&cmd, true, c)
+				cmd_list = append(cmd_list, fmt.Sprintf(`code --install-extension %s`, code_extensions[i]),
+				)
 			}
 
-			cmd := []string{`code`, `--list-extensions`}
-			z.Arch_chroot(&cmd, true, c)
+			cmd_list := append(cmd_list, `code --list-extensions`)
+
+			log.Println("Appending systemd-nspawn 'Get out of Jail for free' command...")
+			cmd_list = append(cmd_list, `sudo poweroff`)
+
+			log.Println("Ensuring VSCode extensions will automatically execute after mounting systemd-nspawn container...")
+			systemd_autorun_dir := filepath.Join("/", "mnt", "etc", "profile.d")
+			code_script := "install_code_extensions.sh"
+
+			log.Println(`Creating VSCode script for systemd-nspawn container...`)
+			u.WriteFile(&systemd_autorun_dir, &code_script, &cmd_list, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
+
+			log.Println("Making executable...")
+			cmd := fmt.Sprintf(`chmod +x %v`, filepath.Join(systemd_autorun_dir, code_script))
+			z.Shell(&cmd)
+
+			log.Println("Installing Code extensions via systemd-nspawn...")
+			z.Systemd_nspawn(&[]string{}, true, c)
+
+			log.Println("Cleaning up cruft...")
+			log.Println("Deleting: ", autologin_dir)
+			err = os.RemoveAll(autologin_dir)
+			if err != nil {
+				log.Fatalln(err)
+			}
+
+			log.Println("Deleting: ", filepath.Join(systemd_autorun_dir, code_script))
+			err = os.Remove(filepath.Join(systemd_autorun_dir, code_script))
+			if err != nil {
+				log.Fatalln(err)
+			}
 
 			log.Println(`Creating config for VSCode...`)
 			code_dir := filepath.Join("/", "mnt", "home", c.User.Username, ".config", "Code - OSS", "User")
