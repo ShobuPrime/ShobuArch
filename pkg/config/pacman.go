@@ -509,11 +509,11 @@ func AUR(c *Config) {
 			"enpass-bin",                  // A multiplatform password manager
 			"firefox-pwa-bin",             // Install, manage and use PWAs in Firefox (native component)
 			"macchina-bin",                // A system information fetcher/frontend, with an (unhealthy) emphasis on performance
-			//"mcmojave-cursors",          // X-cursor theme inspired by macOS and based on capitaine-cursors (Currently refuses to install via chroot)
+			//"mcmojave-cursors",          // X-cursor theme inspired by macOS and based on capitaine-cursors (Currently refuses to install via arch-chroot)
 			//"morgen-bin",                // Modern, intuitive and smart calendar application (Successor to MineTime)
 			//"nerd-dictation-git",        // Simple, hackable offline speech to text - using the VOSK-API.
 			//"sddm-sugar-dark",           // "Sweetest" Dark theme for SDDM
-			"ttf-ms-win11-auto",           // Microsoft Windows 11 TrueType fonts
+			// "ttf-ms-win11-auto",        // Microsoft Windows 11 TrueType fonts (Currently refuses to install via arch-chroot)
 		)
 
 		switch c.Storage.Filesystem {
