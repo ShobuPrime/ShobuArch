@@ -247,9 +247,7 @@ func SetupBaseSystem(c *conf.Config) {
 	`)
 
 	cmd_list := []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`}
-	for i := range c.Pacman.Packages {
-		cmd_list = append(cmd_list, c.Pacman.Packages[i])
-	}
+	cmd_list = append(cmd_list, c.Pacman.Packages...)
 	z.Arch_chroot(&cmd_list, false, c)
 
 	switch u.GetHostStatus().Chassis {
@@ -409,9 +407,7 @@ func SetupCustomRepos(c *conf.Config) {
 			`zfs.target`,
 		}
 
-		for i := range service_names {
-			cmd_list = append(cmd_list, service_names[i])
-		}
+		cmd_list = append(cmd_list, service_names...)
 		z.Arch_chroot(&cmd_list, false, c)
 
 		err := os.Remove("/mnt/archzfs.gpg")
@@ -1053,7 +1049,7 @@ func SetupFlatpaks(c *conf.Config) {
 	u.WriteFile(&autologin_dir, &autologin_file, &autologin_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 	log.Println("Compiling Flatpak commands...")
-	fp_install_cmd := `sudo flatpak install --assumeyes flathub`
+	fp_install_cmd := `sudo flatpak install --verbose --assumeyes flathub`
 	fp_override_cmd := `sudo flatpak override`
 	cmd_list := []string{`sleep 3`}
 	for i := range c.Flatpak.Packages {

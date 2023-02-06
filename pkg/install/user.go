@@ -203,9 +203,7 @@ func UserPackages(c *conf.Config) {
 	`)
 
 	cmd_list := []string{c.Pacman.AUR.Helper, `-Syyu`, `--needed`, `--noconfirm`}
-	for i := range c.Pacman.AUR.Packages {
-		cmd_list = append(cmd_list, c.Pacman.AUR.Packages[i])
-	}
+	cmd_list = append(cmd_list, c.Pacman.AUR.Packages...)
 	z.Arch_chroot(&cmd_list, true, c)
 
 	for i := range c.Pacman.AUR.Packages {
@@ -576,7 +574,7 @@ func UserDotFiles(c *conf.Config) {
 				`		"[\"-s\", \"-w\"]"`,
 				`	],`,
 				`	"python.formatting.provider": "black",`,
-				`	"editor.formatOnSave": true,`,
+				`	"editor.formatOnSave": true`,
 				`}`,
 			}
 			u.WriteFile(&code_dir, &code_file, &code_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
