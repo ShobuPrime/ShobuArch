@@ -482,6 +482,7 @@ func UserDotFiles(c *conf.Config) {
 	u.WriteFile(&autologin_dir, &autologin_file, &autologin_contents, os.O_APPEND|os.O_CREATE|os.O_WRONLY, 0755)
 
 	log.Println("Compiling VSCode extension commands...")
+	// Missing X server or $DISPLAY. The platform failed to initialize. Exiting. The futex facility returned an unexpected error code.
 	cmd_list := []string{`sleep 3`}
 	for i := range c.Pacman.Packages {
 		switch c.Pacman.Packages[i] {

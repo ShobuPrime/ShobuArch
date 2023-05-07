@@ -253,10 +253,13 @@ func SetupBaseSystem(c *conf.Config) {
 	switch u.GetHostStatus().Chassis {
 	case "vm":
 		log.Println("Virtual machine detected! Installing open-vm-tools")
-		cmd_list = []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`, `open-vm-tools`}
+		cmd_list = []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`, `open-vm-tools`, `spice-vdagent`}
 		z.Arch_chroot(&cmd_list, false, c)
 
-		cmd_list = []string{`systemctl`, `enable`, `vmtoolsd.service`, `vmware-vmblock-fuse.service`}
+		cmd_list = []string{`systemctl`, `enable`,
+			`vmtoolsd.service`, `vmware-vmblock-fuse.service`,
+			`spice-vdagentd.service`, `spice-vdagentd.socket`, `spice-webdavd.service`,
+		}
 		z.Arch_chroot(&cmd_list, false, c)
 	}
 
@@ -1235,8 +1238,8 @@ func SetupEFI(c *conf.Config) {
 			c.Parameters = append(c.Parameters, `intel_pstate=active`)
 		case "AuthenticAMD":
 			c.Modules = append(c.Modules, `amd_pstate`)
-			// Note: `amd_pstate=active` not expected until around Kernel v6.3
-			c.Parameters = append(c.Parameters, `amd_pstate=passive`)
+			// Note: `amd_pstate=active` implemented for Kernel v6.3+
+			c.Parameters = append(c.Parameters, `amd_pstate=active`)
 		}
 	}
 
