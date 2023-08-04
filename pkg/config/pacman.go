@@ -534,23 +534,26 @@ func Flatpak(c *Config) {
 	case "FULL":
 		c.Flatpak.Packages = append(c.Flatpak.Packages,
 			"com.belmoussaoui.Obfuscate",                             // Censor private information from images
-			//"com.brave.Browser",                                    // Web browser from Brave
-			"com.microsoft.Edge",                                     // Microsoft Edge Chromium Browser
+			"com.brave.Browser",                                      // Web browser from Brave
 			"com.getmailspring.Mailspring",                           // Email client
 			"com.github.alainm23.planner",                            // Never worry about forgetting things again
+			"com.github.jeromerobert.pdfarranger",                    // PDF Merging, Rearranging, Splitting, Rotating and Cropping
 			"com.github.liferooter.textpieces",                       // Transform text without random websites
 			"com.github.Matoking.protontricks",                       // Winetricks for Proton enabled games
 			"io.github.prateekmedia.appimagepool",                    // Simple, modern AppImageHub client
-			"com.github.tchx84.Flatseal",                             // Manage Flatpak permissions
 			"com.gitlab.bitseater.meteo",                             // Weather forecast app
+			"com.gitlab.davem.ClamTk",                                // GUI for Clam Antivirus (ClamAV)
+			"com.github.tchx84.Flatseal",                             // Manage Flatpak permissions
 			"com.github.wwmm.easyeffects",                            // Audio Effects for PipeWire Applications
 			"com.leinardi.gst",                                       // System utility designed to stress and monitor various hardware components
 			"com.obsproject.Studio",                                  // Live streaming and video recording software
+			"com.protonvpn.www",                                      // High-speed Swiss VPN that safeguards your privacy
 			"com.steamgriddb.steam-rom-manager",                      // Manage ROMs in Steam
 			"com.snes9x.Snes9x",                                      // Super Nintendo Emulator
 			"com.stepmania.StepMania",                                // Rhythm and Dance Game (DDR for PC)
 			"com.synology.SynologyDrive",                             // Powerful private cloud storage with no recurring fees
 			"com.usebottles.bottles",                                 // Sandox Windows Applications in Linux
+			//"com.visualstudio.code-oss",                            // Visual Studio Code. Code editing. Redefined.
 			"im.riot.Riot",                                           // Element -- Matrix Chat Client
 			"in.srev.guiscrcpy",                                      // Android Screen Mirroring Software
 			"io.github.antimicrox.antimicrox",                        // Map gamepad buttons
@@ -559,6 +562,8 @@ func Flatpak(c *Config) {
 			"io.github.simple64.simple64",                            // Nintendo 64 Emulator
 			"io.github.seadve.Kooha",                                 // Record your screen
 			"io.mgba.mGBA",                                           // Nintendo Game Boy Advance Emulator
+			"io.missioncenter.MissionCenter",                         // Monitor system resource usage
+			"it.cuteworks.pacmanlogviewer",                           // Inspect pacman logs
 			"md.obsidian.Obsidian",                                   // Markdown-based knowledge base
 			"media.emby.EmbyTheater",                                 // Emby (Media Server) client for desktop computers
 			"net.davidotek.pupgui2",                                  // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
@@ -578,6 +583,7 @@ func Flatpak(c *Config) {
 			"org.mozilla.Thunderbird",                                // Email, RSS, and newsgroup client with integrated spam filter
 			//"org.onlyoffice.desktopeditors",                        // OnlyOffice productivity suite
 			"org.ppsspp.PPSSPP",                                      // PlayStation Portable emulator
+			"org.upscayl.Upscayl",                                    // Free and Open Source AI Image Upscaler
 			"org.yuzu_emu.yuzu",                                      // Nintendo Switch emulator
 			"tv.plex.PlexDesktop",                                    // Plex client for desktop computers
 			"tv.plex.PlexHTPC",                                       // Plex HTPC client for the big screen
