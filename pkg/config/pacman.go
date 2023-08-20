@@ -35,6 +35,7 @@ func BasePkgs(c *Config) {
 		"flatpak",                // Sandboxed desktop applications on Linux.
 		"fwupd",                  // Daemon to update some devices' firmware
 		"go",                     // Core compiler tools for the Go programming language
+		"iptables-nft",           // Linux kernel packet control tool (using nft interface)
 		//"keepassxc",            // Cross-platform community-driven port of Keepass password manager
 		"libdbusmenu-glib",       // Library for passing menus over DBus
 		"lib32-pipewire",         // Low-latency audio/video router and processor -- 32bit
@@ -63,7 +64,6 @@ func BasePkgs(c *Config) {
 		"v4l2loopback-dkms",      // Virtual Camera for OBS-Studio
 		"wget",                   // Network utility to retrieve files from the
 		"wireplumber",            // Session & policy manager implementation for PipeWire
-		"wireplumber-docs",       // Documentation
 		"wpa_supplicant",         // A utility providing key negotiation for WPA wireless networks
 		"xdg-desktop-portal-gtk", // Prevent blurry text from GTK Flatpaks
 		"xdg-user-dirs",          // Manage user directories like ~/Desktop and ~/Music

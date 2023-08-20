@@ -140,7 +140,7 @@ func SetupMirrors(c *conf.Config) {
 	z.Arch_chroot(&cmd, false, c)
 
 	log.Println(`Detecting best mirrors...`)
-	cmd = []string{`reflector`, `-a`, `48`, `-c`, iso, `-f`, `5`, `-l`, `20`, `--sort rate`, `--save`, `/etc/pacman.d/mirrorlist`}
+	cmd = []string{`reflector`, `--protocol`, `https`, `--country`, iso, `--latest 20`, `--sort`, `rate`, `--ipv6`, `--fastest`, `5`, `--save`, `/etc/pacman.d/mirrorlist`}
 	z.Arch_chroot(&cmd, false, c)
 }
 
@@ -1238,8 +1238,8 @@ func SetupEFI(c *conf.Config) {
 			c.Parameters = append(c.Parameters, `intel_pstate=active`)
 		case "AuthenticAMD":
 			c.Modules = append(c.Modules, `amd_pstate`)
-			// Note: `amd_pstate=active` implemented for Kernel v6.3+
-			c.Parameters = append(c.Parameters, `amd_pstate=active`)
+			// Note: `amd_pstate={active,guided}` implemented for Kernel v6.3+
+			c.Parameters = append(c.Parameters, `amd_pstate=guided`)
 		}
 	}
 
