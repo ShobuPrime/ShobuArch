@@ -81,7 +81,7 @@ func Mirrors(c *conf.Config) {
 		`sed -n 's/^#ParallelDownloads/ParallelDownloads/g' /etc/pacman.conf`,
 		`pacman -Syy --noconfirm --needed reflector rsync`,
 		`cp /etc/pacman.d/mirrorlist /etc/pacman.d/mirrorlist.bak`,
-		fmt.Sprintf(`reflector --protocol https --country %s --latest 20 --sort rate --ipv6 --fastest 5 --save /etc/pacman.d/mirrorlist`, iso),
+		fmt.Sprintf(`reflector --protocol https --country %s --latest 10 --sort rate --ipv6 --fastest 5 --save /etc/pacman.d/mirrorlist`, iso),
 	)
 
 	for i := range cmd_list {

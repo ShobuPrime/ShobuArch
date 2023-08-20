@@ -140,7 +140,7 @@ func SetupMirrors(c *conf.Config) {
 	z.Arch_chroot(&cmd, false, c)
 
 	log.Println(`Detecting best mirrors...`)
-	cmd = []string{`reflector`, `--protocol`, `https`, `--country`, iso, `--latest 20`, `--sort`, `rate`, `--ipv6`, `--fastest`, `5`, `--save`, `/etc/pacman.d/mirrorlist`}
+	cmd = []string{`reflector`, `--protocol`, `https`, `--country`, iso, `--latest`, `10`, `--sort`, `rate`, `--ipv6`, `--fastest`, `5`, `--save`, `/etc/pacman.d/mirrorlist`}
 	z.Arch_chroot(&cmd, false, c)
 }
 
