@@ -123,9 +123,6 @@ func SetupMirrors(c *conf.Config) {
 	cmd = []string{`pacman`, `-Syy`, `--noconfirm`, `--needed`, `reflector`, `rsync`, `arch-install-scripts`, `git`}
 	z.Arch_chroot(&cmd, false, c)
 
-	// cmd = []string{`cp`, `/etc/pacman.d/mirrorlist`, `/etc/pacman.d.mirrorlist.bak`}
-	// z.Arch_chroot(&cmd, false, c)
-
 	// log.Println("Enabling parallel downloading...")
 	// cmd = []string{`sed`, `-i`, `s/^#ParallelDownloads/ParallelDownloads/g`, `/etc/pacman.conf`}
 	// z.Arch_chroot(&cmd, false, c)
@@ -135,13 +132,13 @@ func SetupMirrors(c *conf.Config) {
 	bash := `sed -i "/\[multilib\]/,/Include/"'s/^#//' /mnt/etc/pacman.conf`
 	z.Shell(&bash)
 
-	// log.Println(`Backing up mirror list...`)
-	// cmd = []string{`cp`, `/etc/pacman.d/mirrorlist`, `/etc/pacman.d/mirrorlist.backup`}
-	// z.Arch_chroot(&cmd, false, c)
+	log.Println(`Backing up mirror list...`)
+	cmd = []string{`cp`, `/etc/pacman.d/mirrorlist`, `/etc/pacman.d/mirrorlist.bak`}
+	z.Arch_chroot(&cmd, false, c)
 
-	// log.Println(`Detecting best mirrors...`)
-	// cmd = []string{`reflector`, `--protocol`, `https`, `--country`, iso, `--latest`, `10`, `--sort`, `rate`, `--ipv6`, `--fastest`, `5`, `--save`, `/etc/pacman.d/mirrorlist`}
-	// z.Arch_chroot(&cmd, false, c)
+	log.Println(`Detecting best mirrors...`)
+	cmd = []string{`reflector`, `--protocol`, `https`, `--country`, iso, `--latest`, `10`, `--sort`, `rate`, `--ipv6`, `--fastest`, `5`, `--save`, `/etc/pacman.d/mirrorlist`}
+	z.Arch_chroot(&cmd, false, c)
 }
 
 func SetupResources(c *conf.Config) {
