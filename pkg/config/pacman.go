@@ -36,6 +36,7 @@ func BasePkgs(c *Config) {
 		"fwupd",                  // Daemon to update some devices' firmware
 		"go",                     // Core compiler tools for the Go programming language
 		"iptables-nft",           // Linux kernel packet control tool (using nft interface)
+		"jq",                     // Command-line JSON processor
 		//"keepassxc",            // Cross-platform community-driven port of Keepass password manager
 		"libdbusmenu-glib",       // Library for passing menus over DBus
 		"lib32-pipewire",         // Low-latency audio/video router and processor -- 32bit
@@ -117,7 +118,6 @@ func KDE(c *Config) {
 			"kamera",                      // KDE integration for gphoto2 cameras
 			"kamoso",                      // A webcam recorder
 			"kalarm",                      // Personal alarm scheduler
-			"kalendar",                    // A calendar application using Akonadi to sync
 			"kate",                        // Advanced Text Editor
 			"kbackup",                     // Backup directories or files
 			"kcalc",                       // Scientific Calculator
@@ -159,6 +159,7 @@ func KDE(c *Config) {
 			"kwayland-integration",        // Integration plugins for KDE frameworks and Wayland
 			"kwrited",                     // KDE daemon listening for wall and write messages
 			"markdownpart",                // KPart for rendering Markdown content
+			"merkuro",                     // A calendar application using Akonadi to sync with external services
 			"okular",                      // Document Viewer
 			"oxygen",                      // KDE Oxygen style
 			"packagekit-qt5",              // Qt5 bindings for PackageKit
