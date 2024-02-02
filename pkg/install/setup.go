@@ -364,7 +364,7 @@ func SetupCustomRepos(c *conf.Config) {
 		cmd = []string{`pacman-key`, `-f`, `DDF7DB817396A49B2A2723F7403BD972F75D9D76`}
 		z.Arch_chroot(&cmd, false, c)
 
-		cmd = []string{`awk`, `BEGIN{ printf "# Origin Server - France\n" >> "/etc/pacman.conf" }`}
+		cmd = []string{`awk`, `BEGIN{ printf "# Origin Server - Finland\n" >> "/etc/pacman.conf" }`}
 		z.Arch_chroot(&cmd, false, c)
 
 		cmd = []string{`awk`, `BEGIN{ printf "Server = http://archzfs.com/$repo/x86_64\n" >> "/etc/pacman.conf" }`}
@@ -388,7 +388,7 @@ func SetupCustomRepos(c *conf.Config) {
 		cmd = []string{`awk`, `BEGIN{ printf "Server = https://mirror.in.themindsmaze.com/archzfs/$repo/x86_64\n" >> "/etc/pacman.conf" }`}
 		z.Arch_chroot(&cmd, false, c)
 
-		cmd = []string{`awk`, `BEGIN{ printf "# ArchZFS - US Mirror\n" >> "/etc/pacman.conf" }`}
+		cmd = []string{`awk`, `BEGIN{ printf "# ArchZFS - United States\n" >> "/etc/pacman.conf" }`}
 		z.Arch_chroot(&cmd, false, c)
 
 		cmd = []string{`awk`, `BEGIN{ printf "Server = https://zxcvfdsa.com/archzfs/$repo/$arch\n" >> "/etc/pacman.conf" }`}
@@ -730,9 +730,14 @@ func SetupMiscHardware(c *conf.Config) {
 			log.Printf("'%s' detected!\n", usb.USBDevices[i].Description)
 			log.Println("Appending Razer compatible package(s)...")
 
+			c.Pacman.Packages = append(c.Pacman.Packages,
+				"openrazer-daemon",      // Userspace daemon that abstracts access to the kernel driver. Provides a DBus service for applications to use
+				"openrazer-driver-dkms", // OpenRazer kernel modules sources
+				"python-openrazer",      // Library for interacting with the OpenRazer daemon
+			)
+
 			c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
-				"openrazer-meta", // Razer device drivers
-				"polychromatic",  // RGB management GUI for Razer Devices
+				"polychromatic", // RGB management GUI for Razer Devices
 			)
 		case strings.Contains(usb.USBDevices[i].Description, `Razer USA, Ltd Nari`):
 			log.Println("Appending Razer Nari compatible package(s)...")

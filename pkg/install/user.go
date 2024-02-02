@@ -323,9 +323,17 @@ func UserVariables(c *conf.Config) {
 	environment_config := "environment.conf"
 
 	config_settings := []string{
-		`MOZ_ENABLE_WAYLAND=1`,
+		// `MOZ_ENABLE_WAYLAND=1`, // Firefox 121.0 is supposed to have Wayland support enabled by default
 		`MOZ_DBUS_REMOTE=1`,
 		`AMD_VULKAN_ICD=RADV`, // https://wiki.archlinux.org/title/Vulkan#Selecting_via_environment_variable
+	}
+
+	switch c.Desktop.Environment {
+	case "kde":
+		config_settings = append(config_settings,
+			`SSH_ASKPASS='/usr/bin/ksshaskpass'`,
+			`SSH_ASKPASS_REQUIRE=prefer`,
+		)
 	}
 
 	log.Println(`Creating "environment.conf"`)
@@ -501,6 +509,14 @@ func UserDotFiles(c *conf.Config) {
 				}
 			}
 
+			// Aider Chat
+			// https://marketplace.visualstudio.com/items?itemName=MattFlower.aider
+			code_extensions = append(code_extensions, `MattFlower.aider`)
+
+			// Github CoPilot
+			// https://marketplace.visualstudio.com/items?itemName=GitHub.copilot
+			code_extensions = append(code_extensions, `GitHub.copilot`)
+
 			for i := range code_extensions {
 				cmd_list = append(cmd_list, fmt.Sprintf(`code --install-extension %s`, code_extensions[i]),
 				)
@@ -575,7 +591,9 @@ func UserDotFiles(c *conf.Config) {
 				`		"[\"-s\", \"-w\"]"`,
 				`	],`,
 				`	"python.formatting.provider": "black",`,
-				`	"editor.formatOnSave": true`,
+				`	"editor.formatOnSave": true,`,
+				`	"workbench.colorTheme": "Visual Studio Dark",`,
+				`	"editor.largeFileOptimizations": false`,
 				`}`,
 			}
 			u.WriteFile(&code_dir, &code_file, &code_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
@@ -584,10 +602,11 @@ func UserDotFiles(c *conf.Config) {
 			code_file = "argv.json"
 
 			// This configuration file allows you to pass permanent command line arguments to VS Code.
-			// https://github.com/microsoft/vscode-python/issues/20247#issuecomment-1350342224`
+			// https://github.com/microsoft/vscode-python/issues/20247#issuecomment-1350342224
+			// https://github.com/orgs/community/discussions/11509
 			code_contents = []string{
 				`{`,
-				`	"enable-proposed-api": ["ms-python.python"]`,
+				`	"enable-proposed-api": ["ms-python.python", "github.copilot"],`,
 				`}`,
 			}
 			u.WriteFile(&code_dir, &code_file, &code_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite

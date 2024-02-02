@@ -33,8 +33,10 @@ func BasePkgs(c *Config) {
 		"firefox",                // "Default" Web Browser
 		"firewalld",              // Firewall daemon with D-Bus interface
 		"flatpak",                // Sandboxed desktop applications on Linux.
+		"freerdp",                // Free implementation of the Remote Desktop Protocol (RDP)
 		"fwupd",                  // Daemon to update some devices' firmware
 		"go",                     // Core compiler tools for the Go programming language
+		"gnu-netcat",             // GNU rewrite of netcat, the network piping application (QEMU)
 		"iptables-nft",           // Linux kernel packet control tool (using nft interface)
 		"jq",                     // Command-line JSON processor
 		//"keepassxc",            // Cross-platform community-driven port of Keepass password manager
@@ -44,6 +46,7 @@ func BasePkgs(c *Config) {
 		"lib32-pipewire-v4l2",    // Pipewire V4L2 interceptor -- 32bit
 		"networkmanager",         // Network connection manager and user applications
 		"network-manager-applet", // Applet for managing network connections
+		"noto-fonts-emoji",       // Google Noto emoji fonts
 		"openssh",                // Premier connectivity tool for remote login with the SSH protocol
 		"os-prober",              // Utility to detect other OSes on a set of drives
 		"packagekit",             // A system designed to make installation and updates of packages easier
@@ -55,8 +58,8 @@ func BasePkgs(c *Config) {
 		"python",                 // Next generation of the python high-level scripting language
 		"python-black",           // Uncompromising Python code formatter
 		"python-pip",             // The PyPA recommended tool for installing Python packages
+		"python-pipx",            // Install and Run Python Applications in Isolated Environments
 		"qemu-full",              // A generic and open source machine emulator and virtualizer
-		"qpwgraph",               // PipeWire Graph Qt GUI Interface
 		"reflector",              // A Python 3 module and script to retrieve and filter the latest Pacman mirror list.
 		"rsync",                  // A fast and versatile file copying tool for remote and local files
 		"steam",                  // Valve's digital software delivery system
@@ -66,6 +69,7 @@ func BasePkgs(c *Config) {
 		"wget",                   // Network utility to retrieve files from the
 		"wireplumber",            // Session & policy manager implementation for PipeWire
 		"wpa_supplicant",         // A utility providing key negotiation for WPA wireless networks
+		//"x11-ssh-askpass",      // Lightweight passphrase dialog for SSH (QEMU)
 		"xdg-desktop-portal-gtk", // Prevent blurry text from GTK Flatpaks
 		"xdg-user-dirs",          // Manage user directories like ~/Desktop and ~/Music
 		"xdg-utils",              // Command line tools that assist applications with a variety of desktop integration tasks
@@ -134,7 +138,7 @@ func KDE(c *Config) {
 			"kdf",                         // View Disk Usage
 			"keditbookmarks",              // Bookmark Organizer and Editor
 			"kfind",                       // Find files/folders
-			"kgamma5",                     // Adjust monitor gamma settings
+			"kgamma",                      // Adjust monitor gamma settings
 			"kgpg",                        // GnuPG frontend
 			"khelpcenter",                 // KDE Applications documentation
 			"khotkeys",                    // KHotKeys
@@ -158,6 +162,7 @@ func KDE(c *Config) {
 			"kwave",                       // Sound editor
 			"kwayland-integration",        // Integration plugins for KDE frameworks and Wayland
 			"kwrited",                     // KDE daemon listening for wall and write messages
+			"maliit-keyboard",             // Virtual keyboard based on Maliit framework
 			"markdownpart",                // KPart for rendering Markdown content
 			"merkuro",                     // A calendar application using Akonadi to sync with external services
 			"okular",                      // Document Viewer
@@ -558,7 +563,6 @@ func Flatpak(c *Config) {
 			"im.riot.Riot",                                           // Element -- Matrix Chat Client
 			"in.srev.guiscrcpy",                                      // Android Screen Mirroring Software
 			"io.github.antimicrox.antimicrox",                        // Map gamepad buttons
-			"io.github.hakandundar34coding.system-monitoring-center", // Multi-featured system monitor
 			"io.github.peazip.PeaZip",                                // File Archiver Utility (RAR, TAR, ZIP)
 			"io.github.simple64.simple64",                            // Nintendo 64 Emulator
 			"io.github.seadve.Kooha",                                 // Record your screen
@@ -584,6 +588,7 @@ func Flatpak(c *Config) {
 			"org.mozilla.Thunderbird",                                // Email, RSS, and newsgroup client with integrated spam filter
 			//"org.onlyoffice.desktopeditors",                        // OnlyOffice productivity suite
 			"org.ppsspp.PPSSPP",                                      // PlayStation Portable emulator
+			"org.rncbc.qpwgraph",                                     // PipeWire Graph Qt GUI Interface
 			"org.upscayl.Upscayl",                                    // Free and Open Source AI Image Upscaler
 			"org.yuzu_emu.yuzu",                                      // Nintendo Switch emulator
 			"tv.plex.PlexDesktop",                                    // Plex client for desktop computers
@@ -616,3 +621,5 @@ func PWA(c *Config) {
 
 	SaveConfig(c)
 }
+
+// Make a note to update /usr/bin/steam-runtime to include `env LD_PRELOAD=/usr/lib32/libextest.so` between `exec` and `/usr/lib/steam/steam "$@"`
