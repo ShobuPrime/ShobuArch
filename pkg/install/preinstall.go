@@ -53,7 +53,7 @@ func Prerequisites(c *conf.Config) {
 	-------------------------------------------------------------------------
 	`)
 
-	prereqs := `pacman -Syy --noconfirm --needed btrfs-progs glibc gptfdisk sbctl sed sudo`
+	prereqs := `pacman -Syy --noconfirm --needed btrfs-progs glibc gptfdisk sbctl sed sudo iptables-nft`
 	z.Shell(&prereqs)
 }
 
