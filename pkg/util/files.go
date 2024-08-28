@@ -71,7 +71,7 @@ func WriteFile(filePath *string, fileName *string, fileContents *[]string, fileF
 	if err != nil {
 		log.Fatalln(err)
 	}
-	
+
 	log.Printf("Changing directory to %q", *filePath)
 	if err := os.Chdir(*filePath); err != nil {
 		log.Fatalln(err)
@@ -82,7 +82,7 @@ func WriteFile(filePath *string, fileName *string, fileContents *[]string, fileF
 		log.Fatalln(err)
 	}
 	log.Println(`Saving settings`)
-	if _, err := f.Write([]byte(strings.Join(*fileContents, "\n")+"\n")); err != nil {
+	if _, err := f.Write([]byte(strings.Join(*fileContents, "\n") + "\n")); err != nil {
 		log.Fatalln(err)
 	}
 	log.Println(`Closing file`)

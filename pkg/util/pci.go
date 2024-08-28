@@ -35,8 +35,8 @@ type PCIDevice struct {
 	SDevice    string `json:"SDevice,omitempty"`
 	Rev        string `json:"Rev,omitempty"` //int
 	ProgIf     string `json:"ProgIf,omitempty"`
-	PhySlot    string `json:"PhySlot,omitempty"`   //int
-	NUMANode   string `json:"NUMANode,omitempty"`  //int
+	PhySlot    string `json:"PhySlot,omitempty"`    //int
+	NUMANode   string `json:"NUMANode,omitempty"`   //int
 	IOMMUGroup string `json:"IOMMUGroup,omitempty"` //int
 }
 

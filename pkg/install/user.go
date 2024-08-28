@@ -402,6 +402,14 @@ func UserVariables(c *conf.Config) {
 		fmt.Sprintf(`#alias REPAIR_ALL_PACKAGES='for package in $(%s -Qq); do %s -S "$package" --noconfirm; done'`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
 		fmt.Sprintf(`alias REPAIR_ALL_PACKAGES='%s -Qq | %s -S -; flatpak repair'`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
 		fmt.Sprintf(`alias REPAIR_BROKEN_PACKAGES="%s -Qk | grep -v ' 0 missing files' | cut -d: -f1 | %s -S -"`, c.Pacman.AUR.Helper, c.Pacman.AUR.Helper),
+		`alias sshme='killall ssh-agent; eval $(ssh-agent -s); ssh-add ~/.ssh/id_ed25519'`, // To Do: Create SSH key
+	}
+
+	for i := range c.Pacman.Packages {
+		switch c.Pacman.Packages[i] {
+		case "go":
+			zshrc_contents = append(zshrc_contents, ``, `export PATH=$PATH:$(go env GOPATH)/bin`)
+		}
 	}
 	u.WriteFile(&zshrc_dir, &zshrc_file, &zshrc_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite
 	u.ReadFile(&zshrc_dir, &zshrc_file)
@@ -497,7 +505,7 @@ func UserDotFiles(c *conf.Config) {
 		case "code":
 			// Install extensions
 			log.Println(`Installing VSCode Extensions`)
-			code_extensions := []string{`shardulm94.trailing-spaces`,}
+			code_extensions := []string{`shardulm94.trailing-spaces`}
 			for i := range c.Pacman.Packages {
 				switch c.Pacman.Packages[i] {
 				case "docker":
@@ -518,8 +526,7 @@ func UserDotFiles(c *conf.Config) {
 			code_extensions = append(code_extensions, `GitHub.copilot`)
 
 			for i := range code_extensions {
-				cmd_list = append(cmd_list, fmt.Sprintf(`code --install-extension %s`, code_extensions[i]),
-				)
+				cmd_list = append(cmd_list, fmt.Sprintf(`code --install-extension %s`, code_extensions[i]))
 			}
 
 			cmd_list := append(cmd_list, `code --list-extensions`)

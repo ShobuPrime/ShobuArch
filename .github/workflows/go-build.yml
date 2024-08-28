@@ -17,27 +17,27 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@master
-      
+
       - name: Checkout
         uses: actions/checkout@master
-        
+
       - name: Set up Go
         uses: actions/setup-go@master
         with:
-         go-version: 1.18
-        
+         go-version: 1.23
+
       - name: Build
         run: go build -o ./.build/ -v ./...
-        
+
       - name: Test
         run: go test -v ./...
-        
+
       # - name: Upload Artifact
       #   uses: actions/upload-artifact@master
       #   with:
       #     name: ShobuArch
       #     path: ./.build/
-          
+
       - name: Commit Build
         run: |
          git config --global user.name '${{ secrets.GIT_USER }}'
@@ -46,4 +46,4 @@ jobs:
          git add -A
          git commit -am "Automated Build"
          git push origin main
- 
+

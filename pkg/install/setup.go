@@ -492,10 +492,13 @@ func SetupGraphics(c *conf.Config) {
 					`lib32-vulkan-radeon`,
 					`libva-mesa-driver`,
 					`mesa`,
+					`rocm-opencl-runtime`,
 					`vulkan-icd-loader`,
 					`vulkan-radeon`,
 					`xf86-video-amdgpu`,
 				)
+				c.Parameters = append(c.Parameters, `amdgpu.ppfeaturemask=0xffffffff`) // Adjust clocks and voltages (https://wiki.archlinux.org/title/AMDGPU#Boot_parameter)
+				c.Parameters = append(c.Parameters, `amdgpu.abmlevel=0`)               // Disable panel_power_savings (https://lore.kernel.org/lkml/a1d2749b-8db5-46d1-bf60-7820902cfc8f@amd.com/T/)
 			case "Intel Corporation":
 				cmd = append(cmd,
 					`lib32-mesa`,

@@ -21,6 +21,7 @@ func BasePkgs(c *Config) {
 
 	c.Pacman.Packages = append(c.Pacman.Packages,
 		"apparmor",               // Mandatory Access Control (MAC) using Linux Security Module (LSM)
+		"arch-wiki-docs",         // Arch Wiki Documentation (Offline)
 		"cockpit",                // A systemd web based user interface for Linux servers
 		"cockpit-machines",       // Cockpit UI for virtual machines
 		"cockpit-packagekit",     // Packages UI for Cockpit
@@ -63,6 +64,7 @@ func BasePkgs(c *Config) {
 		"reflector",              // A Python 3 module and script to retrieve and filter the latest Pacman mirror list.
 		"rsync",                  // A fast and versatile file copying tool for remote and local files
 		"steam",                  // Valve's digital software delivery system
+		"system-config-printer",  // A CUPS printer configuration tool and status applet
 		"terminus-font",          // Monospace bitmap font (for X11 and console)
 		"virt-manager",           // Desktop user interface for managing virtual machines
 		"v4l2loopback-dkms",      // Virtual Camera for OBS-Studio
@@ -178,7 +180,7 @@ func KDE(c *Config) {
 			"plasma-systemmonitor",        // Interface for monitoring system sensors, process information and other system resources
 			"plasma-thunderbolt",          // Control Thunderbolt devices
 			"plasma-vault",                // Plasma applet and services for creating encrypted vaults
-			"plasma-wayland-session",      // Plasma Wayland session
+			"plasma-workspace",            // KDE Plasma Workspace
 			"plasma-workspace-wallpapers", // Additional wallpapers for the Plasma Workspace
 			"powerdevil",                  // Manages the power consumption settings of a Plasma Shell
 			"print-manager",               // Tool for managing print jobs and printers
@@ -190,6 +192,175 @@ func KDE(c *Config) {
 			"sweeper",                     // System Cleaner
 			"xdg-desktop-portal-kde",      // Backend implementation for x-d-p using Qt/KF5
 			"yakuake",                     // Drop-down terminal emulator based on KDE konsole technology
+		)
+	case "FLATPAK":
+		c.Flatpak.Packages = append(c.Flatpak.Packages,
+			"org.kde.ark",
+			"org.kde.dolphin",
+			"org.kde.filelight",
+			"org.kde.gwenview",
+			"org.kde.kile",
+			"org.kde.okular",
+			"org.kde.kdenlive",
+			"org.kde.koko",
+			"org.kde.spectacle",
+			"org.kde.okteta",
+			"org.kde.kasts",
+			"org.kde.kmplayer",
+			"org.kde.haruna",
+			"org.kde.neochat",
+			"org.kde.tokodon",
+			"org.kde.kxstitch",
+			"org.kde.skrooge",
+			"org.kde.itinerary",
+			"org.kde.skanpage",
+			"org.kde.kontact",
+			"org.kde.konsole",
+			"org.kde.akregator",
+			"org.kde.arianna",
+			"org.kde.kopete",
+			"org.kde.elisa",
+			"org.kde.kdevelop",
+			"org.kde.lokalize",
+			"org.kde.umbrello",
+			"org.kde.ktechlab",
+			"org.kde.peruse",
+			"org.kde.ktorrent",
+			"org.kde.kget",
+			"org.kde.kgeotag",
+			"org.kde.massif-visualizer",
+			"org.kde.tellico",
+			"org.kde.krdc",
+			"org.kde.ksirk",
+			"org.kde.konversation",
+			"org.kde.gcompris",
+			"org.kde.kpat",
+			"org.kde.kbibtex",
+			"org.kde.labplot2",
+			"org.kde.cantor",
+			"org.kde.digikam",
+			"org.kde.kphotoalbum",
+			"org.kde.krita",
+			"org.kde.plasmatube",
+			"org.kde.amarok",
+			"org.kde.trojita",
+			"org.kde.rocs",
+			"org.kde.kleopatra",
+			"org.kde.kdiff3",
+			"org.kde.kgraphviewer",
+			"org.kde.qmlkonsole",
+			"org.kde.kjumpingcube",
+			"org.kde.klickety",
+			"org.kde.klettres",
+			"org.kde.yakuake",
+			"org.kde.kimagemapeditor",
+			"org.kde.kweather",
+			"org.kde.ktrip",
+			"org.kde.kongress",
+			"org.kde.keysmith",
+			"org.kde.pix",
+			"org.kde.picmi",
+			"org.kde.parley",
+			"org.kde.palapeli",
+			"org.kde.minuet",
+			"org.kde.marble",
+			"org.kde.kwrite",
+			"org.kde.kwordquiz",
+			"org.kde.kwalletmanager5",
+			"org.kde.kuiviewer",
+			"org.kde.kubrick",
+			"org.kde.kturtle",
+			"org.kde.ktuberling",
+			"org.kde.artikulate",
+			"org.kde.atlantik",
+			"org.kde.audiotube",
+			"org.kde.blinken",
+			"org.kde.bomber",
+			"org.kde.bovo",
+			"org.kde.alligator",
+			"org.kde.angelfish",
+			"org.kde.falkon",
+			"org.kde.granatier",
+			"org.kde.juk",
+			"org.kde.kalgebra",
+			"org.kde.kalzium",
+			"org.kde.kamoso",
+			"org.kde.kate",
+			"org.kde.kblocks",
+			"org.kde.kigo",
+			"org.kde.killbots",
+			"org.kde.kanagram",
+			"org.kde.kapman",
+			"org.kde.katomic",
+			"org.kde.kblackbox",
+			"org.kde.kreversi",
+			"org.kde.kruler",
+			"org.kde.ksnakeduel",
+			"org.kde.kdf",
+			"org.kde.kcolorchooser",
+			"org.kde.kcalc",
+			"org.kde.kcachegrind",
+			"org.kde.kbreakout",
+			"org.kde.kbruch",
+			"org.kde.kfourinline",
+			"org.kde.kfind",
+			"org.kde.kdiamond",
+			"org.kde.kgeography",
+			"org.kde.khangman",
+			"org.kde.kgoldrunner",
+			"org.kde.kig",
+			"org.kde.kiriki",
+			"org.kde.kiten",
+			"org.kde.kmahjongg",
+			"org.kde.klines",
+			"org.kde.kmines",
+			"org.kde.vvave",
+			"org.kde.krename",
+			"org.kde.kmymoney",
+			"org.kde.kontrast",
+			"org.kde.kmplot",
+			"org.kde.knetwalk",
+			"org.kde.konquest",
+			"org.kde.kompare",
+			"org.kde.kolourpaint",
+			"org.kde.kollision",
+			"org.kde.kolf",
+			"org.kde.knights",
+			"org.kde.knavalbattle",
+			"org.kde.ktouch",
+			"org.kde.kteatime",
+			"org.kde.ksudoku",
+			"org.kde.ksquares",
+			"org.kde.lskat",
+			"org.kde.kclock",
+			"org.kde.kalk",
+			"org.kde.index",
+			"org.kde.nota",
+			"org.kde.kommit",
+			"org.kde.subtitlecomposer",
+			"org.kde.isoimagewriter",
+			"org.kde.PlatformTheme.QGnomePlatform",
+			"org.kde.kronometer",
+			"org.kde.skanlite",
+			"org.kde.krusader",
+			"org.kde.francis",
+			"org.kde.WaylandDecoration.QAdwaitaDecorations",
+			"org.kde.kid3",
+			"org.kde.ruqola",
+			"org.kde.KStyle.Kvantum",
+			"org.kde.telly-skout",
+			"org.kde.kst",
+			"org.kde.KStyle.Adwaita",
+			"org.kde.KStyle.HighContrast",
+			"org.kde.kstars",
+			"org.kde.ktimetracker",
+			"org.kde.SymbolEditor",
+			"org.kde.kaffeine",
+			"org.kde.Ikona",
+			"org.kde.choqok",
+			"org.kde.WaylandDecoration.QGnomePlatform-decoration",
+			"org.kde.PlatformInputContexts.MaliitSailfishOS",
+			"org.kde.PlatformTheme.QtSNI",
 		)
 	}
 
@@ -539,60 +710,60 @@ func Flatpak(c *Config) {
 	case "MINIMAL":
 	case "FULL":
 		c.Flatpak.Packages = append(c.Flatpak.Packages,
-			"com.belmoussaoui.Obfuscate",                             // Censor private information from images
-			"com.brave.Browser",                                      // Web browser from Brave
-			"com.getmailspring.Mailspring",                           // Email client
-			"com.github.alainm23.planner",                            // Never worry about forgetting things again
-			"com.github.jeromerobert.pdfarranger",                    // PDF Merging, Rearranging, Splitting, Rotating and Cropping
-			"com.github.liferooter.textpieces",                       // Transform text without random websites
-			"com.github.Matoking.protontricks",                       // Winetricks for Proton enabled games
-			"io.github.prateekmedia.appimagepool",                    // Simple, modern AppImageHub client
-			"com.gitlab.bitseater.meteo",                             // Weather forecast app
-			"com.gitlab.davem.ClamTk",                                // GUI for Clam Antivirus (ClamAV)
-			"com.github.tchx84.Flatseal",                             // Manage Flatpak permissions
-			"com.github.wwmm.easyeffects",                            // Audio Effects for PipeWire Applications
-			"com.leinardi.gst",                                       // System utility designed to stress and monitor various hardware components
-			"com.obsproject.Studio",                                  // Live streaming and video recording software
-			"com.protonvpn.www",                                      // High-speed Swiss VPN that safeguards your privacy
-			"com.steamgriddb.steam-rom-manager",                      // Manage ROMs in Steam
-			"com.snes9x.Snes9x",                                      // Super Nintendo Emulator
-			"com.stepmania.StepMania",                                // Rhythm and Dance Game (DDR for PC)
-			"com.synology.SynologyDrive",                             // Powerful private cloud storage with no recurring fees
-			"com.usebottles.bottles",                                 // Sandox Windows Applications in Linux
-			//"com.visualstudio.code-oss",                            // Visual Studio Code. Code editing. Redefined.
-			"im.riot.Riot",                                           // Element -- Matrix Chat Client
-			"in.srev.guiscrcpy",                                      // Android Screen Mirroring Software
-			"io.github.antimicrox.antimicrox",                        // Map gamepad buttons
-			"io.github.peazip.PeaZip",                                // File Archiver Utility (RAR, TAR, ZIP)
-			"io.github.simple64.simple64",                            // Nintendo 64 Emulator
-			"io.github.seadve.Kooha",                                 // Record your screen
-			"io.mgba.mGBA",                                           // Nintendo Game Boy Advance Emulator
-			"io.missioncenter.MissionCenter",                         // Monitor system resource usage
-			"it.cuteworks.pacmanlogviewer",                           // Inspect pacman logs
-			"md.obsidian.Obsidian",                                   // Markdown-based knowledge base
-			"media.emby.EmbyTheater",                                 // Emby (Media Server) client for desktop computers
-			"net.davidotek.pupgui2",                                  // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
-			"net.filebot.FileBot",                                    // Ultimate TV and Movie Renamer
-			"net.kuribo64.melonDS",                                   // Nintendo DS and DSi emulator
-			"net.pcsx2.PCSX2",                                        // Playstation 2 emulator
-			"org.citra_emu.citra",                                    // Nintendo 3DS emulator
-			"org.DolphinEmu.dolphin-emu",                             // Nintendo GameCube and Wii emulator
-			"org.gimp.GIMP",                                          // Create images and edit photographs
-			"org.gnome.Firmware",                                     // Install firmware on devices
-			//"org.gnome.Maps",                                       // Find places around the world
-			"org.kde.kdenlive",                                       // Non-linear video editor for Linux
-			//"org.keepassxc.KeePassXC",                              // Cross-platform community-driven port of Keepass password manager
-			"org.libreoffice.LibreOffice",                            // LibreOffice productivity suite
-			"org.libretro.RetroArch",                                 // Frontend for emulators, game engines and media players
-			"org.mixxx.Mixxx",                                        // DJ Mixing software (Traktor alternative)
-			"org.mozilla.Thunderbird",                                // Email, RSS, and newsgroup client with integrated spam filter
-			//"org.onlyoffice.desktopeditors",                        // OnlyOffice productivity suite
-			"org.ppsspp.PPSSPP",                                      // PlayStation Portable emulator
-			"org.rncbc.qpwgraph",                                     // PipeWire Graph Qt GUI Interface
-			"org.upscayl.Upscayl",                                    // Free and Open Source AI Image Upscaler
-			"org.yuzu_emu.yuzu",                                      // Nintendo Switch emulator
-			"tv.plex.PlexDesktop",                                    // Plex client for desktop computers
-			"tv.plex.PlexHTPC",                                       // Plex HTPC client for the big screen
+			"com.belmoussaoui.Obfuscate",          // Censor private information from images
+			"com.brave.Browser",                   // Web browser from Brave
+			"com.getmailspring.Mailspring",        // Email client
+			"com.github.alainm23.planner",         // Never worry about forgetting things again
+			"com.github.jeromerobert.pdfarranger", // PDF Merging, Rearranging, Splitting, Rotating and Cropping
+			"com.github.liferooter.textpieces",    // Transform text without random websites
+			"com.github.Matoking.protontricks",    // Winetricks for Proton enabled games
+			"io.github.prateekmedia.appimagepool", // Simple, modern AppImageHub client
+			"com.gitlab.bitseater.meteo",          // Weather forecast app
+			"com.gitlab.davem.ClamTk",             // GUI for Clam Antivirus (ClamAV)
+			"com.github.tchx84.Flatseal",          // Manage Flatpak permissions
+			"com.github.wwmm.easyeffects",         // Audio Effects for PipeWire Applications
+			"com.leinardi.gst",                    // System utility designed to stress and monitor various hardware components
+			"com.obsproject.Studio",               // Live streaming and video recording software
+			"com.protonvpn.www",                   // High-speed Swiss VPN that safeguards your privacy
+			"com.steamgriddb.steam-rom-manager",   // Manage ROMs in Steam
+			"com.snes9x.Snes9x",                   // Super Nintendo Emulator
+			"com.stepmania.StepMania",             // Rhythm and Dance Game (DDR for PC)
+			"com.synology.SynologyDrive",          // Powerful private cloud storage with no recurring fees
+			"com.usebottles.bottles",              // Sandox Windows Applications in Linux
+			//"com.visualstudio.code-oss",         // Visual Studio Code. Code editing. Redefined.
+			"im.riot.Riot",                        // Element -- Matrix Chat Client
+			"in.srev.guiscrcpy",                   // Android Screen Mirroring Software
+			"io.github.antimicrox.antimicrox",     // Map gamepad buttons
+			"io.github.peazip.PeaZip",             // File Archiver Utility (RAR, TAR, ZIP)
+			"io.github.simple64.simple64",         // Nintendo 64 Emulator
+			"io.github.seadve.Kooha",              // Record your screen
+			"io.mgba.mGBA",                        // Nintendo Game Boy Advance Emulator
+			"io.missioncenter.MissionCenter",      // Monitor system resource usage
+			"it.cuteworks.pacmanlogviewer",        // Inspect pacman logs
+			"md.obsidian.Obsidian",                // Markdown-based knowledge base
+			"media.emby.EmbyTheater",              // Emby (Media Server) client for desktop computers
+			"net.davidotek.pupgui2",               // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
+			"net.filebot.FileBot",                 // Ultimate TV and Movie Renamer
+			"net.kuribo64.melonDS",                // Nintendo DS and DSi emulator
+			"net.pcsx2.PCSX2",                     // Playstation 2 emulator
+			"org.citra_emu.citra",                 // Nintendo 3DS emulator
+			"org.DolphinEmu.dolphin-emu",          // Nintendo GameCube and Wii emulator
+			"org.gimp.GIMP",                       // Create images and edit photographs
+			"org.gnome.Firmware",                  // Install firmware on devices
+			//"org.gnome.Maps",                    // Find places around the world
+			"org.kde.kdenlive",                    // Non-linear video editor for Linux
+			//"org.keepassxc.KeePassXC",           // Cross-platform community-driven port of Keepass password manager
+			"org.libreoffice.LibreOffice",         // LibreOffice productivity suite
+			"org.libretro.RetroArch",              // Frontend for emulators, game engines and media players
+			"org.mixxx.Mixxx",                     // DJ Mixing software (Traktor alternative)
+			"org.mozilla.Thunderbird",             // Email, RSS, and newsgroup client with integrated spam filter
+			//"org.onlyoffice.desktopeditors",     // OnlyOffice productivity suite
+			"org.ppsspp.PPSSPP",                   // PlayStation Portable emulator
+			"org.rncbc.qpwgraph",                  // PipeWire Graph Qt GUI Interface
+			"org.upscayl.Upscayl",                 // Free and Open Source AI Image Upscaler
+			"org.yuzu_emu.yuzu",                   // Nintendo Switch emulator
+			"tv.plex.PlexDesktop",                 // Plex client for desktop computers
+			"tv.plex.PlexHTPC",                    // Plex HTPC client for the big screen
 		)
 	}
 
@@ -602,10 +773,10 @@ func Flatpak(c *Config) {
 func PWA(c *Config) {
 
 	messages := Site{
-		Name: "Messages",
+		Name:        "Messages",
 		Description: "Simple, helpful messaging by Google",
-		StartUrl: "https://messages.google.com/web",
-		Manifest: "manifest.json",
+		StartUrl:    "https://messages.google.com/web",
+		Manifest:    "manifest.json",
 	}
 
 	c.PWA.Sites = append(c.PWA.Sites, messages)
