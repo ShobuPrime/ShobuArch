@@ -209,7 +209,7 @@ func UserPackages(c *conf.Config) {
 	for i := range c.Pacman.AUR.Packages {
 		switch c.Pacman.AUR.Packages[i] {
 		case "bcompare":
-			log.Println("Service menus for Beyond Compare 4")
+			log.Println("Service menus for Beyond Compare 5")
 			cmd_list = []string{c.Pacman.AUR.Helper, `-Syyu`, `--needed`, `--noconfirm`}
 			switch c.Desktop.Environment {
 			case "cinnamon":
@@ -222,7 +222,7 @@ func UserPackages(c *conf.Config) {
 				cmd_list = append(cmd_list, `bcompare-mate`)
 				z.Arch_chroot(&cmd_list, true, c)
 			case "kde":
-				cmd_list = append(cmd_list, `bcompare-kde5`)
+				cmd_list = append(cmd_list, `bcompare-kde6`)
 				z.Arch_chroot(&cmd_list, true, c)
 			case "xfce":
 				cmd_list = append(cmd_list, `bcompare-thunar`)
@@ -509,7 +509,7 @@ func UserDotFiles(c *conf.Config) {
 			for i := range c.Pacman.Packages {
 				switch c.Pacman.Packages[i] {
 				case "docker":
-					code_extensions = append(code_extensions, `ms-azuretools.vscode-docker`)
+					code_extensions = append(code_extensions, `ms-azuretools.vscode-containers`)
 				case "go":
 					code_extensions = append(code_extensions, `golang.go`)
 				case "python":
@@ -517,13 +517,9 @@ func UserDotFiles(c *conf.Config) {
 				}
 			}
 
-			// Aider Chat
-			// https://marketplace.visualstudio.com/items?itemName=MattFlower.aider
-			code_extensions = append(code_extensions, `MattFlower.aider`)
-
-			// Github CoPilot
-			// https://marketplace.visualstudio.com/items?itemName=GitHub.copilot
-			code_extensions = append(code_extensions, `GitHub.copilot`)
+			// Remote SSH
+			// https://open-vsx.org/extension/jeanp413/open-remote-ssh
+			code_extensions = append(code_extensions, `jeanp413.open-remote-ssh`)
 
 			for i := range code_extensions {
 				cmd_list = append(cmd_list, fmt.Sprintf(`code --install-extension %s`, code_extensions[i]))
@@ -613,7 +609,7 @@ func UserDotFiles(c *conf.Config) {
 			// https://github.com/orgs/community/discussions/11509
 			code_contents = []string{
 				`{`,
-				`	"enable-proposed-api": ["ms-python.python", "github.copilot"],`,
+				`	"enable-proposed-api": ["ms-python.python", "jeanp413.open-remote-ssh"],`,
 				`}`,
 			}
 			u.WriteFile(&code_dir, &code_file, &code_contents, os.O_CREATE|os.O_RDWR|os.O_TRUNC, 0755) // Overwrite

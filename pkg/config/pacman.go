@@ -30,8 +30,10 @@ func BasePkgs(c *Config) {
 		"dmidecode",              // Desktop Management Interface table related utilities
 		"dnsmasq",                // Lightweight, easy to configure DNS forwarder and DHCP server
 		"docker",                 // Pack, ship and run any application as a lightweight container
+		"docker-buildx",          // Docker CLI plugin for extended build capabilities
 		"efibootmgr",             // Linux user-space application to modify the EFI Boot Manager
 		"firefox",                // "Default" Web Browser
+		"firefoxpwa",             // Install, manage and use PWAs in Firefox (native component)
 		"firewalld",              // Firewall daemon with D-Bus interface
 		"flatpak",                // Sandboxed desktop applications on Linux.
 		"freerdp",                // Free implementation of the Remote Desktop Protocol (RDP)
@@ -39,6 +41,7 @@ func BasePkgs(c *Config) {
 		"go",                     // Core compiler tools for the Go programming language
 		"gnu-netcat",             // GNU rewrite of netcat, the network piping application (QEMU)
 		"iptables-nft",           // Linux kernel packet control tool (using nft interface)
+		"ipp-usb",                // IPP USB Printer Driver
 		"jq",                     // Command-line JSON processor
 		//"keepassxc",            // Cross-platform community-driven port of Keepass password manager
 		"libdbusmenu-glib",       // Library for passing menus over DBus
@@ -63,9 +66,11 @@ func BasePkgs(c *Config) {
 		"qemu-full",              // A generic and open source machine emulator and virtualizer
 		"reflector",              // A Python 3 module and script to retrieve and filter the latest Pacman mirror list.
 		"rsync",                  // A fast and versatile file copying tool for remote and local files
+		"sane-airscan",           // SANE - SANE backend for AirScan (eSCL) and WSD document scanners
 		"steam",                  // Valve's digital software delivery system
 		"system-config-printer",  // A CUPS printer configuration tool and status applet
 		"terminus-font",          // Monospace bitmap font (for X11 and console)
+		"unrar",                  // Extract, view and test RAR archives
 		"virt-manager",           // Desktop user interface for managing virtual machines
 		"v4l2loopback-dkms",      // Virtual Camera for OBS-Studio
 		"wget",                   // Network utility to retrieve files from the
@@ -75,6 +80,7 @@ func BasePkgs(c *Config) {
 		"xdg-desktop-portal-gtk", // Prevent blurry text from GTK Flatpaks
 		"xdg-user-dirs",          // Manage user directories like ~/Desktop and ~/Music
 		"xdg-utils",              // Command line tools that assist applications with a variety of desktop integration tasks
+		"yq",                     // A lightweight and portable command-line YAML processor
 	)
 
 	SaveConfig(c)
@@ -143,7 +149,6 @@ func KDE(c *Config) {
 			"kgamma",                      // Adjust monitor gamma settings
 			"kgpg",                        // GnuPG frontend
 			"khelpcenter",                 // KDE Applications documentation
-			"khotkeys",                    // KHotKeys
 			"kimagemapeditor",             // HTML Image Map Editor
 			"kinfocenter",                 // Provides information about a computer system
 			"kleopatra",                   // Certificate Manager and Unified Crypto GUI
@@ -681,11 +686,9 @@ func AUR(c *Config) {
 		// )
 	case "FULL":
 		c.Pacman.AUR.Packages = append(c.Pacman.AUR.Packages,
-			"bcompare",                    // Beyond Compare 4
+			"bcompare",                    // Beyond Compare 5
 			"cockpit-navigator-git",       // File Browser for Cockpit
 			"enpass-bin",                  // A multiplatform password manager
-			"firefox-pwa-bin",             // Install, manage and use PWAs in Firefox (native component)
-			"macchina-bin",                // A system information fetcher/frontend, with an (unhealthy) emphasis on performance
 			//"mcmojave-cursors",          // X-cursor theme inspired by macOS and based on capitaine-cursors (Currently refuses to install via arch-chroot)
 			//"morgen-bin",                // Modern, intuitive and smart calendar application (Successor to MineTime)
 			//"nerd-dictation-git",        // Simple, hackable offline speech to text - using the VOSK-API.
@@ -710,6 +713,8 @@ func Flatpak(c *Config) {
 	case "MINIMAL":
 	case "FULL":
 		c.Flatpak.Packages = append(c.Flatpak.Packages,
+			"app.grayjay.Grayjay",                 // Universal media aggregator
+			"app.xemu.xemu",                       // Original Xbox emulator
 			"com.belmoussaoui.Obfuscate",          // Censor private information from images
 			"com.brave.Browser",                   // Web browser from Brave
 			"com.getmailspring.Mailspring",        // Email client
@@ -742,6 +747,7 @@ func Flatpak(c *Config) {
 			"it.cuteworks.pacmanlogviewer",        // Inspect pacman logs
 			"md.obsidian.Obsidian",                // Markdown-based knowledge base
 			"media.emby.EmbyTheater",              // Emby (Media Server) client for desktop computers
+			"net.codelogistics.webapps",           // Install websites as desktop apps
 			"net.davidotek.pupgui2",               // ProtonUp-QT (Install Wine and Proton-based compatibility tools)
 			"net.filebot.FileBot",                 // Ultimate TV and Movie Renamer
 			"net.kuribo64.melonDS",                // Nintendo DS and DSi emulator

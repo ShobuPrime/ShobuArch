@@ -341,57 +341,32 @@ func SetupCustomRepos(c *conf.Config) {
 
 	switch c.Storage.Filesystem {
 	case "zfs":
+		// https://github.com/archzfs/archzfs/releases/tag/experimental
 		log.Println("Adding custom repo to install ArchZFS...")
-		cmd = []string{`wget`, `https://archzfs.com/archzfs.gpg`}
+		cmd = []string{`awk`, `BEGIN{ printf "\n" >> "/etc/pacman.conf" }`}
 		z.Arch_chroot(&cmd, false, c)
 
-		cmd = []string{`awk`, `BEGIN{ printf "\n" >> "/etc/pacman.conf" }`}
+		cmd = []string{`pacman-key`, `--recv-keys`, `3A9917BF0DED5C13F69AC68FABEC0A1208037BE9`}
+		z.Arch_chroot(&cmd, false, c)
+
+		cmd = []string{`pacman-key`, `--lsign-key`, `3A9917BF0DED5C13F69AC68FABEC0A1208037BE9`}
+		z.Arch_chroot(&cmd, false, c)
+
+		// Check the fingerprint and verify it matches the one on the archzfs page
+		cmd = []string{`pacman-key`, `-f`, `3A9917BF0DED5C13F69AC68FABEC0A1208037BE9`}
 		z.Arch_chroot(&cmd, false, c)
 
 		cmd = []string{`awk`, `BEGIN{ printf "[archzfs]\n" >> "/etc/pacman.conf" }`}
 		z.Arch_chroot(&cmd, false, c)
 
-		cmd = []string{`pacman-key`, `-a`, `archzfs.gpg`}
+		cmd = []string{`awk`, `BEGIN{ printf "# ArchZFS\n" >> "/etc/pacman.conf" }`}
 		z.Arch_chroot(&cmd, false, c)
 
-		cmd = []string{`pacman-key`, `-r`, `DDF7DB817396A49B2A2723F7403BD972F75D9D76`}
+		// TODO: Change this to `Required` once it's announced that the signing system is finalized.
+		cmd = []string{`awk`, `BEGIN{ printf "SigLevel = Never\n" >> "/etc/pacman.conf" }`}
 		z.Arch_chroot(&cmd, false, c)
 
-		cmd = []string{`pacman-key`, `--lsign-key`, `DDF7DB817396A49B2A2723F7403BD972F75D9D76`}
-		z.Arch_chroot(&cmd, false, c)
-
-		// # Check the fingerprint and verify it matches the one on the archzfs page
-		cmd = []string{`pacman-key`, `-f`, `DDF7DB817396A49B2A2723F7403BD972F75D9D76`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "# Origin Server - Finland\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "Server = http://archzfs.com/$repo/x86_64\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "# Mirror - Germany\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "Server = http://mirror.sum7.eu/archlinux/archzfs/$repo/x86_64\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "# Mirror - Germany\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "Server = https://mirror.biocrafting.net/archlinux/archzfs/$repo/x86_64\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "# Mirror - India\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "Server = https://mirror.in.themindsmaze.com/archzfs/$repo/x86_64\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "# ArchZFS - United States\n" >> "/etc/pacman.conf" }`}
-		z.Arch_chroot(&cmd, false, c)
-
-		cmd = []string{`awk`, `BEGIN{ printf "Server = https://zxcvfdsa.com/archzfs/$repo/$arch\n" >> "/etc/pacman.conf" }`}
+		cmd = []string{`awk`, `BEGIN{ printf "Server = https://github.com/archzfs/archzfs/releases/download/experimental\n" >> "/etc/pacman.conf" }`}
 		z.Arch_chroot(&cmd, false, c)
 
 		cmd = []string{`pacman`, `-Syy`, `--needed`, `--noconfirm`, `zfs-dkms`, `zfs-utils`}
@@ -486,11 +461,9 @@ func SetupGraphics(c *conf.Config) {
 				)
 			case "Advanced Micro Devices, Inc. [AMD]", "Advanced Micro Devices, Inc. [AMD/ATI]":
 				cmd = append(cmd,
-					`lib32-libva-mesa-driver`,
 					`lib32-mesa`,
 					`lib32-vulkan-icd-loader`,
 					`lib32-vulkan-radeon`,
-					`libva-mesa-driver`,
 					`mesa`,
 					`rocm-opencl-runtime`,
 					`vulkan-icd-loader`,
